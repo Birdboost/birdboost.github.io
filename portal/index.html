@@ -190,12 +190,12 @@ function render() {
       <div class="stat"><b>${data.sales.count}</b><span>pieces sold with your code</span></div>
     </div>
     <div class="storecode"><div style="flex:1;min-width:180px"><div class="small" style="font-weight:700">YOUR STORE CODE</div><code>${esc(me.store_code)}</code>
-      <div class="small">Customers give this code when they buy, so the sale counts as yours.</div></div>
+      <div class="small">It's also your customers' discount code. When someone buys with it, they get the discount and the sale counts as yours.</div></div>
       <div class="row"><button class="btn sm" id="copysc">Copy code</button>${shareBtn}</div></div>
     ${me.code_expires_at ? `<p class="small mute">Your access code works until ${fmtDate(me.code_expires_at, false)}.</p>` : ""}
   </div></div>`
   : `<div class="hello mini"><div class="wrap"><div class="row"><h1>Hi ${first}</h1>
-      <span class="minicode">Store code <code>${esc(me.store_code)}</code><button class="btn sm" id="copysc" aria-label="Copy store code">Copy</button></span></div></div></div>`;
+      <span class="minicode" title="Your store code, also your customers' discount code">Store code <code>${esc(me.store_code)}</code><button class="btn sm" id="copysc" aria-label="Copy store code">Copy</button></span></div></div></div>`;
   app.innerHTML = `
   <header class="top"><div class="wrap"><a class="brand" href="#home"><span class="logo"></span>THE FLOCK</a>
     <nav class="toptabs" role="tablist" aria-label="Sections">${TABS.map(([k, n]) => tabBtn(k, n, false)).join("")}</nav><span class="sp"></span>
@@ -208,7 +208,7 @@ function render() {
     try { await load(); render(); toast("Up to date"); } catch (err) { if (!isCodeErr(err)) { toast(errText(err), 1); b.disabled = false; b.textContent = "↻"; } } };
   document.getElementById("copysc").onclick = () => navigator.clipboard.writeText(me.store_code).then(() => toast("Store code copied"), () => toast("Couldn't copy. Your code is " + me.store_code));
   const sh = document.getElementById("sharesc");
-  if (sh) sh.onclick = () => navigator.share({ text: `Shopping Birdboost? Use my store code ${me.store_code} when you buy.` }).catch(() => {});
+  if (sh) sh.onclick = () => navigator.share({ text: `Shopping Birdboost? Use my code ${me.store_code} for a discount when you buy.` }).catch(() => {});
   app.querySelectorAll("[data-tab]").forEach((b) => b.onclick = () => { tab = b.dataset.tab; history.replaceState(null, "", "#" + tab); render(); scrollTo(0, 0); });
   ({ home: viewTasks, events: viewEvents, store: viewStore, chat: viewChat }[tab] || viewTasks)(document.getElementById("view"));
 }

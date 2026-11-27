@@ -393,7 +393,7 @@ function changeCode(id, back) {
   } });
 }
 function inviteText(a) {
-  return `Welcome to the Birdboost Flock, ${a.full_name.split(" ")[0]}!\n\nLog in to the ambassador portal here: ${PORTAL_URL}\nYour access code: ${pretty(a.access_code)}\n\nYour store code: ${a.store_code}\nWhen someone buys a piece, ask them to give your store code so the sale counts for you.\n\nKeep your access code private.`;
+  return `Welcome to the Birdboost Flock, ${a.full_name.split(" ")[0]}!\n\nLog in to the ambassador portal here: ${PORTAL_URL}\nYour access code: ${pretty(a.access_code)}\n\nYour store code: ${a.store_code}\nIt's also a discount code for your customers. When someone buys with it, they get the discount and the sale counts for you.\n\nKeep your access code private.`;
 }
 function waLink(a) {
   let p = String(a.phone || "").replace(/\D/g, "");
