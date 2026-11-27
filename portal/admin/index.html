@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Flock admin · Birdboost</title>
+<link rel="icon" href="../logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+<style>
+.login{min-height:100vh;display:grid;place-items:center;padding:24px}
+.login .box{width:min(420px,100%)}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px}
+.bar h2{margin:0}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:18px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.kpi b{display:block;font-family:Anton,Impact,sans-serif;font-weight:400;font-size:30px;line-height:1.1}
+.kpi span{font-size:13px;color:var(--mute)}
+td .btn{margin:2px 0}
+.linkish{background:none;border:0;padding:0;color:var(--ink);font:inherit;font-weight:700;cursor:pointer;text-align:left;text-decoration:underline;text-decoration-color:#555;text-underline-offset:3px}
+.who{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.who div{display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:6px;font-size:14px}
+.mini3d{width:100%;max-width:260px}
+.check{display:flex;gap:8px;align-items:center;font-weight:600}
+.check input{width:auto}
+.brief{white-space:pre-wrap}
+.section-gap{margin-top:34px}
+</style>
+</head>
+<body>
+<div id="app"><div class="login"><span class="spin"></span></div></div>
+<dialog id="dlg"><div class="dhead"><h3 id="dlgTitle"></h3><button class="x" aria-label="Close" onclick="dlg.close()">×</button></div><div class="dbody" id="dlgBody"></div></dialog>
+
+<script src="../config.js"></script>
+<script src="../viewer3d.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+const CFG = window.BB_CONFIG || {};
+const app = document.getElementById("app"), dlg = document.getElementById("dlg");
+const TZ = "Africa/Harare";
+const PORTAL_URL = new URL("../", location.href).href;
+let db, user, tab = location.hash.slice(1) || "ambassadors";
+let D = { ambassadors: [], tasks: [], task_done: [], events: [], event_people: [], products: [], preorders: [], sales: [], settings: {}, admins: [] };
+
+// ---------- helpers ----------
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const safeUrl = (u) => /^https?:\/\//i.test(u || "") ? u : "";
+const pretty = (c) => c ? c.slice(0, 4) + "-" + c.slice(4) : "";
+const clean = (c) => String(c || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+const fmt = (d, time = true) => d ? new Date(d.length === 10 ? d + "T12:00:00+02:00" : d).toLocaleString("en-GB", { timeZone: TZ, day: "numeric", month: "short", year: "numeric", ...(time && d.length > 10 ? { hour: "2-digit", minute: "2-digit" } : {}) }) : "";
+const toLocalInput = (iso) => iso ? new Date(new Date(iso).getTime() + 2 * 3600e3).toISOString().slice(0, 16) : ""; // Harare is UTC+2 all year
+const fromLocalInput = (v) => v ? v + ":00+02:00" : null;
+const todayHarare = () => new Date(Date.now() + 2 * 3600e3).toISOString().slice(0, 10);
+const money = (n, cur) => n == null ? "" : new Intl.NumberFormat("en", { style: "currency", currency: cur || "USD" }).format(n);
+const byId = (list, id) => list.find((x) => x.id === id);
+function toast(msg, bad) { const t = document.createElement("div"); t.className = "toast" + (bad ? " bad" : ""); t.textContent = msg; t.setAttribute("role", "status"); document.body.appendChild(t); setTimeout(() => t.remove(), 3500); }
+const ERR = { store_code_taken: "That store code is already used by another ambassador.", name_required: "Add the ambassador's name.", not_admin: "This login isn't on the admin list.", "duplicate key": "That already exists." };
+const errText = (e) => { const m = (e && e.message) || String(e); for (const k in ERR) if (m.includes(k)) return ERR[k]; return m; };
+const ok = ({ data, error }) => { if (error) throw error; return data; };
+function openDlg(title, html) { document.getElementById("dlgTitle").textContent = title; document.getElementById("dlgBody").innerHTML = html; if (!dlg.open) dlg.showModal(); dlg.querySelector(".dbody").scrollTop = 0; }
+dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); });
+// Errors already shown to the admin as a message don't need to go anywhere else.
+addEventListener("unhandledrejection", (e) => { if (e.reason && e.reason.__shown) e.preventDefault(); });
+async function busy(btn, fn, msg) {
+  const old = btn && btn.innerHTML; if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spin"></span>'; }
+  try { const r = await fn(); if (msg) toast(msg); return r; }
+  catch (e) { toast(errText(e), 1); try { e.__shown = true; } catch {} throw e; }
+  finally { if (btn && btn.isConnected) { btn.disabled = false; btn.innerHTML = old; } }
+}
+function codeState(a) {
+  if (a.code_status === "revoked") return '<span class="pill bad">Revoked</span>';
+  if (a.code_expires_at && new Date(a.code_expires_at) < new Date()) return '<span class="pill warn">Expired</span>';
+  return '<span class="pill g">Active</span>' + (a.code_expires_at ? `<div class="small mute">until ${fmt(a.code_expires_at, false)}</div>` : "");
+}
+// Simple form builder: fields = [{k, label, type, hint, options, req, full}]
+function fieldsHtml(fields, v = {}) {
+  return fields.map((f) => {
+    const val = v[f.k] ?? f.def ?? "";
+    const req = f.req ? " required" : "";
+    let input;
+    if (f.type === "textarea") input = `<textarea name="${f.k}"${req}>${esc(val)}</textarea>`;
+    else if (f.type === "select") input = `<select name="${f.k}"${req}>${f.options.map(([ov, ol]) => `<option value="${esc(ov)}"${String(ov) === String(val) ? " selected" : ""}>${esc(ol)}</option>`).join("")}</select>`;
+    else if (f.type === "check") return `<label class="check"><input type="checkbox" name="${f.k}"${val ? " checked" : ""}> ${esc(f.label)}</label>`;
+    else input = `<input name="${f.k}" type="${f.type || "text"}" value="${esc(val)}"${req}${f.step ? ` step="${f.step}"` : ""}${f.accept ? ` accept="${f.accept}"` : ""}${f.ph ? ` placeholder="${esc(f.ph)}"` : ""}>`;
+    return `<label${f.full ? ' style="grid-column:1/-1"' : ""}>${esc(f.label)}${f.req ? " *" : ""}${input}${f.hint ? `<span class="hint">${esc(f.hint)}</span>` : ""}</label>`;
+  }).join("");
+}
+function readForm(form, fields) {
+  const out = {};
+  for (const f of fields) {
+    const el = form.elements[f.k]; if (!el || f.type === "file") continue;
+    if (f.type === "check") out[f.k] = el.checked;
+    else if (f.type === "number") out[f.k] = el.value === "" ? null : Number(el.value);
+    else out[f.k] = el.value.trim() === "" ? null : el.value.trim();
+  }
+  return out;
+}
+
+// ---------- data ----------
+async function loadAll() {
+  const t = (name, order = "created_at", asc = false) => db.from(name).select("*").order(order, { ascending: asc });
+  const [a, tk, td, ev, ep, pr, po, sa, st, ad] = await Promise.all([
+    t("ambassadors", "full_name", true), t("tasks"), db.from("task_done").select("*"), t("events", "starts_at", true),
+    db.from("event_people").select("*"), t("products", "sort_order", true), t("preorders"), t("sales", "sold_on"), db.from("settings").select("*"), db.from("admins").select("*")]);
+  D = { ambassadors: ok(a), tasks: ok(tk), task_done: ok(td), events: ok(ev), event_people: ok(ep), products: ok(pr), preorders: ok(po), sales: ok(sa),
+        settings: Object.fromEntries(ok(st).map((r) => [r.key, r.value])), admins: ok(ad) };
+}
+async function refresh() { await loadAll(); render(); }
+
+// ---------- login ----------
+function showLogin(msg = "") {
+  app.innerHTML = `<main class="login"><div class="box">
+    <a class="brand" href="${PORTAL_URL}"><span class="logo"></span>BIRDBOOST</a>
+    <h1 style="margin:20px 0 6px">Flock <span style="color:var(--g)">admin</span></h1>
+    <p class="mute">For the Birdboost team only.</p>
+    <form id="lf" class="card" style="margin-top:16px">
+      <label>Email<input name="email" type="email" autocomplete="username" required></label>
+      <label>Password<input name="pw" type="password" autocomplete="current-password" required></label>
+      <p id="lerr" role="alert" style="color:var(--bad);min-height:1.2em">${esc(msg)}</p>
+      <button class="btn g" style="width:100%">Log in</button>
+    </form></div></main>`;
+  document.getElementById("lf").onsubmit = async (e) => {
+    e.preventDefault(); const f = e.target, b = f.querySelector("button");
+    b.disabled = true;
+    const { error } = await db.auth.signInWithPassword({ email: f.email.value.trim(), password: f.pw.value });
+    if (error) { document.getElementById("lerr").textContent = /invalid/i.test(error.message) ? "Wrong email or password." : error.message; b.disabled = false; return; }
+    start();
+  };
+}
+async function start() {
+  const { data: { session } } = await db.auth.getSession();
+  if (!session) return showLogin();
+  user = session.user;
+  const { data: isAdmin, error } = await db.rpc("is_admin");
+  if (error || !isAdmin) { await db.auth.signOut(); return showLogin(error ? errText(error) : `${user.email} isn't on the admin list. Ask an existing admin to add you in Settings.`); }
+  try { await refresh(); } catch (e) { app.innerHTML = `<main class="login"><div class="box card"><h2>Couldn't load</h2><p>${esc(errText(e))}</p><p class="small mute">If this is a new setup, check that database.sql ran without errors.</p></div></main>`; }
+}
+
+// ---------- shell ----------
+const TABS = [["ambassadors", "Ambassadors"], ["tasks", "Tasks"], ["events", "Events"], ["merch", "Preview store"], ["sales", "Sales"], ["settings", "Settings"]];
+function render() {
+  app.innerHTML = `<header class="top"><div class="wrap"><a class="brand" href="#ambassadors"><span class="logo"></span>FLOCK ADMIN</a><span class="sp"></span>
+    <a class="btn sm" href="${PORTAL_URL}" target="_blank" rel="noopener">Ambassador view</a><button class="btn sm" id="rf">Refresh</button><button class="btn sm" id="out">Log out</button></div>
+    <div class="wrap"><nav class="tabs" role="tablist">${TABS.map(([k, n]) => `<button role="tab" data-tab="${k}" aria-selected="${tab === k}">${n}</button>`).join("")}</nav></div></header>
+    <main class="wrap"><section class="view" id="view"></section></main>`;
+  document.getElementById("out").onclick = async () => { await db.auth.signOut(); showLogin(); };
+  document.getElementById("rf").onclick = (e) => busy(e.currentTarget, refresh, "Up to date");
+  app.querySelectorAll(".tabs button").forEach((b) => b.onclick = () => { tab = b.dataset.tab; history.replaceState(null, "", "#" + tab); render(); });
+  const v = document.getElementById("view");
+  ({ ambassadors: vAmb, tasks: vTasks, events: vEvents, merch: vMerch, sales: vSales, settings: vSettings }[tab] || vAmb)(v);
+}
+
+// ================= AMBASSADORS =================
+const AMB_FIELDS = [
+  { k: "full_name", label: "Full name", req: true },
+  { k: "phone", label: "WhatsApp number", type: "tel", hint: "With country code, e.g. +263 77 123 4567" },
+  { k: "email", label: "Email", type: "email" },
+  { k: "city", label: "City or town" },
+  { k: "instagram", label: "Instagram handle" },
+  { k: "tiktok", label: "TikTok handle" },
+  { k: "notes", label: "Notes (only admins see this)", type: "textarea", full: true },
+];
+const VALIDITY = [["", "Never expires"], ["30", "30 days"], ["90", "90 days"], ["180", "6 months"], ["365", "1 year"]];
+function salesQty(id) { return D.sales.filter((s) => s.ambassador_id === id).reduce((n, s) => n + (s.quantity || 0), 0); }
+function vAmb(v) {
+  const n = D.ambassadors.length, active = D.ambassadors.filter((a) => a.code_status === "active" && !(a.code_expires_at && new Date(a.code_expires_at) < new Date())).length;
+  v.innerHTML = `<div class="bar"><h2>Ambassadors</h2><button class="btn g" id="add">+ Add ambassador</button></div>
+    <div class="kpis"><div class="kpi"><b>${n}</b><span>ambassadors</span></div><div class="kpi"><b>${active}</b><span>with a working code</span></div>
+      <div class="kpi"><b>${D.ambassadors.filter((a) => a.code_last_used).length}</b><span>have logged in</span></div></div>
+    ${n ? `<input id="q" placeholder="Search by name, city or store code" style="margin-bottom:12px">
+    <div class="tablewrap"><table><thead><tr><th>Name</th><th>Store code</th><th>Access code</th><th>Last login</th><th>Tasks</th><th>Sold</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>`
+    : `<div class="empty">No ambassadors yet. Pick people from your applications, then press “Add ambassador”.</div>`}`;
+  document.getElementById("add").onclick = addAmbassador;
+  const rows = document.getElementById("rows"); if (!rows) return;
+  const draw = (q = "") => {
+    q = q.toLowerCase();
+    rows.innerHTML = D.ambassadors.filter((a) => !q || [a.full_name, a.city, a.store_code].join(" ").toLowerCase().includes(q)).map((a) => `<tr>
+      <td><button class="linkish" data-open="${a.id}">${esc(a.full_name)}</button><div class="small mute">${esc(a.city || "")}</div></td>
+      <td><code>${esc(a.store_code)}</code></td><td>${codeState(a)}</td>
+      <td class="small">${a.code_last_used ? fmt(a.code_last_used) : '<span class="mute">Never</span>'}</td>
+      <td>${D.task_done.filter((t) => t.ambassador_id === a.id).length}</td><td>${salesQty(a.id)}</td>
+      <td><button class="btn sm" data-open="${a.id}">Manage</button></td></tr>`).join("");
+    rows.querySelectorAll("[data-open]").forEach((b) => b.onclick = () => manageAmbassador(b.dataset.open));
+  };
+  draw(); document.getElementById("q").oninput = (e) => draw(e.target.value);
+}
+function addAmbassador() {
+  const extra = [{ k: "store_code", label: "Store code", hint: "Leave empty to make one from their name. Letters and numbers only." }, { k: "valid", label: "Access code lasts", type: "select", options: VALIDITY }];
+  openDlg("Add ambassador", `<form id="f"><div class="grid2">${fieldsHtml([...AMB_FIELDS.slice(0, 6), ...extra, AMB_FIELDS[6]])}</div><button class="btn g">Create account and code</button></form>`);
+  document.getElementById("f").onsubmit = async (e) => {
+    e.preventDefault(); const f = e.target, v = readForm(f, [...AMB_FIELDS, ...extra]);
+    const a = await busy(f.querySelector("button"), async () => ok(await db.rpc("admin_create_ambassador", {
+      p_full_name: v.full_name, p_phone: v.phone, p_email: v.email, p_city: v.city, p_instagram: v.instagram, p_tiktok: v.tiktok,
+      p_notes: v.notes, p_store_code: v.store_code, p_valid_days: v.valid ? +v.valid : null })), "Ambassador created");
+    await loadAll(); render(); showInvite(a.id ? a : byId(D.ambassadors, a.id), true);
+  };
+}
+function inviteText(a) {
+  return `Welcome to the Birdboost Flock, ${a.full_name.split(" ")[0]}!\n\nLog in to the ambassador portal here: ${PORTAL_URL}\nYour access code: ${pretty(a.access_code)}\n\nYour store code: ${a.store_code}\nWhen someone buys a piece, ask them to give your store code so the sale counts for you.\n\nKeep your access code private.`;
+}
+function waLink(a) {
+  let p = String(a.phone || "").replace(/\D/g, "");
+  if (p.startsWith("0")) p = "263" + p.slice(1); // local Zimbabwe number
+  return p ? `https://wa.me/${p}?text=${encodeURIComponent(inviteText(a))}` : `https://wa.me/?text=${encodeURIComponent(inviteText(a))}`;
+}
+function showInvite(a, isNew) {
+  openDlg(isNew ? "Account created" : "Access code", `<p>${isNew ? "Send this to " : "Access code for "}<b>${esc(a.full_name)}</b>.</p>
+    <div class="codebox">${esc(pretty(a.access_code))}</div>
+    <p class="small mute" style="margin-top:8px">Store code: <b>${esc(a.store_code)}</b>${a.code_expires_at ? ` · works until ${fmt(a.code_expires_at, false)}` : " · never expires"}</p>
+    <label>Message to send<textarea readonly style="min-height:170px">${esc(inviteText(a))}</textarea></label>
+    <div class="row"><button class="btn g" id="cp">Copy message</button><a class="btn" href="${esc(waLink(a))}" target="_blank" rel="noopener">Send on WhatsApp</a>
+    ${isNew ? "" : `<button class="btn" id="back">Back</button>`}</div>`);
+  document.getElementById("cp").onclick = () => navigator.clipboard.writeText(inviteText(a)).then(() => toast("Copied"));
+  const back = document.getElementById("back"); if (back) back.onclick = () => manageAmbassador(a.id);
+}
+function manageAmbassador(id) {
+  const a = byId(D.ambassadors, id); if (!a) return dlg.close();
+  const evs = D.event_people.filter((p) => p.ambassador_id === id).map((p) => ({ ...p, ev: byId(D.events, p.event_id) })).filter((p) => p.ev);
+  const sales = D.sales.filter((s) => s.ambassador_id === id);
+  openDlg(a.full_name, `
+    <div class="card" style="margin-bottom:14px"><div class="row" style="justify-content:space-between"><h3>Access code</h3>${codeState(a)}</div>
+      <p class="small mute">Last login: ${a.code_last_used ? fmt(a.code_last_used) : "never"}</p>
+      <div class="row"><button class="btn g sm" id="show">Show code and invite</button>
+      ${a.code_status === "revoked" ? `<button class="btn sm" id="restore">Switch code back on</button>` : `<button class="btn bad sm" id="revoke">Revoke code</button>`}
+      <button class="btn sm" id="newc">Make a new code</button></div>
+      <div class="row" style="margin-top:10px"><span class="small mute">Renew:</span>
+        <button class="btn sm" data-renew="30">+30 days</button><button class="btn sm" data-renew="90">+90 days</button><button class="btn sm" data-renew="365">+1 year</button><button class="btn sm" data-renew="0">Never expires</button></div>
+      <p class="small mute" style="margin-top:8px">Revoke switches the code off straight away. “Make a new code” replaces it, so the old one stops working.</p></div>
+    <div class="card" style="margin-bottom:14px"><h3>Activity</h3>
+      <p class="small">Store code <b>${esc(a.store_code)}</b> · ${salesQty(id)} pieces sold · ${D.task_done.filter((t) => t.ambassador_id === id).length} tasks done</p>
+      ${evs.length ? `<p class="small">${evs.map((p) => `${esc(p.ev.title)} <span class="pill">${p.status}</span>`).join("<br>")}</p>` : `<p class="small mute">No events yet.</p>`}
+      ${sales.length ? `<p class="small mute">Latest sale: ${esc(sales[0].item || "")} on ${fmt(sales[0].sold_on, false)}</p>` : ""}</div>
+    <form id="f"><h3>Details</h3><div class="grid2">${fieldsHtml([...AMB_FIELDS.slice(0, 6), { k: "store_code", label: "Store code", req: true }, AMB_FIELDS[6]], a)}</div>
+      <div class="row" style="justify-content:space-between"><button class="btn g">Save details</button><button type="button" class="btn bad sm" id="del">Delete ambassador</button></div></form>`);
+  const upd = async (btn, patch, msg) => { await busy(btn, async () => ok(await db.from("ambassadors").update(patch).eq("id", id)), msg); await loadAll(); render(); manageAmbassador(id); };
+  document.getElementById("show").onclick = () => showInvite(a);
+  const rv = document.getElementById("revoke"); if (rv) rv.onclick = (e) => { if (confirm(`Revoke ${a.full_name}'s code? They'll be logged out straight away.`)) upd(e.currentTarget, { code_status: "revoked" }, "Code revoked"); };
+  const rs = document.getElementById("restore"); if (rs) rs.onclick = (e) => upd(e.currentTarget, { code_status: "active" }, "Code switched back on");
+  document.getElementById("newc").onclick = async (e) => {
+    if (!confirm("Make a new code? The old code stops working straight away.")) return;
+    const r = await busy(e.currentTarget, async () => ok(await db.rpc("admin_new_access_code", { p_id: id, p_valid_days: null })), "New code made");
+    await loadAll(); render(); showInvite(r);
+  };
+  dlg.querySelectorAll("[data-renew]").forEach((b) => b.onclick = () => {
+    const d = +b.dataset.renew;
+    if (!d) return upd(b, { code_expires_at: null, code_status: "active" }, "Code never expires now");
+    const base = Math.max(Date.now(), a.code_expires_at ? new Date(a.code_expires_at).getTime() : Date.now());
+    upd(b, { code_expires_at: new Date(base + d * 864e5).toISOString(), code_status: "active" }, `Renewed by ${d} days`);
+  });
+  document.getElementById("f").onsubmit = (e) => { e.preventDefault(); const v = readForm(e.target, [...AMB_FIELDS, { k: "store_code" }]); v.store_code = clean(v.store_code);
+    upd(e.target.querySelector("button"), v, "Saved"); };
+  document.getElementById("del").onclick = async (e) => {
+    if (!confirm(`Delete ${a.full_name}? Their code stops working and their task and event history is removed. Their sales stay on record without a name.`)) return;
+    await busy(e.currentTarget, async () => ok(await db.from("ambassadors").delete().eq("id", id)), "Deleted"); dlg.close(); refresh();
+  };
+}
+
+// ================= TASKS =================
+const TASK_FIELDS = [
+  { k: "title", label: "Task", req: true, ph: "e.g. Post the new drop teaser on your story", full: true },
+  { k: "details", label: "Details", type: "textarea", full: true, hint: "What to do, what to say, what to tag." },
+  { k: "link", label: "Link (optional)", type: "url", hint: "Photos to use, a post to share, etc." },
+  { k: "due_date", label: "Due date (optional)", type: "date" },
+];
+function vTasks(v) {
+  const total = D.ambassadors.length;
+  v.innerHTML = `<div class="bar"><h2>Tasks</h2></div>
+    <form id="nf" class="card" style="margin-bottom:22px"><h3>Post a task</h3><div class="grid2">${fieldsHtml(TASK_FIELDS)}</div><button class="btn g">Post to all ambassadors</button></form>
+    ${D.tasks.length ? `<div class="cards">${D.tasks.map((t) => {
+      const done = D.task_done.filter((d) => d.task_id === t.id);
+      return `<article class="card"><div class="row" style="justify-content:space-between"><h3>${esc(t.title)}</h3>
+        <div class="row">${t.is_open ? '<span class="pill g">Open</span>' : '<span class="pill">Closed</span>'}${t.due_date ? `<span class="pill warn">Due ${fmt(t.due_date, false)}</span>` : ""}</div></div>
+        ${t.details ? `<p class="brief small">${esc(t.details)}</p>` : ""}${safeUrl(t.link) ? `<p class="small"><a href="${esc(t.link)}" target="_blank" rel="noopener">${esc(t.link)}</a></p>` : ""}
+        <p><b>${done.length}</b> of ${total} ambassadors done</p>
+        ${done.length ? `<details><summary class="small">See who</summary><div class="who">${done.map((d) => { const a = byId(D.ambassadors, d.ambassador_id);
+          return `<div><span>${esc(a ? a.full_name : "Removed")}</span><span class="mute">${fmt(d.done_at)}</span>${safeUrl(d.proof_link) ? `<a href="${esc(d.proof_link)}" target="_blank" rel="noopener">See post</a>` : ""}</div>`; }).join("")}</div></details>` : ""}
+        <div class="row" style="margin-top:10px"><button class="btn sm" data-edit="${t.id}">Edit</button>
+          <button class="btn sm" data-toggle="${t.id}">${t.is_open ? "Close task" : "Reopen"}</button><button class="btn bad sm" data-del="${t.id}">Delete</button></div></article>`; }).join("")}</div>`
+    : `<div class="empty">No tasks yet.</div>`}`;
+  document.getElementById("nf").onsubmit = async (e) => { e.preventDefault(); const f = e.target;
+    await busy(f.querySelector("button"), async () => ok(await db.from("tasks").insert(readForm(f, TASK_FIELDS))), "Task posted"); refresh(); };
+  v.querySelectorAll("[data-toggle]").forEach((b) => b.onclick = async () => { const t = byId(D.tasks, b.dataset.toggle);
+    await busy(b, async () => ok(await db.from("tasks").update({ is_open: !t.is_open }).eq("id", t.id))); refresh(); });
+  v.querySelectorAll("[data-del]").forEach((b) => b.onclick = async () => { if (!confirm("Delete this task and everyone's progress on it?")) return;
+    await busy(b, async () => ok(await db.from("tasks").delete().eq("id", b.dataset.del)), "Deleted"); refresh(); });
+  v.querySelectorAll("[data-edit]").forEach((b) => b.onclick = () => { const t = byId(D.tasks, b.dataset.edit);
+    openDlg("Edit task", `<form id="f"><div class="grid2">${fieldsHtml(TASK_FIELDS, t)}</div><button class="btn g">Save</button></form>`);
+    document.getElementById("f").onsubmit = async (e) => { e.preventDefault();
+      await busy(e.target.querySelector("button"), async () => ok(await db.from("tasks").update(readForm(e.target, TASK_FIELDS)).eq("id", t.id)), "Saved"); dlg.close(); refresh(); }; });
+}
+
+// ================= EVENTS =================
+const EVENT_FIELDS = [
+  { k: "title", label: "Event name", req: true, full: true },
+  { k: "starts_at", label: "Starts (Harare time)", type: "datetime-local" },
+  { k: "ends_at", label: "Ends (Harare time)", type: "datetime-local" },
+  { k: "location", label: "Where" },
+  { k: "spots", label: "Ambassadors needed", type: "number", hint: "Leave empty if there's no limit." },
+  { k: "dress_code", label: "What to wear" },
+  { k: "brief", label: "Brief", type: "textarea", full: true, hint: "What's happening, what ambassadors will do, timings, who to report to." },
+  { k: "is_open", label: "Open for applications (ambassadors can see it and apply)", type: "check", def: true },
+];
+const evRead = (f) => { const v = readForm(f, EVENT_FIELDS); v.starts_at = fromLocalInput(v.starts_at); v.ends_at = fromLocalInput(v.ends_at); return v; };
+const evVals = (e) => ({ ...e, starts_at: toLocalInput(e.starts_at), ends_at: toLocalInput(e.ends_at) });
+const ST_PILL = { applied: '<span class="pill blue">Applied</span>', suggested: '<span class="pill warn">Suggested</span>', assigned: '<span class="pill g">On the team</span>', declined: '<span class="pill">Declined</span>' };
+function vEvents(v) {
+  v.innerHTML = `<div class="bar"><h2>Events</h2><button class="btn g" id="add">+ Post an event</button></div>
+    ${D.events.length ? `<div class="cards two">${D.events.map((e) => {
+      const ppl = D.event_people.filter((p) => p.event_id === e.id), c = (s) => ppl.filter((p) => p.status === s).length;
+      return `<article class="card"><div class="small" style="color:var(--g2);font-weight:800">${esc(fmt(e.starts_at)) || "Date to be set"}</div>
+        <div class="row" style="justify-content:space-between"><h3>${esc(e.title)}</h3>${e.is_open ? '<span class="pill g">Open</span>' : '<span class="pill">Closed</span>'}</div>
+        ${e.location ? `<p class="small">${esc(e.location)}</p>` : ""}
+        <p class="small">${c("assigned")}${e.spots ? ` of ${e.spots}` : ""} on the team · ${c("applied")} applied · ${c("suggested")} suggested</p>
+        <div class="row"><button class="btn g sm" data-team="${e.id}">Team and applicants</button><button class="btn sm" data-edit="${e.id}">Edit</button><button class="btn bad sm" data-del="${e.id}">Delete</button></div></article>`; }).join("")}</div>`
+    : `<div class="empty">No events yet.</div>`}`;
+  document.getElementById("add").onclick = () => editEvent();
+  v.querySelectorAll("[data-edit]").forEach((b) => b.onclick = () => editEvent(byId(D.events, b.dataset.edit)));
+  v.querySelectorAll("[data-team]").forEach((b) => b.onclick = () => eventTeam(b.dataset.team));
+  v.querySelectorAll("[data-del]").forEach((b) => b.onclick = async () => { if (!confirm("Delete this event and its team list?")) return;
+    await busy(b, async () => ok(await db.from("events").delete().eq("id", b.dataset.del)), "Deleted"); refresh(); });
+}
+function editEvent(e) {
+  openDlg(e ? "Edit event" : "Post an event", `<form id="f"><div class="grid2">${fieldsHtml(EVENT_FIELDS, e ? evVals(e) : {})}</div><button class="btn g">${e ? "Save" : "Post event"}</button></form>`);
+  document.getElementById("f").onsubmit = async (ev) => { ev.preventDefault(); const vals = evRead(ev.target);
+    await busy(ev.target.querySelector("button"), async () => ok(e ? await db.from("events").update(vals).eq("id", e.id) : await db.from("events").insert(vals)), e ? "Saved" : "Event posted");
+    dlg.close(); refresh(); };
+}
+function eventTeam(id) {
+  const e = byId(D.events, id), ppl = D.event_people.filter((p) => p.event_id === id);
+  const st = (aid) => ppl.find((p) => p.ambassador_id === aid);
+  const order = { assigned: 0, applied: 1, suggested: 2, declined: 3 };
+  const list = [...D.ambassadors].sort((x, y) => (order[st(x.id)?.status] ?? 9) - (order[st(y.id)?.status] ?? 9) || x.full_name.localeCompare(y.full_name));
+  openDlg(e.title, `<p class="small mute">Applied: they asked to go. Suggested: you'd like them there, and they can accept. On the team: confirmed. Ambassadors see their status in the portal.</p>
+    <div class="tablewrap"><table><thead><tr><th>Ambassador</th><th>Status</th></tr></thead><tbody>${list.map((a) => { const p = st(a.id);
+      return `<tr><td><b>${esc(a.full_name)}</b><div class="small mute">${esc(a.city || "")}</div>${p && p.message ? `<div class="small">“${esc(p.message)}”</div>` : ""}</td>
+      <td><select data-amb="${a.id}" aria-label="Status for ${esc(a.full_name)}">${[["", "Not involved"], ["suggested", "Suggest them"], ["applied", "Applied"], ["assigned", "On the team"], ["declined", "Declined"]]
+        .map(([k, n]) => `<option value="${k}"${(p?.status || "") === k ? " selected" : ""}>${n}</option>`).join("")}</select></td></tr>`; }).join("") || `<tr><td colspan="2" class="mute">Add ambassadors first.</td></tr>`}</tbody></table></div>`);
+  dlg.querySelectorAll("select[data-amb]").forEach((s) => s.onchange = async () => {
+    const aid = s.dataset.amb;
+    try {
+      if (!s.value) ok(await db.from("event_people").delete().eq("event_id", id).eq("ambassador_id", aid));
+      else ok(await db.from("event_people").upsert({ event_id: id, ambassador_id: aid, status: s.value, updated_at: new Date().toISOString() }, { onConflict: "event_id,ambassador_id" }));
+      toast("Updated"); await loadAll(); render();
+    } catch (err) { toast(errText(err), 1); }
+  });
+}
+
+// ================= MERCH =================
+const PROD_FIELDS = [
+  { k: "name", label: "Name", req: true },
+  { k: "stage", label: "Stage", type: "select", options: [["preview", "Preview only"], ["preorder", "Pre-order open"]] },
+  { k: "price", label: "Price", type: "number", step: "0.01", hint: "Leave empty to show “Price coming soon”." },
+  { k: "currency", label: "Currency code", def: "USD", hint: "e.g. USD" },
+  { k: "sizes", label: "Sizes", ph: "S, M, L, XL", hint: "Separate with commas." },
+  { k: "release_note", label: "Release note", ph: "e.g. Drops in December" },
+  { k: "description", label: "Description", type: "textarea", full: true },
+  { k: "front_file", label: "Front photo", type: "file", accept: "image/*", hint: "A photo on a plain background works best." },
+  { k: "back_file", label: "Back photo", type: "file", accept: "image/*", hint: "Optional. Lets ambassadors spin it round." },
+  { k: "model_file", label: "3D model (.glb), optional", type: "file", accept: ".glb,model/gltf-binary", hint: "If you have a 3D file of the piece, it replaces the photo turntable." },
+  { k: "sort_order", label: "Order on page", type: "number", def: 0, hint: "Lower numbers show first." },
+  { k: "is_visible", label: "Show to ambassadors", type: "check", def: true },
+];
+async function upload(file) {
+  const ext = (file.name.split(".").pop() || "bin").toLowerCase().replace(/[^a-z0-9]/g, "");
+  const path = `${crypto.randomUUID()}.${ext}`;
+  ok(await db.storage.from("merch").upload(path, file, { contentType: file.type || (ext === "glb" ? "model/gltf-binary" : undefined), upsert: false }));
+  return db.storage.from("merch").getPublicUrl(path).data.publicUrl;
+}
+function vMerch(v) {
+  v.innerHTML = `<div class="bar"><h2>Preview store</h2><button class="btn g" id="add">+ Add a piece</button></div>
+    <p class="mute">Unreleased designs and pre-orders. Only logged-in ambassadors see this.</p>
+    ${D.products.length ? `<div class="cards two" id="pg"></div>` : `<div class="empty">No pieces yet. Add one with a front photo (and a back photo if you have it) to show it in 3D.</div>`}
+    <h2 class="section-gap">Pre-orders</h2>
+    ${D.preorders.length ? `<div class="tablewrap"><table><thead><tr><th>Ambassador</th><th>Piece</th><th>Size</th><th>Qty</th><th>Note</th><th>When</th><th>Status</th></tr></thead><tbody>
+      ${D.preorders.map((o) => `<tr><td>${esc(byId(D.ambassadors, o.ambassador_id)?.full_name || "Removed")}</td><td>${esc(byId(D.products, o.product_id)?.name || "")}</td>
+      <td>${esc(o.size || "")}</td><td>${o.quantity}</td><td class="small">${esc(o.note || "")}</td><td class="small">${fmt(o.created_at)}</td>
+      <td><select data-po="${o.id}" aria-label="Pre-order status">${["requested", "confirmed", "cancelled"].map((s) => `<option${s === o.status ? " selected" : ""}>${s}</option>`).join("")}</select></td></tr>`).join("")}</tbody></table></div>`
+    : `<div class="empty">No pre-orders yet.</div>`}`;
+  document.getElementById("add").onclick = () => editProduct();
+  const pg = document.getElementById("pg");
+  D.products.forEach((p) => {
+    const c = document.createElement("article"); c.className = "card";
+    const n = D.preorders.filter((o) => o.product_id === p.id && o.status !== "cancelled").reduce((s, o) => s + o.quantity, 0);
+    c.innerHTML = `<div class="s3"></div><div class="row" style="justify-content:space-between;margin-top:10px"><h3>${esc(p.name)}</h3>
+      <div class="row">${p.stage === "preorder" ? '<span class="pill g">Pre-order</span>' : '<span class="pill">Preview</span>'}${p.is_visible ? "" : '<span class="pill bad">Hidden</span>'}</div></div>
+      <p class="small">${p.price == null ? "Price coming soon" : esc(money(p.price, p.currency))} · ${n} pre-ordered</p>
+      <div class="row"><button class="btn sm" data-edit>Edit</button><button class="btn bad sm" data-del>Delete</button></div>`;
+    pg.appendChild(c); BB3D.mount(c.querySelector(".s3"), p);
+    c.querySelector("[data-edit]").onclick = () => editProduct(p);
+    c.querySelector("[data-del]").onclick = async (e) => { if (!confirm(`Delete ${p.name} and its pre-orders?`)) return;
+      await busy(e.currentTarget, async () => ok(await db.from("products").delete().eq("id", p.id)), "Deleted"); refresh(); };
+  });
+  v.querySelectorAll("select[data-po]").forEach((s) => s.onchange = async () => {
+    try { ok(await db.from("preorders").update({ status: s.value }).eq("id", s.dataset.po)); toast("Updated"); await loadAll(); } catch (e) { toast(errText(e), 1); } });
+}
+function editProduct(p) {
+  openDlg(p ? "Edit " + p.name : "Add a piece", `<form id="f"><div class="grid2">${fieldsHtml(PROD_FIELDS, p || {})}</div>
+    ${p ? `<p class="small mute">Leave a photo empty to keep the current one.${p.back_image ? ' <label class="check"><input type="checkbox" name="rm_back"> Remove back photo</label>' : ""}${p.model_url ? ' <label class="check"><input type="checkbox" name="rm_model"> Remove 3D model</label>' : ""}</p>` : ""}
+    <button class="btn g">${p ? "Save" : "Add to preview store"}</button></form>`);
+  document.getElementById("f").onsubmit = async (e) => {
+    e.preventDefault(); const f = e.target, vals = readForm(f, PROD_FIELDS);
+    vals.currency = (vals.currency || "USD").toUpperCase();
+    await busy(f.querySelector("button"), async () => {
+      if (f.front_file.files[0]) vals.front_image = await upload(f.front_file.files[0]);
+      if (f.back_file.files[0]) vals.back_image = await upload(f.back_file.files[0]);
+      if (f.model_file.files[0]) vals.model_url = await upload(f.model_file.files[0]);
+      if (f.rm_back && f.rm_back.checked) vals.back_image = null;
+      if (f.rm_model && f.rm_model.checked) vals.model_url = null;
+      ok(p ? await db.from("products").update(vals).eq("id", p.id) : await db.from("products").insert(vals));
+    }, "Saved");
+    dlg.close(); refresh();
+  };
+}
+
+// ================= SALES =================
+function vSales(v) {
+  const board = D.ambassadors.map((a) => { const s = D.sales.filter((x) => x.ambassador_id === a.id); const tot = {};
+    s.forEach((x) => { if (x.amount != null) tot[x.currency] = (tot[x.currency] || 0) + Number(x.amount); });
+    return { a, qty: s.reduce((n, x) => n + x.quantity, 0), tot }; }).filter((r) => r.qty).sort((x, y) => y.qty - x.qty);
+  const unmatched = D.sales.filter((s) => !s.ambassador_id);
+  v.innerHTML = `<div class="bar"><h2>Sales by store code</h2><button class="btn sm" id="csv">Download CSV</button></div>
+    <form id="sf" class="card" style="margin-bottom:22px"><h3>Record a sale</h3><div class="grid2">
+      <label>Store code *<input name="store_code" required autocapitalize="characters"><span class="hint" id="who">The code the customer gave.</span></label>
+      <label>Piece<select name="product_id"><option value="">Other (type below)</option>${D.products.map((p) => `<option value="${p.id}">${esc(p.name)}</option>`).join("")}</select></label>
+      <label>Item (if not in the list)<input name="item"></label>
+      <label>Quantity<input name="quantity" type="number" min="1" value="1" required></label>
+      <label>Total amount<input name="amount" type="number" step="0.01"></label>
+      <label>Currency<input name="currency" value="USD"></label>
+      <label>Customer (optional)<input name="customer"></label>
+      <label>Date<input name="sold_on" type="date" value="${todayHarare()}" required></label>
+      <label style="grid-column:1/-1">Note<input name="note"></label></div>
+      <button class="btn g">Save sale</button></form>
+    <h3>Leaderboard</h3>
+    ${board.length ? `<div class="tablewrap" style="margin-bottom:22px"><table><thead><tr><th>#</th><th>Ambassador</th><th>Store code</th><th>Pieces</th><th>Value</th></tr></thead><tbody>
+      ${board.map((r, i) => `<tr><td>${i + 1}</td><td>${esc(r.a.full_name)}</td><td><code>${esc(r.a.store_code)}</code></td><td><b>${r.qty}</b></td><td>${Object.entries(r.tot).map(([c, n]) => esc(money(n, c))).join(" + ")}</td></tr>`).join("")}</tbody></table></div>`
+    : `<div class="empty" style="margin-bottom:22px">No sales recorded yet.</div>`}
+    ${unmatched.length ? `<p style="color:var(--warn)">${unmatched.length} sale(s) used a store code that doesn't belong to any ambassador. They're marked below.</p>` : ""}
+    <h3>All sales</h3>
+    ${D.sales.length ? `<div class="tablewrap"><table><thead><tr><th>Date</th><th>Code</th><th>Ambassador</th><th>Item</th><th>Qty</th><th>Amount</th><th>Customer</th><th></th></tr></thead><tbody>
+      ${D.sales.map((s) => `<tr><td class="small">${fmt(s.sold_on, false)}</td><td><code>${esc(s.store_code)}</code></td>
+      <td>${s.ambassador_id ? esc(byId(D.ambassadors, s.ambassador_id)?.full_name) : '<span class="pill warn">No match</span>'}</td>
+      <td>${esc(s.item || "")}</td><td>${s.quantity}</td><td>${esc(money(s.amount, s.currency))}</td><td class="small">${esc(s.customer || "")}</td>
+      <td><button class="btn bad sm" data-del="${s.id}">Delete</button></td></tr>`).join("")}</tbody></table></div>` : ""}`;
+  const f = document.getElementById("sf"), who = document.getElementById("who");
+  f.store_code.oninput = () => { const c = clean(f.store_code.value), a = D.ambassadors.find((x) => x.store_code === c);
+    who.innerHTML = !c ? "The code the customer gave." : a ? `<span style="color:var(--g2)">✓ ${esc(a.full_name)}</span>` : `<span style="color:var(--warn)">No ambassador has this code</span>`; };
+  f.onsubmit = async (e) => { e.preventDefault();
+    const vals = { store_code: clean(f.store_code.value), product_id: f.product_id.value || null, item: f.item.value.trim() || null, quantity: +f.quantity.value || 1,
+      amount: f.amount.value === "" ? null : +f.amount.value, currency: (f.currency.value.trim() || "USD").toUpperCase(), customer: f.customer.value.trim() || null, sold_on: f.sold_on.value, note: f.note.value.trim() || null };
+    if (vals.product_id && !vals.item) vals.item = byId(D.products, vals.product_id).name;
+    if (!D.ambassadors.some((a) => a.store_code === vals.store_code) && !confirm("No ambassador has this store code. Save the sale anyway?")) return;
+    await busy(f.querySelector("button"), async () => ok(await db.from("sales").insert(vals)), "Sale saved"); refresh(); };
+  v.querySelectorAll("[data-del]").forEach((b) => b.onclick = async () => { if (!confirm("Delete this sale?")) return;
+    await busy(b, async () => ok(await db.from("sales").delete().eq("id", b.dataset.del)), "Deleted"); refresh(); });
+  document.getElementById("csv").onclick = () => {
+    const rows = [["date", "store_code", "ambassador", "item", "quantity", "amount", "currency", "customer", "note"],
+      ...D.sales.map((s) => [s.sold_on, s.store_code, byId(D.ambassadors, s.ambassador_id)?.full_name || "", s.item, s.quantity, s.amount, s.currency, s.customer, s.note])];
+    const csv = rows.map((r) => r.map((x) => `"${String(x ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
+    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = `birdboost-sales-${todayHarare()}.csv`; a.click();
+  };
+}
+
+// ================= SETTINGS =================
+function vSettings(v) {
+  const S = D.settings;
+  v.innerHTML = `<h2>Settings</h2>
+    <form id="sf" class="card" style="margin-bottom:22px"><div class="grid2">
+      <label style="grid-column:1/-1">WhatsApp group invite link<input name="whatsapp_link" type="url" value="${esc(S.whatsapp_link || "")}" placeholder="https://chat.whatsapp.com/..."><span class="hint">In WhatsApp: open the group, tap its name, then “Invite via link”, then “Copy link”.</span></label>
+      <label style="grid-column:1/-1">Welcome message on the ambassador home page<textarea name="welcome_message">${esc(S.welcome_message || "")}</textarea></label>
+      <label>Instagram handle<input name="instagram" value="${esc(S.instagram || "")}"></label>
+      <label>TikTok handle<input name="tiktok" value="${esc(S.tiktok || "")}"></label></div>
+      <button class="btn g">Save settings</button></form>
+    <div class="card" style="margin-bottom:22px"><h3>Links</h3>
+      <p class="small">Ambassador portal: <a href="${PORTAL_URL}" target="_blank" rel="noopener">${PORTAL_URL}</a></p>
+      <p class="small">This admin page: <a href="${location.href.split("#")[0]}">${location.href.split("#")[0]}</a></p></div>
+    <div class="card"><h3>Admins</h3><p class="small mute">To add an admin: put their email here, then create a login for the same email in Supabase (Authentication, Users, Add user).</p>
+      <div class="who">${D.admins.map((a) => `<div><span>${esc(a.email)}</span>${a.email.toLowerCase() === user.email.toLowerCase() ? '<span class="mute">You</span>' : `<button class="btn bad sm" data-rm="${esc(a.email)}">Remove</button>`}</div>`).join("")}</div>
+      <form id="af" class="row" style="margin-top:12px"><input name="email" type="email" placeholder="email@example.com" required style="flex:1;min-width:200px"><button class="btn">Add admin</button></form></div>`;
+  document.getElementById("sf").onsubmit = async (e) => { e.preventDefault(); const f = e.target;
+    const rows = ["whatsapp_link", "welcome_message", "instagram", "tiktok"].map((k) => ({ key: k, value: f.elements[k].value.trim() || null }));
+    await busy(f.querySelector("button"), async () => ok(await db.from("settings").upsert(rows)), "Settings saved"); refresh(); };
+  document.getElementById("af").onsubmit = async (e) => { e.preventDefault();
+    await busy(e.target.querySelector("button"), async () => ok(await db.from("admins").insert({ email: e.target.email.value.trim().toLowerCase() })), "Admin added"); refresh(); };
+  v.querySelectorAll("[data-rm]").forEach((b) => b.onclick = async () => { if (!confirm(`Remove ${b.dataset.rm} as an admin?`)) return;
+    await busy(b, async () => ok(await db.from("admins").delete().eq("email", b.dataset.rm)), "Removed"); refresh(); });
+}
+
+addEventListener("hashchange", () => { const h = location.hash.slice(1); if (user && TABS.some(([k]) => k === h) && h !== tab) { tab = h; render(); } });
+
+// ---------- start ----------
+(async () => {
+  if (!CFG.SUPABASE_URL || CFG.SUPABASE_URL.startsWith("PASTE") || !window.supabase) {
+    app.innerHTML = `<main class="login"><div class="box card"><h2>Not connected yet</h2><p>Fill in <code>portal/config.js</code> with your Supabase project URL and anon key. The setup guide explains how.</p></div></main>`;
+    return;
+  }
+  db = supabase.createClient(CFG.SUPABASE_URL, CFG.SUPABASE_ANON_KEY);
+  start();
+})();
+</script>
+</body>
+</html>
