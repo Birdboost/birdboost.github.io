@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Join the Flock</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: loud streetwear drop poster, warm faith-centred welcome underneath.
+   IDEA: a flock flying in V formation with exactly 10 places in it.
+   PICTURE: 10 birds in a V behind the logo; tap a bird to claim it, it becomes "your spot".
+   COLOUR and TYPE: black ground, white type, Birdboost green accent. Anton headlines, Inter body.
+   LAYOUT: poster hero with countdown, then perks, commitments, steps, and a one-column application. */
+:root{--lg:url(data:image/png;base64,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);color-scheme:light dark;--bg:#0b0b0b;--ink:#f5f5f2;--mute:#a9aba6;--g:#3fae3a;--g2:#1f6e22;--card:#161716;--line:#2a2b29;--paper:light-dark(#f4f4f0,#121312);--pink:light-dark(#111,#f5f5f2)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(28px,4vw,64px) max(5vw,16px)}
+.wrap{max-width:1240px;margin:0 auto}
+h1,h2,.big{font-family:Anton,Impact,'Arial Narrow',sans-serif;font-weight:400;line-height:1.02;letter-spacing:.01em;text-wrap:balance;margin:0}
+h1{font-size:clamp(52px,9vw,112px);text-transform:uppercase}
+h1 .g{color:var(--g)}
+h2{font-size:clamp(34px,5vw,52px);text-transform:uppercase;margin-bottom:18px}
+p{margin:0 0 12px}
+.logo{display:inline-block;width:46px;height:48px;background:currentColor;-webkit-mask:var(--lg) center/contain no-repeat;mask:var(--lg) center/contain no-repeat}
+.brand{display:flex;align-items:center;gap:12px;font-weight:800;font-size:20px}
+/* hero */
+.hero{position:relative;background:radial-gradient(120% 90% at 80% 10%,#163d17 0,#0b0b0b 60%);border-bottom:6px solid var(--g)}
+.hgrid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:clamp(20px,4vw,56px);align-items:center;margin-top:28px}
+.lead{font-size:19px;color:#dcdcd6;max-width:34em}
+.ten{display:inline-flex;align-items:baseline;gap:10px;background:var(--g);color:#06140a;padding:8px 16px;border-radius:6px;margin:14px 0 20px;font-weight:800}
+.ten b{font-family:Anton,Impact,sans-serif;font-weight:400;font-size:40px;line-height:1}
+.cta{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 26px;border-radius:999px;background:var(--ink);color:#0b0b0b;font-weight:800;text-decoration:none;border:0;font-size:17px;cursor:pointer}
+.cta.g{background:var(--g);color:#06140a}
+.cta:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.bird:focus-visible{outline:3px solid #9be38f;outline-offset:3px}
+.clock{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}
+.clock div{background:#111;border:1px solid var(--line);border-radius:10px;padding:8px 12px;min-width:74px;text-align:center}
+.clock b{display:block;font-family:Anton,Impact,sans-serif;font-weight:400;font-size:34px;line-height:1.1}
+.clock span{font-size:13px;color:var(--mute)}
+.fig{position:relative;min-height:420px}
+.fig svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.bird{cursor:pointer;transition:transform .25s}
+.bird:hover .bb{fill:var(--g)}
+.bird.mine .bb{fill:var(--g)}
+.lbl{font:600 13px Inter,sans-serif;fill:#cfd0cb}
+.note{font-size:14px;color:var(--mute);margin-top:22px;text-align:center}
+@media (prefers-reduced-motion:no-preference){.flap{animation:bob 3.2s ease-in-out infinite}@keyframes bob{50%{transform:translateY(-6px)}}}
+/* perks */
+.light{background:var(--paper);color:var(--pink)}
+.light .mute{color:light-dark(#555,#a9aba6)}
+.perks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:10px}
+.perk{perspective:900px;height:210px;border:0;background:none;padding:0;cursor:pointer;font:inherit;color:inherit;text-align:left}
+.pi{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d}
+.perk.on .pi{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border-radius:14px;padding:18px;display:flex;flex-direction:column;justify-content:space-between}
+.front{background:#0b0b0b;color:#f5f5f2}
+.front .big{font-size:30px}
+.front small{color:#9be38f;font-weight:600}
+.back{background:var(--g);color:#06140a;transform:rotateY(180deg);font-size:16px}
+.tees{margin-top:22px;border-radius:14px;overflow:hidden;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);background:#0b0b0b;color:#f5f5f2}
+.tees img{width:100%;height:100%;object-fit:cover;display:block}
+.tees div{padding:22px;align-self:center}
+/* commit + steps */
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(20px,4vw,56px)}
+ul.ck{list-style:none;padding:0;margin:0}
+ul.ck li{padding:12px 0 12px 36px;border-bottom:1px solid var(--line);position:relative}
+ul.ck li::before{content:"";position:absolute;left:0;top:15px;width:20px;height:20px;border-radius:50%;background:var(--g);-webkit-mask:radial-gradient(circle,#000 60%,transparent 62%)}
+.steps{display:grid;gap:0}
+.step{display:grid;grid-template-columns:110px minmax(0,1fr);gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}
+.step b{font-family:Anton,Impact,sans-serif;font-weight:400;font-size:22px;color:var(--g);white-space:nowrap}
+.ages{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:18px}
+.ages div{border:1px solid var(--line);border-radius:12px;padding:14px}
+.ages b{display:block;font-family:Anton,Impact,sans-serif;font-weight:400;font-size:26px}
+/* form */
+form{max-width:640px;margin:0 auto}
+.fld{margin-bottom:16px}
+label{display:block;font-weight:600;margin-bottom:6px}
+input,select,textarea{width:100%;font:16px Inter,sans-serif;padding:12px 14px;min-height:48px;border-radius:10px;border:1px solid light-dark(#c9c9c2,#3a3b38);background:light-dark(#fff,#0f100f);color:inherit}
+textarea{min-height:96px;resize:vertical}
+.row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.sizes{display:flex;flex-wrap:wrap;gap:8px}
+.sizes label{margin:0}
+.sizes input{position:absolute;opacity:0;width:1px;height:1px}
+.sizes span{display:inline-flex;align-items:center;justify-content:center;min-width:52px;min-height:44px;border-radius:10px;border:1px solid light-dark(#c9c9c2,#3a3b38);font-weight:600;cursor:pointer}
+.sizes input:checked+span{background:var(--g);border-color:var(--g);color:#06140a}
+.sizes input:focus-visible+span{outline:3px solid #9be38f;outline-offset:2px}
+.parent{display:none;border-left:4px solid var(--g);padding:12px 0 2px 16px;margin-bottom:16px}
+.parent.show{display:block}
+.chk{display:flex;gap:10px;align-items:flex-start;font-weight:400}
+.chk input{width:22px;height:22px;min-height:0;margin-top:2px;flex:none;accent-color:var(--g)}
+.msg{border-radius:12px;padding:14px 16px;margin:10px 0 16px;display:none}
+.msg.show{display:block}
+.msg.no{background:light-dark(#fde9e7,#3a1614)}
+.msg.ok{background:light-dark(#e3f5e1,#123614)}
+.out{display:none;margin-top:18px}
+.out.show{display:block}
+.out pre{white-space:pre-wrap;background:light-dark(#fff,#0f100f);border:1px solid light-dark(#c9c9c2,#3a3b38);border-radius:10px;padding:14px;font:14px/1.5 Inter,sans-serif}
+.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.err{color:light-dark(#b3261e,#ff8a80);font-size:14px;min-height:20px;margin-top:4px}
+footer{text-align:center;color:var(--mute);font-size:14px}
+@media(max-width:860px){.hgrid,.two,.tees{grid-template-columns:minmax(0,1fr)}.perks{grid-template-columns:repeat(2,minmax(0,1fr))}.fig{min-height:340px}}
+@media(max-width:520px){.perks{grid-template-columns:minmax(0,1fr)}.perk{height:170px}.ages{grid-template-columns:minmax(0,1fr)}.row{grid-template-columns:minmax(0,1fr)}.step{grid-template-columns:minmax(0,1fr);gap:2px}.fig{min-height:280px}}
+</style>
+</head>
+<body>
+
+<section class="hero band">
+  <div class="wrap">
+    <div class="brand"><span class="logo" aria-hidden="true"></span>birdboost.inc</div>
+    <div class="hgrid">
+      <div>
+        <h1>Join the <span class="g">Flock.</span><br>Become a Birdboost ambassador</h1>
+        <div class="ten"><b>10</b> spots only. That's the whole team.</div>
+        <p class="lead">We're building the crew that carries Birdboost into the drop on 28 December. Wear the pieces, make the content, bring your people, and rep a brand that puts faith first.</p>
+        <a class="cta g" href="#apply">Apply for a spot</a>
+        <div class="clock" id="clock" aria-live="polite">
+          <div><b id="cd">–</b><span>days</span></div>
+          <div><b id="ch">–</b><span>hours</span></div>
+          <div><b id="cm">–</b><span>minutes</span></div>
+          <div style="text-align:left;min-width:140px"><span>Applications close</span><b style="font-size:22px">6 December</b></div>
+        </div>
+      </div>
+      <div>
+        <div class="fig" id="fig"><svg id="flock" role="img" aria-label="A V formation of 10 birds, one for each ambassador spot"></svg></div>
+        <p class="note" id="flocknote">Tap a bird. One of these could be yours.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band light">
+  <div class="wrap">
+    <h2>What you get</h2>
+    <p class="mute">Tap each card.</p>
+    <div class="perks" id="perks"></div>
+    <div class="tees">
+      <img src="tees.jpg" alt="The Righteous tee in green, nude and grey">
+      <div><div class="big" style="font-size:30px">Your free piece</div><p style="margin-top:8px">Every ambassador gets a piece from the first drop before anyone else can buy it. You'll be wearing it in the launch shoot.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap two">
+    <div>
+      <h2>What we ask</h2>
+      <ul class="ck">
+        <li>Come to one shoot day with the team in December.</li>
+        <li>Post at least 2 Birdboost videos or posts a week during launch month, and share on launch day.</li>
+        <li>Label your posts as gifted or partnership, the honest way.</li>
+        <li>Keep it clean. Nothing that would embarrass the brand or isn't okay for a younger audience.</li>
+        <li>Send order questions to the Birdboost WhatsApp. We handle all payments.</li>
+      </ul>
+      <p style="margin-top:16px;color:var(--mute)">Follower count matters less than being real, consistent and reliable. Show up, reply to messages, and be you.</p>
+    </div>
+    <div>
+      <h2>How it works</h2>
+      <div class="steps">
+        <div class="step"><b>By 6 Dec</b><span>Apply below. It takes two minutes.</span></div>
+        <div class="step"><b>7 to 13 Dec</b><span>Shortlisted? We'll have a quick 10 minute call or meet, then confirm the final 10 in writing.</span></div>
+        <div class="step"><b>By 13 Dec</b><span>Onboarding: the brand story, the Flock pose, the launch plan, and your ambassador WhatsApp group.</span></div>
+        <div class="step"><b>December</b><span>Shoot day. Then we go live on 28 December.</span></div>
+      </div>
+      <div class="ages">
+        <div><b>18+</b>You can apply.</div>
+        <div><b>16 to 17</b>Apply with a parent's written okay. They stay in the loop.</div>
+        <div><b>Under 16</b>Not this time. Join the Flock as a supporter.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band light" id="apply">
+  <div class="wrap">
+    <form id="f" name="ambassador" novalidate>
+            <p hidden><label>Leave this empty <input name="_gotcha" tabindex="-1" autocomplete="off"></label></p>
+      <input type="hidden" name="source" id="h_source"><input type="hidden" name="campaign" id="h_campaign"><input type="hidden" name="ref" id="h_ref"><input type="hidden" name="latest_source" id="h_latest"><input type="hidden" name="referrer" id="h_referrer"><input type="hidden" name="first_visit" id="h_first"><input type="hidden" name="visits" id="h_visits"><input type="hidden" name="device" id="h_device"><input type="hidden" name="spot_picked" id="h_spot">
+      <h2>Apply for a spot</h2>
+      <p class="mute">Fill this in and send it straight to our WhatsApp. Only 10 spots, so tell us why it should be you.</p>
+      <div class="row">
+        <div class="fld"><label for="name">Full name</label><input id="name" name="name" autocomplete="name" required></div>
+        <div class="fld"><label for="age">Age</label><input id="age" name="age" type="number" inputmode="numeric" min="10" max="60" required></div>
+      </div>
+      <div class="msg no" id="young">Thank you for wanting to be part of this. Ambassadors need to be 16 or older, so this round isn't for you yet. Follow Birdboost and join the Flock as a supporter, we'd love to have you.</div>
+      <div class="parent" id="parent">
+        <p style="font-weight:600">You're 16 or 17, so a parent or guardian needs to say yes and stay in the loop.</p>
+        <div class="row">
+          <div class="fld"><label for="pname">Parent or guardian name</label><input id="pname" name="parent_name"></div>
+          <div class="fld"><label for="pphone">Their phone number</label><input id="pphone" name="parent_phone" type="tel" inputmode="tel"></div>
+        </div>
+        <label class="chk"><input type="checkbox" id="pok" name="parent_ok" value="yes"> My parent or guardian knows I'm applying and is happy for Birdboost to contact them.</label>
+      </div>
+      <div class="row">
+        <div class="fld"><label for="city">City or town</label><input id="city" name="city" required></div>
+        <div class="fld"><label for="phone">Your WhatsApp number</label><input id="phone" name="whatsapp" type="tel" inputmode="tel" required></div>
+      </div>
+      <div class="fld"><label for="handles">Instagram and TikTok handles</label><input id="handles" name="handles" placeholder="@yourname on both" required></div>
+      <div class="fld"><label>Your size</label><div class="sizes" id="sizes"><label><input type="radio" name="size" value="XS"><span>XS</span></label><label><input type="radio" name="size" value="S"><span>S</span></label><label><input type="radio" name="size" value="M"><span>M</span></label><label><input type="radio" name="size" value="L"><span>L</span></label><label><input type="radio" name="size" value="XL"><span>XL</span></label><label><input type="radio" name="size" value="XXL"><span>XXL</span></label></div></div>
+      <div class="fld"><label for="why">Why Birdboost? Why you?</label><textarea id="why" name="why" required placeholder="A few lines is perfect."></textarea></div>
+      <label class="chk fld"><input type="checkbox" id="agree" name="commitment" value="yes"> I can make one December shoot day and post at least twice a week in launch month.</label>
+      <div class="err" id="err" role="alert"></div>
+      <p class="mute" style="font-size:14px">We only use your details to review your application and contact you about it. We also note which link brought you here, so we know where the Flock is finding us. Nothing is shared or sold.</p>
+      <button class="cta g" type="submit" id="sub">Send my application</button>
+      <div class="out" id="out">
+        <div class="msg ok show" id="okmsg"><b>Application received. Thank you!</b> We'll be in touch on WhatsApp after 6 December if you're shortlisted. Keep an eye on Birdboost in the meantime.</div>
+        <div id="fallback" style="display:none">
+          <div class="msg no show">We couldn't send your application just now. Please send it to us on WhatsApp instead, or try again in a minute.</div>
+          <pre id="txt"></pre>
+          <div class="btns">
+            <a class="cta g" id="wa" href="#" target="_blank" rel="noopener">Send on WhatsApp</a>
+            <button class="cta" type="button" id="copy" style="background:#0b0b0b;color:#f5f5f2">Copy application</button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>
+
+<footer class="band"><span class="logo" aria-hidden="true" style="width:30px;height:32px;vertical-align:middle"></span> Birdboost · faith-driven clothing and community, Zimbabwe · WhatsApp +263 71 387 5931</footer>
+
+<script>
+{
+const DEADLINE = Date.parse('2026-12-06T23:59:00+02:00');
+const WA = '263713875931';
+/* Paste your Formspree form ID here (the part after formspree.io/f/) */
+const FORM_ID = 'mdegjvad';
+const perks = [
+  ['Free piece','From the first drop','A Birdboost piece from the first drop, yours to keep and wear in the launch shoot.'],
+  ['Ambassador title','On the Birdboost page','You get the official Ambassador title and a feature on Birdboost\'s page.'],
+  ['First look','Before anyone else','See new designs before they drop and help shape what comes next.'],
+  ['Your own code','For your friends','A personal discount code to share with your people.']
+];
+const $ = id => document.getElementById(id);
+
+/* Where did they come from? First-party only: stored in this browser, sent only with the application. */
+const track = (() => {
+  const q = new URLSearchParams(location.search);
+  const clean = s => (s||'').toString().slice(0,80).replace(/[^\w\-. @]/g,'');
+  let ref = ''; try { ref = document.referrer ? new URL(document.referrer).hostname : ''; } catch(e){}
+  const guess = h => /instagram/.test(h)?'instagram':/tiktok/.test(h)?'tiktok':/facebook|fb\./.test(h)?'facebook':/whatsapp|wa\.me/.test(h)?'whatsapp':/google/.test(h)?'google':h||'direct';
+  const now = {
+    source: clean(q.get('src')||q.get('utm_source')) || guess(ref),
+    campaign: clean(q.get('utm_campaign')||q.get('c')),
+    ref: clean(q.get('ref')),
+    referrer: ref
+  };
+  let t = null;
+  try { t = JSON.parse(localStorage.getItem('bb-src')||'null'); } catch(e){}
+  if (!t) t = { ...now, first: new Date().toISOString(), visits: 0 };
+  t.visits = (t.visits||0) + 1;
+  t.latest = now.source;
+  if (!t.ref && now.ref) t.ref = now.ref;
+  try { localStorage.setItem('bb-src', JSON.stringify(t)); } catch(e){}
+  return t;
+})();
+$('h_source').value = track.source; $('h_campaign').value = track.campaign||''; $('h_ref').value = track.ref||'';
+$('h_latest').value = track.latest; $('h_referrer').value = track.referrer||''; $('h_first').value = track.first;
+$('h_visits').value = track.visits; $('h_device').value = matchMedia('(max-width:820px)').matches ? 'mobile' : 'desktop';
+
+$('perks').innerHTML = perks.map((p,i)=>`<button class="perk" type="button" aria-pressed="false" aria-label="${p[0]}: ${p[2]}"><div class="pi"><div class="face front"><span class="logo" style="width:30px;height:32px"></span><div><div class="big">${p[0]}</div><small>${p[1]}</small></div></div><div class="face back"><div class="big" style="font-size:26px">${p[0]}</div><span>${p[2]}</span></div></div></button>`).join('');
+$('perks').addEventListener('click', e => { const b = e.target.closest('.perk'); if (!b) return; b.classList.toggle('on'); b.setAttribute('aria-pressed', b.classList.contains('on')); });
+
+
+const tick = () => {
+  let ms = Math.max(0, DEADLINE - Date.now());
+  const d = Math.floor(ms/864e5), h = Math.floor(ms%864e5/36e5), m = Math.floor(ms%36e5/6e4);
+  $('cd').textContent = d; $('ch').textContent = h; $('cm').textContent = m;
+  if (!ms) $('clock').innerHTML = '<div style="text-align:left"><b style="font-size:22px">Applications have closed</b><span>Thank you, Flock. Watch for the launch on 28 December.</span></div>';
+};
+tick(); const clk = setInterval(tick, 30000);
+
+/* V formation of 10 birds; the lead bird is the logo */
+const svg = $('flock');
+let mine = -1;
+const BIRD = 'M-22 4 C-12 -6 -4 -6 0 2 C4 -6 12 -6 22 4 C12 0 5 1 0 8 C-5 1 -12 0 -22 4Z';
+const draw = () => {
+  const W = svg.clientWidth, H = svg.clientHeight; if (!W) return;
+  const sc = Math.min(W/520, H/420) * 1.9;
+  const cx = W/2, top = H*0.2;
+  const pos = [];
+  for (let i=1;i<=5;i++){ pos.push([cx - i*W*0.088, top + i*H*0.14]); pos.push([cx + i*W*0.088, top + i*H*0.14]); }
+  pos.sort((a,b)=>a[1]-b[1]||a[0]-b[0]);
+  const lead = 70*sc;
+  let s = `<g class="flap"><foreignObject x="${cx-lead/2}" y="${top-lead*0.9}" width="${lead}" height="${lead}"><div xmlns="http://www.w3.org/1999/xhtml" class="logo" style="width:100%;height:100%;color:#f5f5f2"></div></foreignObject></g>`;
+  s += pos.map((p,i)=>{
+    const k = (i===mine)?1.3:1;
+    return `<g class="bird${i===mine?' mine':''}" tabindex="0" role="button" data-i="${i}" aria-label="Spot ${i+1} of 10${i===mine?', yours':''}" transform="translate(${p[0]} ${p[1]})">
+      <g class="flap" style="animation-delay:${(i*0.23).toFixed(2)}s"><g transform="scale(${(sc*k).toFixed(2)})"><circle r="30" fill="transparent"/><path class="bb" d="${BIRD}" fill="#f5f5f2"/></g></g>
+      <text class="lbl" text-anchor="middle" y="${(16*sc+14).toFixed(0)}">${i===mine?'You?':'#'+(i+1)}</text></g>`;
+  }).join('');
+  svg.innerHTML = s;
+};
+const ro = new ResizeObserver(draw); ro.observe($('fig'));
+const pick = el => {
+  const g = el.closest('.bird'); if (!g) return;
+  mine = +g.dataset.i; draw(); $('h_spot').value = mine+1;
+  $('flocknote').textContent = `Spot #${mine+1} has your name on it. Apply before 6 December to claim a place.`;
+  const nb = svg.querySelector(`[data-i="${mine}"]`); if (nb) nb.focus();
+};
+svg.addEventListener('click', e => pick(e.target));
+svg.addEventListener('keydown', e => { if (e.key==='Enter'||e.key===' ') { e.preventDefault(); pick(e.target); } });
+
+/* form */
+const ageState = () => {
+  const a = parseInt($('age').value,10);
+  $('young').classList.toggle('show', a>0 && a<16);
+  $('parent').classList.toggle('show', a===16 || a===17);
+  return a;
+};
+$('age').addEventListener('input', ageState);
+
+const fields = ['name','age','city','phone','handles','why','pname','pphone'];
+try { const saved = JSON.parse(localStorage.getItem('bb-amb')||'{}'); fields.forEach(k=>{ if(saved[k]) $(k).value = saved[k]; }); ageState(); } catch(e){}
+$('f').addEventListener('input', () => { try { const o={}; fields.forEach(k=>o[k]=$(k).value); localStorage.setItem('bb-amb', JSON.stringify(o)); } catch(e){} });
+
+$('f').addEventListener('submit', e => {
+  e.preventDefault();
+  const a = ageState(), err = $('err'); err.textContent = '';
+  const v = k => $(k).value.trim();
+  const size = (document.querySelector('input[name=size]:checked')||{}).value || '';
+  const miss = [['name','your name'],['age','your age'],['city','your city'],['phone','your WhatsApp number'],['handles','your handles'],['why','why Birdboost']].filter(([k])=>!v(k)).map(x=>x[1]);
+  if (!size) miss.push('your size');
+  if (miss.length) { err.textContent = 'Please add ' + miss.join(', ') + '.'; return; }
+  if (a < 16) { err.textContent = 'Ambassadors need to be 16 or older for this round.'; $('young').scrollIntoView({block:'center'}); return; }
+  if (a < 18 && (!v('pname') || !v('pphone') || !$('pok').checked)) { err.textContent = 'Please add your parent or guardian\'s name and number, and tick that they\'re happy for you to apply.'; return; }
+  if (!$('agree').checked) { err.textContent = 'Please tick that you can make the shoot day and post twice a week.'; return; }
+  const lines = [
+    'BIRDBOOST AMBASSADOR APPLICATION',
+    'Name: ' + v('name'), 'Age: ' + a, 'City: ' + v('city'), 'WhatsApp: ' + v('phone'),
+    'Handles: ' + v('handles'), 'Size: ' + size
+  ];
+  if (a < 18) lines.push('Parent or guardian: ' + v('pname') + ', ' + v('pphone') + ' (knows I am applying)');
+  lines.push('Why Birdboost: ' + v('why'), 'I can make one December shoot day and post twice a week in launch month.');
+  const t = lines.join('\n');
+  $('txt').textContent = t;
+  $('wa').href = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(t);
+  const btn = $('sub'); btn.disabled = true; btn.textContent = 'Sending...';
+  const data = {}; new FormData($('f')).forEach((val,k) => { data[k] = val; });
+  data._subject = 'New Flock application: ' + v('name') + ' (' + a + ', ' + v('city') + ')';
+  fetch('https://formspree.io/f/' + FORM_ID, { method:'POST', headers:{'Content-Type':'application/json','Accept':'application/json'}, body:JSON.stringify(data) })
+    .then(r => { if (!r.ok) throw new Error(r.status);
+      $('okmsg').style.display = ''; $('fallback').style.display = 'none';
+      btn.textContent = 'Application sent';
+      try { localStorage.removeItem('bb-amb'); } catch(e){}
+    })
+    .catch(() => { $('okmsg').style.display = 'none'; $('fallback').style.display = ''; btn.disabled = false; btn.textContent = 'Try again'; })
+    .finally(() => { $('out').classList.add('show'); $('out').scrollIntoView({behavior:'smooth', block:'start'}); });
+});
+$('copy').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText($('txt').textContent); $('copy').textContent = 'Copied'; }
+  catch(e) { $('copy').textContent = 'Select the text above to copy'; }
+  setTimeout(()=>{ $('copy').textContent = 'Copy application'; }, 2500);
+});
+}
+</script>
+</body>
+</html>
