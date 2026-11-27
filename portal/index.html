@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>The Flock · Birdboost ambassadors</title>
+<link rel="icon" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.login{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(120% 90% at 80% 0%,#163d17 0,#0b0b0b 60%)}
+.login .box{width:min(440px,100%)}
+.login .codein{font:800 26px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.18em;text-align:center;text-transform:uppercase;padding:16px}
+.hello{padding:26px 0 6px;border-bottom:6px solid var(--g);background:radial-gradient(120% 90% at 80% 0%,#163d17 0,#0b0b0b 65%)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}
+.stat{background:#111;border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.stat b{display:block;font-family:Anton,Impact,sans-serif;font-weight:400;font-size:34px;line-height:1.1}
+.stat span{font-size:13px;color:var(--mute)}
+.storecode{display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:var(--g);color:#06140a;border-radius:14px;padding:12px 16px;margin-bottom:18px}
+.storecode code{font:800 24px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.08em}
+.storecode .btn{background:#06140a;color:var(--ink);border-color:#06140a}
+nav.bottom{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(11,11,11,.95);backdrop-filter:blur(8px);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom)}
+nav.bottom button{flex:1;max-width:160px;background:none;border:0;color:var(--mute);font:700 12px Inter,sans-serif;padding:10px 4px 12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
+nav.bottom button svg{width:24px;height:24px}
+nav.bottom button[aria-selected=true]{color:var(--g2)}
+.task.done{opacity:.7}
+.task.done h3{text-decoration:line-through;text-decoration-color:var(--g)}
+.when{font-weight:800;color:var(--g2);font-size:14px;text-transform:uppercase;letter-spacing:.04em}
+.prod{cursor:pointer;padding:12px}
+.prod .meta{padding:10px 4px 2px}
+.price{font-family:Anton,Impact,sans-serif;font-size:24px}
+.wa{background:linear-gradient(160deg,#173a16,#0f100f);border:1px solid #2f5a2d}
+.brief{white-space:pre-wrap}
+</style>
+</head>
+<body>
+<div id="app"><div class="login"><span class="spin"></span></div></div>
+
+<dialog id="dlg"><div class="dhead"><h3 id="dlgTitle"></h3><button class="x" aria-label="Close" onclick="dlg.close()">×</button></div><div class="dbody" id="dlgBody"></div></dialog>
+
+<script src="config.js"></script>
+<script src="viewer3d.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+const CFG = window.BB_CONFIG || {};
+const app = document.getElementById("app");
+const dlg = document.getElementById("dlg");
+const TZ = "Africa/Harare";
+const KEY = "bb_flock_code";
+let db = null, data = null, code = localStorage.getItem(KEY) || "", tab = location.hash.slice(1) || "home";
+
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const safeUrl = (u) => /^https?:\/\//i.test(u || "") ? u : "";
+const fmtDate = (d, withTime = true) => d ? new Date(d.length === 10 ? d + "T12:00:00+02:00" : d).toLocaleString("en-GB", { timeZone: TZ, weekday: "short", day: "numeric", month: "short", ...(withTime && d.length > 10 ? { hour: "2-digit", minute: "2-digit" } : {}) }) : "";
+const money = (p) => p.price == null ? "Price coming soon" : new Intl.NumberFormat("en", { style: "currency", currency: p.currency || "USD" }).format(p.price);
+const pretty = (c) => c ? c.slice(0, 4) + "-" + c.slice(4) : "";
+function toast(msg, bad) {
+  const t = document.createElement("div"); t.className = "toast" + (bad ? " bad" : ""); t.textContent = msg; t.setAttribute("role", "status");
+  document.body.appendChild(t); setTimeout(() => t.remove(), 3200);
+}
+const ERR = {
+  invalid_code: "That code doesn't match. Check it and try again, or ask a Birdboost admin.",
+  code_revoked: "This access code has been switched off. Ask a Birdboost admin for a new one.",
+  code_expired: "This access code has expired. Ask a Birdboost admin to renew it.",
+  event_closed: "Applications for this event are closed.",
+  task_closed: "This task is closed.",
+  not_preorderable: "This piece isn't open for pre-orders right now.",
+};
+const errText = (e) => { const m = (e && (e.message || e.error_description)) || String(e); for (const k in ERR) if (m.includes(k)) return ERR[k]; return "Something went wrong. Check your connection and try again."; };
+const isCodeErr = (e) => /invalid_code|code_revoked|code_expired/.test((e && e.message) || "");
+
+async function rpc(fn, args = {}) {
+  const { data: d, error } = await db.rpc(fn, { p_code: code, ...args });
+  if (error) { if (isCodeErr(error)) { logout(errText(error)); } throw error; }
+  return d;
+}
+async function load() { data = await rpc("amb_home"); }
+
+// ---------- Login ----------
+function showLogin(msg = "") {
+  app.innerHTML = `<main class="login"><div class="box">
+    <a class="brand" href="../"><span class="logo"></span>BIRDBOOST</a>
+    <h1 style="margin:22px 0 8px">The <span style="color:var(--g)">Flock</span></h1>
+    <p class="mute">Ambassadors only. Enter the access code a Birdboost admin gave you.</p>
+    <form id="lf" class="card" style="margin-top:18px">
+      <label>Access code<input id="ci" class="codein" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" placeholder="ABCD-EFGH" maxlength="12" required></label>
+      <p id="lerr" role="alert" style="color:var(--bad);min-height:1.2em">${esc(msg)}</p>
+      <button class="btn g" style="width:100%">Enter</button>
+    </form>
+    <p class="small mute" style="margin-top:16px">Not an ambassador yet? <a href="../">Apply to join the Flock</a>.</p>
+  </div></main>`;
+  const ci = document.getElementById("ci");
+  ci.addEventListener("input", () => {
+    const raw = ci.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8);
+    ci.value = raw.length > 4 ? raw.slice(0, 4) + "-" + raw.slice(4) : raw;
+  });
+  document.getElementById("lf").onsubmit = async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector("button"); btn.disabled = true; btn.innerHTML = '<span class="spin"></span>';
+    code = ci.value.replace(/[^A-Z0-9]/gi, "").toUpperCase();
+    try { await load(); localStorage.setItem(KEY, code); render(); }
+    catch (err) { code = ""; document.getElementById("lerr").textContent = errText(err); btn.disabled = false; btn.textContent = "Enter"; }
+  };
+  ci.focus();
+}
+function logout(msg) { localStorage.removeItem(KEY); code = ""; data = null; showLogin(msg || ""); }
+
+// ---------- Main ----------
+const ICONS = {
+  home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>',
+  events: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
+  store: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.4 6.6L16 3c-.6 1.7-2.2 3-4 3s-3.4-1.3-4-3L3.6 6.6 5.5 10 7 9.3V21h10V9.3l1.5.7z"/></svg>',
+  chat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 01-12.6 7.3L3 21l2.2-5.4A8.5 8.5 0 1121 11.5z"/></svg>',
+};
+const TABS = [["home", "Tasks"], ["events", "Events"], ["store", "Preview store"], ["chat", "Chat"]];
+
+function render() {
+  const me = data.me;
+  const done = data.tasks.filter((t) => t.done).length;
+  const myEvents = data.events.filter((e) => e.my_status === "assigned").length;
+  app.innerHTML = `
+  <header class="top"><div class="wrap"><a class="brand" href="#home"><span class="logo"></span>THE FLOCK</a><span class="sp"></span>
+    <button class="btn sm" id="refresh" aria-label="Refresh">Refresh</button><button class="btn sm" id="out">Log out</button></div></header>
+  <div class="hello"><div class="wrap">
+    <p class="mute" style="margin:0">Welcome back</p>
+    <h1>${esc(me.name.split(" ")[0])}</h1>
+    ${data.settings.welcome_message ? `<p style="margin-top:8px;max-width:40em">${esc(data.settings.welcome_message)}</p>` : ""}
+    <div class="stats">
+      <div class="stat"><b>${done}</b><span>tasks done</span></div>
+      <div class="stat"><b>${myEvents}</b><span>events on the team</span></div>
+      <div class="stat"><b>${data.sales.count}</b><span>pieces sold with your code</span></div>
+    </div>
+    <div class="storecode"><div style="flex:1;min-width:180px"><div class="small" style="font-weight:700">YOUR STORE CODE</div><code>${esc(me.store_code)}</code>
+      <div class="small">Customers give this code when they buy, so the sale counts as yours.</div></div>
+      <button class="btn sm" id="copysc">Copy code</button></div>
+    ${me.code_expires_at ? `<p class="small mute">Your access code works until ${fmtDate(me.code_expires_at, false)}.</p>` : ""}
+  </div></div>
+  <main class="wrap"><section class="view" id="view"></section></main>
+  <nav class="bottom" role="tablist">${TABS.map(([k, n]) => `<button role="tab" data-tab="${k}" aria-selected="${tab === k}">${ICONS[k]}${n}</button>`).join("")}</nav>`;
+  document.getElementById("out").onclick = () => logout();
+  document.getElementById("refresh").onclick = async () => { try { await load(); render(); toast("Up to date"); } catch (e) { if (!isCodeErr(e)) toast(errText(e), 1); } };
+  document.getElementById("copysc").onclick = () => navigator.clipboard.writeText(me.store_code).then(() => toast("Store code copied"));
+  app.querySelectorAll("nav.bottom button").forEach((b) => b.onclick = () => { tab = b.dataset.tab; history.replaceState(null, "", "#" + tab); render(); scrollTo(0, 0); });
+  ({ home: viewTasks, events: viewEvents, store: viewStore, chat: viewChat }[tab] || viewTasks)(document.getElementById("view"));
+}
+addEventListener("hashchange", () => { const h = location.hash.slice(1); if (data && TABS.some(([k]) => k === h) && h !== tab) { tab = h; render(); } });
+
+async function act(btn, fn, okMsg) {
+  btn.disabled = true;
+  try { await fn(); await load(); render(); if (okMsg) toast(okMsg); }
+  catch (e) { if (!isCodeErr(e)) { toast(errText(e), 1); btn.disabled = false; } }
+}
+
+// ---------- Tasks ----------
+function viewTasks(v) {
+  const open = data.tasks.filter((t) => !t.done && t.is_open), done = data.tasks.filter((t) => t.done);
+  const card = (t) => `<article class="card task ${t.done ? "done" : ""}">
+    <div class="row" style="justify-content:space-between"><h3>${esc(t.title)}</h3>${t.done ? '<span class="pill g">Done</span>' : t.due_date ? `<span class="pill warn">Due ${fmtDate(t.due_date, false)}</span>` : ""}</div>
+    ${t.details ? `<p class="brief">${esc(t.details)}</p>` : ""}
+    ${safeUrl(t.link) ? `<p><a href="${esc(t.link)}" target="_blank" rel="noopener">Open the link for this task</a></p>` : ""}
+    ${t.done ? `${safeUrl(t.proof_link) ? `<p class="small">Your post: <a href="${esc(t.proof_link)}" target="_blank" rel="noopener">${esc(t.proof_link)}</a></p>` : ""}
+      ${t.is_open ? `<button class="btn sm" data-undo="${t.id}">Mark as not done</button>` : ""}`
+    : `<form class="row" data-done="${t.id}" style="margin-top:8px"><input name="proof" type="url" placeholder="Link to your post (optional)" style="flex:1;min-width:200px"><button class="btn g sm">Mark done</button></form>`}
+  </article>`;
+  v.innerHTML = `<h2>Your tasks</h2>
+    ${open.length ? `<div class="cards">${open.map(card).join("")}</div>` : `<div class="empty">No open tasks right now. Check back soon.</div>`}
+    ${done.length ? `<h3 style="margin:28px 0 12px">Done</h3><div class="cards">${done.map(card).join("")}</div>` : ""}`;
+  v.querySelectorAll("form[data-done]").forEach((f) => f.onsubmit = (e) => { e.preventDefault();
+    act(f.querySelector("button"), () => rpc("amb_task_done", { p_task: f.dataset.done, p_done: true, p_proof_link: f.proof.value || null }), "Nice work. Task marked done."); });
+  v.querySelectorAll("[data-undo]").forEach((b) => b.onclick = () => act(b, () => rpc("amb_task_done", { p_task: b.dataset.undo, p_done: false })));
+}
+
+// ---------- Events ----------
+const STATUS = {
+  applied: ['<span class="pill blue">Applied</span>', "You've applied. An admin will confirm the team."],
+  suggested: ['<span class="pill warn">You\'re invited</span>', "The Birdboost team would love you at this one."],
+  assigned: ['<span class="pill g">On the team</span>', "You're confirmed for this event."],
+  declined: ['<span class="pill">Not this time</span>', "You're not on the team for this one. There will be more."],
+};
+function viewEvents(v) {
+  const card = (e) => {
+    const st = STATUS[e.my_status];
+    const full = e.spots && e.team_size >= e.spots;
+    let actions = "";
+    if (!e.my_status && e.is_open) actions = `<button class="btn g sm" data-apply="${e.id}">Apply for this event</button>`;
+    if (e.my_status === "suggested") actions = `<button class="btn g sm" data-apply="${e.id}" data-accept="1">I'm in</button> <button class="btn sm" data-withdraw="${e.id}">I can't make it</button>`;
+    if (e.my_status === "applied") actions = `<button class="btn sm" data-withdraw="${e.id}">Withdraw my application</button>`;
+    return `<article class="card">
+      <div class="when">${esc(fmtDate(e.starts_at))}${e.ends_at ? " to " + esc(fmtDate(e.ends_at)) : ""}</div>
+      <div class="row" style="justify-content:space-between;margin:4px 0 6px"><h3>${esc(e.title)}</h3>${st ? st[0] : e.is_open ? "" : '<span class="pill">Applications closed</span>'}</div>
+      ${e.location ? `<p class="small"><b>Where:</b> ${esc(e.location)}</p>` : ""}
+      ${e.dress_code ? `<p class="small"><b>Wear:</b> ${esc(e.dress_code)}</p>` : ""}
+      ${e.spots ? `<p class="small mute">${e.team_size} of ${e.spots} spots filled${full ? " (full)" : ""}</p>` : ""}
+      ${e.brief ? `<p class="brief">${esc(e.brief)}</p>` : ""}
+      ${st ? `<p class="small mute">${st[1]}</p>` : ""}
+      <div class="row">${actions}</div></article>`;
+  };
+  v.innerHTML = `<h2>Events</h2><p class="mute">See what Birdboost is planning, read the brief, and apply for the ones you can make.</p>
+    ${data.events.length ? `<div class="cards two">${data.events.map(card).join("")}</div>` : `<div class="empty">No events posted yet.</div>`}`;
+  v.querySelectorAll("[data-apply]").forEach((b) => b.onclick = () => {
+    if (b.dataset.accept) return act(b, () => rpc("amb_event_apply", { p_event: b.dataset.apply }), "You're in. An admin will confirm.");
+    const ev = data.events.find((e) => e.id === b.dataset.apply);
+    openDlg("Apply: " + ev.title, `<form id="af"><label>Anything we should know? (optional)<textarea name="msg" placeholder="For example, what time you can get there, or what you can help with"></textarea></label><button class="btn g">Send my application</button></form>`);
+    document.getElementById("af").onsubmit = (e) => { e.preventDefault(); const msg = e.target.msg.value; dlg.close();
+      act(b, () => rpc("amb_event_apply", { p_event: ev.id, p_message: msg || null }), "Application sent"); };
+  });
+  v.querySelectorAll("[data-withdraw]").forEach((b) => b.onclick = () => act(b, () => rpc("amb_event_withdraw", { p_event: b.dataset.withdraw }), "Done"));
+}
+
+// ---------- Preview store ----------
+function viewStore(v) {
+  v.innerHTML = `<h2>Preview store</h2><p class="mute">Designs that aren't out yet. You see them first, and you can pre-order before anyone else. This is not the main Birdboost shop.</p>
+    ${data.products.length ? `<div class="cards two" id="pg"></div>` : `<div class="empty">No previews yet. New drops will show up here first.</div>`}
+    ${data.preorders.length ? `<h3 style="margin:30px 0 12px">Your pre-orders</h3><div class="tablewrap"><table><thead><tr><th>Piece</th><th>Size</th><th>Qty</th><th>Status</th><th></th></tr></thead><tbody>
+      ${data.preorders.map((o) => `<tr><td>${esc(o.product)}</td><td>${esc(o.size || "")}</td><td>${o.quantity}</td><td>${{ requested: '<span class="pill blue">Requested</span>', confirmed: '<span class="pill g">Confirmed</span>', cancelled: '<span class="pill">Cancelled</span>' }[o.status]}</td>
+      <td>${o.status === "requested" ? `<button class="btn sm" data-cancel="${o.id}">Cancel</button>` : ""}</td></tr>`).join("")}</tbody></table></div>` : ""}`;
+  const pg = v.querySelector("#pg");
+  data.products.forEach((p) => {
+    const c = document.createElement("article"); c.className = "card prod";
+    c.innerHTML = `<div class="s3"></div><div class="meta"><div class="row" style="justify-content:space-between"><h3>${esc(p.name)}</h3>${p.stage === "preorder" ? '<span class="pill g">Pre-order open</span>' : '<span class="pill">Preview</span>'}</div>
+      <div class="price">${esc(money(p))}</div>${p.release_note ? `<p class="small mute">${esc(p.release_note)}</p>` : ""}<button class="btn sm" style="margin-top:6px">See details</button></div>`;
+    pg.appendChild(c);
+    BB3D.mount(c.querySelector(".s3"), p);
+    c.querySelector(".meta button").onclick = () => openProduct(p);
+  });
+  v.querySelectorAll("[data-cancel]").forEach((b) => b.onclick = () => act(b, () => rpc("amb_preorder_cancel", { p_id: b.dataset.cancel }), "Pre-order cancelled"));
+}
+function openProduct(p) {
+  const sizes = (p.sizes || "").split(",").map((s) => s.trim()).filter(Boolean);
+  openDlg(p.name, `<div id="big3d"></div>
+    <div class="row" style="justify-content:space-between;margin:14px 0 6px"><div class="price">${esc(money(p))}</div>${p.stage === "preorder" ? '<span class="pill g">Pre-order open</span>' : '<span class="pill">Preview</span>'}</div>
+    ${p.release_note ? `<p class="mute">${esc(p.release_note)}</p>` : ""}
+    ${p.description ? `<p class="brief">${esc(p.description)}</p>` : ""}
+    ${sizes.length ? `<p class="small"><b>Sizes:</b> ${sizes.map(esc).join(", ")}</p>` : ""}
+    ${p.stage === "preorder" ? `<form id="pf" class="card" style="margin-top:14px"><h3>Pre-order</h3>
+      <div class="grid2">${sizes.length ? `<label>Size<select name="size" required><option value="">Choose</option>${sizes.map((s) => `<option>${esc(s)}</option>`).join("")}</select></label>` : ""}
+      <label>How many<input name="qty" type="number" min="1" max="50" value="1" required></label></div>
+      <label>Note (optional)<input name="note" placeholder="Anything we should know"></label>
+      <button class="btn g">Request pre-order</button><p class="small mute" style="margin-top:8px">An admin will confirm your pre-order and how to pay.</p></form>`
+      : `<p class="small mute">Pre-orders aren't open for this piece yet.</p>`}`);
+  BB3D.mount(document.getElementById("big3d"), p, { big: true });
+  const f = document.getElementById("pf");
+  if (f) f.onsubmit = (e) => { e.preventDefault(); const b = f.querySelector("button");
+    const args = { p_product: p.id, p_size: f.size ? f.size.value : null, p_quantity: +f.qty.value, p_note: f.note.value || null };
+    dlg.close(); act(b, () => rpc("amb_preorder", args), "Pre-order requested"); };
+}
+
+// ---------- Chat ----------
+function viewChat(v) {
+  const s = data.settings, wa = safeUrl(s.whatsapp_link);
+  const ig = (s.instagram || "").replace(/^@/, ""), tt = (s.tiktok || "").replace(/^@/, "");
+  v.innerHTML = `<h2>Chat</h2>
+    <div class="card wa" style="margin-bottom:14px"><h3>Flock WhatsApp group</h3>
+      <p>Talk to the other ambassadors, share your posts, and get updates from the Birdboost team.</p>
+      ${wa ? `<a class="btn g" href="${esc(wa)}" target="_blank" rel="noopener">Open the WhatsApp group</a>` : `<p class="mute">The group link isn't up yet. Check back soon.</p>`}</div>
+    <div class="card"><h3>Follow and tag Birdboost</h3><p class="mute">Tag us in your posts so we can share them.</p>
+      <div class="row">${ig ? `<a class="btn" href="https://instagram.com/${encodeURIComponent(ig)}" target="_blank" rel="noopener">Instagram @${esc(ig)}</a>` : ""}
+      ${tt ? `<a class="btn" href="https://www.tiktok.com/@${encodeURIComponent(tt)}" target="_blank" rel="noopener">TikTok @${esc(tt)}</a>` : ""}</div></div>`;
+}
+
+function openDlg(title, html) { document.getElementById("dlgTitle").textContent = title; document.getElementById("dlgBody").innerHTML = html; dlg.showModal(); }
+dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); });
+
+// ---------- Start ----------
+(async () => {
+  if (!CFG.SUPABASE_URL || CFG.SUPABASE_URL.startsWith("PASTE") || !window.supabase) {
+    app.innerHTML = `<main class="login"><div class="box card"><h2>Almost ready</h2><p>The portal isn't connected to its database yet. A Birdboost admin needs to fill in <code>portal/config.js</code>.</p></div></main>`;
+    return;
+  }
+  db = supabase.createClient(CFG.SUPABASE_URL, CFG.SUPABASE_ANON_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
+  if (!code) return showLogin();
+  try { await load(); render(); } catch (e) { if (!isCodeErr(e)) showLogin(errText(e)); }
+})();
+</script>
+</body>
+</html>
