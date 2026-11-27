@@ -1,0 +1,129 @@
+/* Birdboost world: shared look for every public page.
+   VOICE: a fashion campaign at night. Quiet, confident, a lot of air.
+   IDEA: one bird (you), the flock (us), the nest (where the pieces live).
+   COLOUR: near-black ground, warm white type, Birdboost green as the one sharp accent, forest green for atmosphere.
+   TYPE: Anton for the loud lines, Instrument Serif italic for the human ones, Inter for everything you read. */
+:root{color-scheme:dark;--bg:#0a0a0a;--bg2:#101110;--ink:#f3f2ec;--mute:#a3a59f;--dim:#6f716c;--g:#3fae3a;--g2:#9be38f;--forest:#0f2410;--sand:#c9b497;--line:#262725;--card:#141514;--r:18px;
+  --display:Anton,Impact,'Arial Narrow',sans-serif;--serif:'Instrument Serif',Georgia,'Times New Roman',serif;--sans:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;--ease:cubic-bezier(.2,.7,.1,1)}
+*{box-sizing:border-box;min-width:0}
+html{scroll-behavior:smooth;scroll-padding-top:84px;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--sans);overflow-x:clip;-webkit-font-smoothing:antialiased}
+img{max-width:100%;display:block}
+[hidden]{display:none!important}
+a{color:inherit}
+p{margin:0 0 14px}
+h1,h2,h3{margin:0;font-weight:400}
+.display{font-family:var(--display);text-transform:uppercase;line-height:.95;letter-spacing:.005em;text-wrap:balance}
+.serif{font-family:var(--serif);font-style:italic;font-weight:400;text-transform:none;letter-spacing:0}
+.mute{color:var(--mute)}
+.wrap{max-width:1240px;margin:0 auto;padding:0 max(5vw,18px)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+:focus-visible{outline:3px solid var(--g2);outline-offset:3px;border-radius:6px}
+
+/* the bird's sky: above content, never in the way */
+.bb-sky{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:45}
+
+/* brand mark */
+.logo{display:inline-block;width:30px;height:32px;background:currentColor;-webkit-mask:var(--logo,url(logo.png)) center/contain no-repeat;mask:var(--logo,url(logo.png)) center/contain no-repeat;flex:none}
+
+/* ---------- navigation ---------- */
+.nav{position:fixed;top:0;left:0;right:0;z-index:60;transition:background .4s,border-color .4s,transform .4s var(--ease);border-bottom:1px solid transparent}
+.nav.solid{background:rgba(10,10,10,.78);-webkit-backdrop-filter:blur(14px) saturate(1.2);backdrop-filter:blur(14px) saturate(1.2);border-bottom-color:#ffffff12}
+.nav .in{display:flex;align-items:center;gap:18px;min-height:68px;max-width:1400px;margin:0 auto;padding:0 max(3vw,16px)}
+.brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;font-family:var(--display);font-size:21px;letter-spacing:.06em;min-height:44px}
+.nav nav{margin:0 auto}
+.links{display:flex;gap:2px;margin:0;list-style:none;padding:0}
+.links a{display:inline-flex;align-items:center;min-height:44px;padding:0 13px;text-decoration:none;font:600 12.5px/1 var(--sans);letter-spacing:.11em;text-transform:uppercase;color:#d6d6d0;border-radius:999px;transition:color .2s}
+.links a:hover,.links a[aria-current=page]{color:#fff}
+.links a{position:relative}
+.links a[aria-current=page]::after{content:"";position:absolute;left:50%;bottom:6px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--g)}
+.navr{display:flex;align-items:center;gap:8px}
+.pill-link{display:inline-flex;align-items:center;gap:0;min-height:40px;padding:0 14px;border-radius:999px;border:1px solid #ffffff26;text-decoration:none;font:600 13px var(--sans);color:#e4e4de;white-space:nowrap;transition:border-color .2s,background .2s}
+.pill-link:hover{border-color:var(--g)}
+.me-pill{border-color:#3fae3a80;background:#0f2410b3}
+.me-pill span{color:var(--mute);font-weight:400}
+.cartbtn{position:relative;width:44px;height:44px;display:inline-grid;place-items:center;border-radius:999px;border:1px solid #ffffff26;background:none;color:inherit;cursor:pointer;text-decoration:none}
+.cartbtn svg{width:20px;height:20px}
+.cartbtn b{position:absolute;top:-3px;right:-3px;min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:var(--g);color:#06140a;font:800 11px/19px var(--sans);text-align:center}
+.cartbtn b:empty{display:none}
+.menubtn{display:none;width:44px;height:44px;border-radius:999px;border:1px solid #ffffff26;background:none;color:inherit;cursor:pointer;place-items:center}
+.menubtn i{display:block;width:18px;height:1.5px;background:currentColor;position:relative}
+.menubtn i::before,.menubtn i::after{content:"";position:absolute;left:0;width:18px;height:1.5px;background:currentColor;transition:transform .3s}
+.menubtn i::before{top:-6px}.menubtn i::after{top:6px}
+.menu-open .menubtn i{background:none}.menu-open .menubtn i::before{transform:translateY(6px) rotate(45deg)}.menu-open .menubtn i::after{transform:translateY(-6px) rotate(-45deg)}
+@media(max-width:1020px){
+  .links{position:fixed;inset:0;z-index:-1;flex-direction:column;justify-content:center;gap:4px;padding:90px 8vw 40px;margin:0;background:radial-gradient(90% 70% at 80% 10%,#123015,#0a0a0a 70%);opacity:0;visibility:hidden;transition:opacity .35s,visibility .35s}
+  .menu-open .links{opacity:1;visibility:visible}
+  .links a{font:400 clamp(40px,11vw,64px)/1.05 var(--display);letter-spacing:.01em;padding:4px 0;color:#f3f2ec;min-height:0}
+  .links a[aria-current=page]{color:var(--g)}.links a[aria-current=page]::after{display:none}
+  .menubtn{display:inline-grid}
+  .nav .in{justify-content:space-between}
+  .navr{margin-left:auto}
+}
+.pill-link .short{display:none}
+@media(max-width:520px){.pill-link .long{display:none}.pill-link .short{display:inline}.brand b{display:none}}
+
+.announce{background:var(--g);color:#06140a;text-align:center;font:600 13.5px/1.4 var(--sans);padding:8px 16px;overflow:hidden;max-height:60px;transition:max-height .4s var(--ease),padding .4s}
+.announce a{font-weight:800;text-decoration:underline;text-underline-offset:3px}
+.nav.solid .announce,.menu-open .announce{max-height:0;padding-block:0}
+
+/* ---------- buttons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 26px;border-radius:999px;border:1px solid transparent;font:700 15px var(--sans);text-decoration:none;cursor:pointer;transition:transform .25s var(--ease),background .25s,border-color .25s,color .25s;white-space:nowrap}
+.btn:active{transform:scale(.98)}
+.btn.w{background:var(--ink);color:#0a0a0a}
+.btn.w:hover{background:#fff}
+.btn.g{background:var(--g);color:#06140a}
+.btn.g:hover{background:#4cc046}
+.btn.o{border-color:#ffffff40;color:var(--ink);background:none}
+.btn.o:hover{border-color:var(--ink)}
+.btn .arr{transition:transform .25s var(--ease)}
+.btn:hover .arr{transform:translateX(4px)}
+.btn[disabled]{opacity:.55;cursor:default}
+
+/* ---------- chapters ---------- */
+.chap{position:relative;padding:clamp(90px,14vw,180px) 0}
+.kicker{display:flex;align-items:center;gap:14px;font:400 clamp(20px,2.2vw,26px)/1 var(--serif);font-style:italic;color:var(--g2);margin-bottom:22px}
+.kicker::before{content:"";width:46px;height:1px;background:currentColor;opacity:.6}
+.h2{font:400 clamp(46px,8vw,112px)/.92 var(--display);text-transform:uppercase;text-wrap:balance;margin:0 0 26px}
+.h2 .serif{font-size:.82em;line-height:1;color:var(--ink)}
+.lede{font-size:clamp(17px,1.5vw,20px);line-height:1.6;color:#d4d4ce;max-width:34em}
+
+/* reveal on scroll */
+.rv{opacity:0;transform:translateY(34px);transition:opacity 1s var(--ease),transform 1.1s var(--ease)}
+.rv.in{opacity:1;transform:none}
+.rv.d1{transition-delay:.12s}.rv.d2{transition-delay:.24s}.rv.d3{transition-delay:.36s}
+.reveal-img{clip-path:inset(12% 8% 12% 8% round 24px);transition:clip-path 1.4s var(--ease)}
+.reveal-img.in{clip-path:inset(0 0 0 0 round 24px)}
+.reveal-img img{transform:scale(1.14);transition:transform 1.8s var(--ease)}
+.reveal-img.in img{transform:scale(1)}
+
+/* film grain: one tiny static texture, no animation cost */
+.grain::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:44;opacity:.07;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* ---------- footer ---------- */
+.foot{border-top:1px solid var(--line);padding:56px 0 calc(40px + env(safe-area-inset-bottom));color:var(--mute);font-size:14px}
+.foot .cols{display:grid;grid-template-columns:minmax(0,1.4fr) repeat(3,minmax(0,1fr));gap:30px}
+.foot h4{margin:0 0 12px;font:600 12px var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--ink)}
+.foot a{display:flex;align-items:center;min-height:36px;text-decoration:none;color:var(--mute)}
+.foot a:hover{color:var(--ink)}
+.foot .big{font:400 clamp(30px,4vw,44px)/1 var(--display);color:var(--ink);text-transform:uppercase;margin-bottom:10px}
+.foot .fine{margin-top:40px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--dim);font-size:13px}
+@media(max-width:760px){.foot .cols{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.foot .cols>div:first-child{grid-column:1/-1}}
+
+/* ---------- page arrival and departure ---------- */
+@view-transition{navigation:auto}
+@keyframes bb-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+main{animation:bb-in .7s var(--ease) both}
+.leaving main,.leaving .foot{opacity:0;transform:translateY(-8px);transition:opacity .3s,transform .3s}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;transition-delay:0s!important}
+  .rv{opacity:1;transform:none}.reveal-img{clip-path:none}.reveal-img img{transform:none}
+}
+
+/* the nest drawing: strands weave in when it comes into view */
+svg[data-nest] path{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.6s var(--ease);transition-delay:calc(var(--i) * 22ms)}
+[data-draw].in svg[data-nest] path,svg[data-nest].in path{stroke-dashoffset:0}
+.menu-open .nav{-webkit-backdrop-filter:none;backdrop-filter:none;background:none;border-bottom-color:transparent}
+@media(prefers-reduced-motion:reduce){svg[data-nest] path{stroke-dashoffset:0}}

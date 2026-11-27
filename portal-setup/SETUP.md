@@ -103,6 +103,35 @@ Ambassadors can pre-order pieces marked **Pre-order open**. You see the requests
 
 ---
 
+## The Nest (the shop on the website)
+
+The website has a shop called **the Nest** at `birdboost.github.io/nest/`. Customers pick a piece and size, and send their order. **Nobody pays on the website.** You confirm stock, delivery and payment with them on WhatsApp, the same way you do today.
+
+Until you do the steps below, the Nest shows the three Righteous tees from the file `assets/catalog.js`, and orders go straight to the Birdboost WhatsApp as a message. To set prices there, open that file on GitHub, press the pencil, and change `price: null` to a number such as `price: 18`.
+
+### Switch on the full shop (about 3 minutes)
+
+1. In Supabase, open **SQL Editor**, then **New query**.
+2. Open `portal-setup/update-03-the-nest.sql`, copy all of it, paste it in, and press **Run**. It's safe to run again.
+3. Refresh the admin page. You now have a **Shop orders** tab, and each piece under **Preview store** has a **Sell in the Nest** tick box, a category and a colour.
+4. Tick **Sell in the Nest** on the pieces you want in the shop and add a price. As soon as one piece is ticked, the Nest shows your pieces from the admin page instead of the built-in list.
+
+### Shop orders
+
+Every order sent from the Nest shows up under **Shop orders**, with a reference like `BB-F6370`, the customer's WhatsApp number (tap it to message them) and the ambassador code they used. The customer is also asked to send the order to you on WhatsApp, so you get it both ways.
+
+Move each order along: **New**, **Confirmed**, **Paid**, **Sent or collected**, or **Cancelled**. When an order with an ambassador's code is paid, press **Add to sales**. The ambassador then sees it on their dashboard and on the leaderboard.
+
+### Ambassador links, discount and commission
+
+* Every ambassador can copy their **Nest link** from their dashboard. It looks like `birdboost.github.io/nest/?code=BIGBIRD7`. Anyone who opens it has that code filled in at checkout.
+* Under **Settings** you can set a **discount %** for customers who use an ambassador code. Leave it empty to agree the discount on WhatsApp.
+* Under **Settings** you can set a **commission per piece**. Ambassadors then see what they've earned on their dashboard, worked out from the sales you record.
+
+### Taking real card or mobile money payments later
+
+To take payment on the website itself you need a payment provider account in Birdboost's name. For Zimbabwe, Paynow (EcoCash, OneMoney and cards) is the usual choice; Stripe or PayPal work for cards from abroad. The provider then needs a small piece of server code to confirm payments safely, which this site can't do on its own. Until then, the WhatsApp step is the honest way to take payment.
+
 ## Good to know
 
 - **Free plan limits.** Supabase's free plan is plenty for this. If nobody uses the portal for 7 days, Supabase pauses the project. If that happens, log in to supabase.com and press **Restore project**. Nothing is lost.

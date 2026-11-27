@@ -85,7 +85,9 @@ const app = document.getElementById("app"), dlg = document.getElementById("dlg")
 const TZ = "Africa/Harare";
 const PORTAL_URL = new URL("../", location.href).href;
 let db, user, tab = location.hash.slice(1) || "ambassadors";
-let D = { ambassadors: [], tasks: [], task_done: [], events: [], event_people: [], products: [], preorders: [], sales: [], settings: {}, admins: [] };
+let D = { ambassadors: [], tasks: [], task_done: [], events: [], event_people: [], products: [], preorders: [], sales: [], settings: {}, admins: [], orders: [] };
+// The Nest (public shop) switches on once portal-setup/update-03-the-nest.sql has been run.
+let shopReady = false;
 
 // ---------- helpers ----------
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -172,7 +174,10 @@ async function loadAll() {
     t("ambassadors", "full_name", true), t("tasks"), db.from("task_done").select("*"), t("events", "starts_at", true),
     db.from("event_people").select("*"), t("products", "sort_order", true), t("preorders"), t("sales", "sold_on"), db.from("settings").select("*"), db.from("admins").select("*")]);
   D = { ambassadors: ok(a), tasks: ok(tk), task_done: ok(td), events: ok(ev), event_people: ok(ep), products: ok(pr), preorders: ok(po), sales: ok(sa),
-        settings: Object.fromEntries(ok(st).map((r) => [r.key, r.value])), admins: ok(ad) };
+        settings: Object.fromEntries(ok(st).map((r) => [r.key, r.value])), admins: ok(ad), orders: [] };
+  const so = await db.from("shop_orders").select("*").order("created_at", { ascending: false });
+  shopReady = !so.error;
+  if (shopReady) { D.orders = so.data || []; if (!TABS.some(([k]) => k === "orders")) TABS.splice(4, 0, ["orders", "Shop orders"]); }
 }
 async function refresh() { await loadAll(); render(); }
 
@@ -215,12 +220,13 @@ function attention() {
     preorders: D.preorders.filter((o) => o.status === "requested").length,
     expiring: D.ambassadors.filter((a) => a.is_active !== false && a.code_status === "active" && a.code_expires_at && new Date(a.code_expires_at).getTime() < soon).length,
     unmatched: D.sales.filter((x) => !x.ambassador_id).length,
+    newOrders: D.orders.filter((o) => o.status === "new").length,
     noWhatsApp: !D.settings.whatsapp_link,
   };
 }
 function render() {
   const at = attention();
-  const badge = { events: at.applicants, merch: at.preorders, sales: at.unmatched };
+  const badge = { events: at.applicants, merch: at.preorders, sales: at.unmatched, orders: at.newOrders };
   const scrollY = window.scrollY, same = render.last === tab; render.last = tab;
   app.innerHTML = `<header class="top"><div class="wrap"><a class="brand" href="#ambassadors"><span class="logo"></span>FLOCK ADMIN</a><span class="sp"></span>
     <span class="who-am-i" title="${esc(user.email)}">${esc(user.email)}</span>
@@ -238,7 +244,7 @@ function render() {
   });
   const sel = app.querySelector(".tabs [aria-selected=true]"); if (sel) sel.scrollIntoView({ block: "nearest", inline: "nearest" });
   const v = document.getElementById("view");
-  ({ ambassadors: vAmb, tasks: vTasks, events: vEvents, merch: vMerch, sales: vSales, settings: vSettings }[tab] || vAmb)(v);
+  ({ ambassadors: vAmb, tasks: vTasks, events: vEvents, merch: vMerch, orders: shopReady ? vOrders : vAmb, sales: vSales, settings: vSettings }[tab] || vAmb)(v);
   labelTables(v);
   if (same) window.scrollTo(0, scrollY); // stay in place after saving something
 }
@@ -569,6 +575,14 @@ const PROD_FIELDS = [
   { k: "sort_order", label: "Order on page", type: "number", def: 0, hint: "Lower numbers show first." },
   { k: "is_visible", label: "Show to ambassadors", type: "check", def: true },
 ];
+// Extra fields once the Nest (public shop) is switched on.
+const SHOP_FIELDS = [
+  { k: "in_shop", label: "Sell in the Nest (the public shop on the website)", type: "check", def: false },
+  { k: "category", label: "Shop category", ph: "e.g. Tees, Jackets", hint: "Customers can filter by this." },
+  { k: "color", label: "Colour name", ph: "e.g. Green", hint: "Pieces with the same name and different colours are shown as colour options." },
+  { k: "swatch", label: "Colour dot", type: "color", def: "#3fae3a", hint: "The little colour circle in the shop." },
+];
+const prodFields = () => shopReady ? [...PROD_FIELDS, ...SHOP_FIELDS] : PROD_FIELDS;
 async function upload(file) {
   const ext = (file.name.split(".").pop() || "bin").toLowerCase().replace(/[^a-z0-9]/g, "");
   const path = `${crypto.randomUUID()}.${ext}`;
@@ -591,7 +605,7 @@ function vMerch(v) {
     const c = document.createElement("article"); c.className = "card";
     const n = D.preorders.filter((o) => o.product_id === p.id && o.status !== "cancelled").reduce((s, o) => s + o.quantity, 0);
     c.innerHTML = `<div class="s3"></div><div class="row" style="justify-content:space-between;margin-top:10px"><h3>${esc(p.name)}</h3>
-      <div class="row">${p.stage === "preorder" ? '<span class="pill g">Pre-order</span>' : '<span class="pill">Preview</span>'}${p.is_visible ? "" : '<span class="pill bad">Hidden</span>'}</div></div>
+      <div class="row">${p.stage === "preorder" ? '<span class="pill g">Pre-order</span>' : '<span class="pill">Preview</span>'}${p.is_visible ? "" : '<span class="pill bad">Hidden</span>'}${p.in_shop ? '<span class="pill blue">In the Nest</span>' : ""}</div></div>
       <p class="small">${p.price == null ? "Price coming soon" : esc(money(p.price, p.currency))} · ${n} pre-ordered</p>
       <div class="row"><button class="btn sm" data-edit>Edit</button><button class="btn bad sm" data-del>Delete</button></div>`;
     pg.appendChild(c); BB3D.mount(c.querySelector(".s3"), p);
@@ -603,11 +617,11 @@ function vMerch(v) {
     try { ok(await db.from("preorders").update({ status: s.value }).eq("id", s.dataset.po)); toast("Pre-order " + s.value); await refresh(); } catch (e) { toast(errText(e), 1); } });
 }
 function editProduct(p) {
-  openDlg(p ? "Edit " + p.name : "Add a piece", `<form id="f"><div class="grid2">${fieldsHtml(PROD_FIELDS, p || {})}</div>
+  openDlg(p ? "Edit " + p.name : "Add a piece", `<form id="f"><div class="grid2">${fieldsHtml(prodFields(), p || {})}</div>
     ${p ? `<p class="small mute">Leave a photo empty to keep the current one.${p.back_image ? ' <label class="check"><input type="checkbox" name="rm_back"> Remove back photo</label>' : ""}${p.model_url ? ' <label class="check"><input type="checkbox" name="rm_model"> Remove 3D model</label>' : ""}</p>` : ""}
     <button class="btn g">${p ? "Save" : "Add to preview store"}</button></form>`);
   document.getElementById("f").onsubmit = async (e) => {
-    e.preventDefault(); const f = e.target, vals = readForm(f, PROD_FIELDS);
+    e.preventDefault(); const f = e.target, vals = readForm(f, prodFields());
     vals.currency = (vals.currency || "USD").toUpperCase();
     await busy(f.querySelector("button"), async () => {
       if (f.front_file.files[0]) vals.front_image = await upload(f.front_file.files[0]);
@@ -619,6 +633,34 @@ function editProduct(p) {
     }, "Saved");
     dlg.close(); refresh();
   };
+}
+
+// ================= SHOP ORDERS (the Nest) =================
+const ORDER_STATUS = [["new", "New"], ["confirmed", "Confirmed"], ["paid", "Paid"], ["sent", "Sent or collected"], ["cancelled", "Cancelled"]];
+function vOrders(v) {
+  const recorded = (o) => D.sales.some((s) => (s.note || "").includes(o.ref));
+  v.innerHTML = `<div class="bar"><h2>Shop orders</h2></div>
+    <p class="mute">Order requests from the Nest on the website. Nothing has been paid: confirm stock, delivery and payment with the customer on WhatsApp, then move the order along. When it's paid, press “Add to sales” so the ambassador whose code was used gets the credit.</p>
+    ${D.orders.length ? `<div class="tablewrap"><table><thead><tr><th>Order</th><th>Customer</th><th>Pieces</th><th>Total</th><th>Code</th><th>Status</th><th></th></tr></thead><tbody>
+      ${D.orders.map((o) => {
+        const amb = o.ambassador_id ? byId(D.ambassadors, o.ambassador_id) : null;
+        const items = (o.items || []).map((i) => `${esc(i.name)}${i.color ? " (" + esc(i.color) + ")" : ""}${i.size ? ", " + esc(i.size) : ""} × ${i.qty}`).join("<br>");
+        const wa = "https://wa.me/" + String(o.phone || "").replace(/[^0-9]/g, "").replace(/^0/, "263");
+        return `<tr><td class="lead"><b>${esc(o.ref)}</b><div class="small mute">${fmt(o.created_at)}</div></td>
+        <td><b>${esc(o.name)}</b><div class="small"><a href="${esc(wa)}" target="_blank" rel="noopener">${esc(o.phone)}</a>${o.city ? " · " + esc(o.city) : ""}${o.delivery ? " · " + esc(o.delivery) : ""}</div>${o.email ? `<div class="small mute">${esc(o.email)}</div>` : ""}${o.note ? `<div class="small mute">“${esc(o.note)}”</div>` : ""}</td>
+        <td class="small">${items}</td>
+        <td>${o.total != null ? esc(money(o.total, o.currency)) + (o.discount_pct ? `<div class="small mute">${esc(o.discount_pct)}% off</div>` : "") : '<span class="mute">Agree on WhatsApp</span>'}</td>
+        <td>${o.store_code ? `<code>${esc(o.store_code)}</code><div class="small">${amb ? esc(amb.full_name) : '<span style="color:var(--warn)">No match</span>'}</div>` : '<span class="mute">—</span>'}</td>
+        <td><select data-os="${o.id}" aria-label="Status of order ${esc(o.ref)}">${ORDER_STATUS.map(([k, l]) => `<option value="${k}"${k === o.status ? " selected" : ""}>${l}</option>`).join("")}</select></td>
+        <td class="acts">${o.store_code && amb ? (recorded(o) ? '<span class="pill g">In sales</span>' : `<button class="btn sm" data-tosale="${o.id}">Add to sales</button>`) : ""}</td></tr>`; }).join("")}</tbody></table></div>`
+    : `<div class="empty"><h3>No shop orders yet</h3><p>When a customer sends an order from the Nest, it shows up here. Make sure the pieces you sell are marked “Sell in the Nest” under Preview store.</p></div>`}`;
+  v.querySelectorAll("select[data-os]").forEach((s) => s.onchange = async () => {
+    try { ok(await db.from("shop_orders").update({ status: s.value }).eq("id", s.dataset.os)); toast("Order " + s.selectedOptions[0].textContent.toLowerCase()); await refresh(); } catch (e) { toast(errText(e), 1); } });
+  v.querySelectorAll("[data-tosale]").forEach((b) => b.onclick = async () => {
+    const o = byId(D.orders, b.dataset.tosale);
+    const rows = (o.items || []).map((i) => ({ store_code: o.store_code, product_id: i.product_id || null, item: [i.name, i.color, i.size].filter(Boolean).join(" · "), quantity: i.qty || 1,
+      amount: i.price == null ? null : Math.round(i.price * (i.qty || 1) * (1 - (o.discount_pct || 0) / 100) * 100) / 100, currency: o.currency || "USD", customer: o.name, sold_on: todayHarare(), note: "Shop order " + o.ref }));
+    await busy(b, async () => ok(await db.from("sales").insert(rows)), "Added to sales"); refresh(); });
 }
 
 // ================= SALES =================
@@ -684,7 +726,9 @@ function vSettings(v) {
       <label style="grid-column:1/-1">WhatsApp group invite link<input name="whatsapp_link" type="url" value="${esc(S.whatsapp_link || "")}" placeholder="https://chat.whatsapp.com/..."><span class="hint">In WhatsApp: open the group, tap its name, then “Invite via link”, then “Copy link”.</span></label>
       <label style="grid-column:1/-1">Welcome message on the ambassador home page<textarea name="welcome_message">${esc(S.welcome_message || "")}</textarea></label>
       <label>Instagram handle<input name="instagram" value="${esc(S.instagram || "")}"></label>
-      <label>TikTok handle<input name="tiktok" value="${esc(S.tiktok || "")}"></label></div>
+      <label>TikTok handle<input name="tiktok" value="${esc(S.tiktok || "")}"></label>
+      ${shopReady ? `<label>Discount for customers using an ambassador code (%)<input name="shop_discount_percent" type="number" min="0" max="90" step="1" value="${esc(S.shop_discount_percent || "")}"><span class="hint">Shown in the Nest at checkout. Leave empty to agree the discount on WhatsApp.</span></label>
+      <label>Ambassador commission per piece sold<input name="commission_per_piece" type="number" min="0" step="0.01" value="${esc(S.commission_per_piece || "")}"><span class="hint">Shown on each ambassador's dashboard, worked out from the sales you record. Leave empty to hide it.</span></label>` : ""}</div>
       <button class="btn g">Save settings</button></form>
     <div class="card" style="margin-bottom:22px"><h3>Links</h3>
       <p class="small">Ambassador portal: <a href="${PORTAL_URL}" target="_blank" rel="noopener">${PORTAL_URL}</a></p>
@@ -693,7 +737,7 @@ function vSettings(v) {
       <div class="who">${D.admins.map((a) => `<div><span>${esc(a.email)}</span>${a.email.toLowerCase() === user.email.toLowerCase() ? '<span class="mute">You</span>' : `<button class="btn bad sm" data-rm="${esc(a.email)}">Remove</button>`}</div>`).join("")}</div>
       <form id="af" class="row" style="margin-top:12px"><input name="email" type="email" placeholder="email@example.com" required style="flex:1;min-width:200px"><button class="btn">Add admin</button></form></div>`;
   document.getElementById("sf").onsubmit = async (e) => { e.preventDefault(); const f = e.target;
-    const rows = ["whatsapp_link", "welcome_message", "instagram", "tiktok"].map((k) => ({ key: k, value: f.elements[k].value.trim() || null }));
+    const rows = ["whatsapp_link", "welcome_message", "instagram", "tiktok", ...(shopReady ? ["shop_discount_percent", "commission_per_piece"] : [])].map((k) => ({ key: k, value: f.elements[k].value.trim() || null }));
     await busy(f.querySelector("button"), async () => ok(await db.from("settings").upsert(rows)), "Settings saved"); refresh(); };
   document.getElementById("af").onsubmit = async (e) => { e.preventDefault();
     await busy(e.target.querySelector("button"), async () => ok(await db.from("admins").insert({ email: e.target.email.value.trim().toLowerCase() })), "Admin added"); refresh(); };
