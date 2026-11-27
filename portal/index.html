@@ -64,18 +64,21 @@ const ERR = {
   invalid_code: "That code doesn't match. Check it and try again, or ask a Birdboost admin.",
   code_revoked: "This access code has been switched off. Ask a Birdboost admin for a new one.",
   code_expired: "This access code has expired. Ask a Birdboost admin to renew it.",
+  account_inactive: "Your account is currently inactive. Please contact an administrator.",
   too_many_tries: "Too many wrong codes. Wait 15 minutes, then try again.",
   event_closed: "Applications for this event are closed.",
   task_closed: "This task is closed.",
   not_preorderable: "This piece isn't open for pre-orders right now.",
 };
 const errText = (e) => { const m = (e && (e.message || e.error_description)) || String(e); for (const k in ERR) if (m.includes(k)) return ERR[k]; return "Something went wrong. Check your connection and try again."; };
-const isCodeErr = (e) => /invalid_code|code_revoked|code_expired/.test((e && e.message) || "");
+const isCodeErr = (e) => /invalid_code|code_revoked|code_expired|account_inactive/.test((e && e.message) || "");
+// What to do when the server says the code or account no longer works.
+function blocked(err) { if (/account_inactive/.test(err.message || "")) showInactive(); else logout(errText(err)); }
 
 async function rpc(fn, args = {}) {
   const { data: d, error } = await db.rpc(fn, { p_code: code, ...args });
-  if (error) { if (isCodeErr(error)) { logout(errText(error)); } throw error; }
-  if (d && d.error) { const err = new Error(d.error); if (isCodeErr(err)) logout(errText(err)); throw err; }
+  if (error) { if (isCodeErr(error)) blocked(error); throw error; }
+  if (d && d.error) { const err = new Error(d.error); if (isCodeErr(err)) blocked(err); throw err; }
   return d;
 }
 async function load() { data = await rpc("amb_home"); }
@@ -99,9 +102,23 @@ function showLogin(msg = "") {
     const btn = e.target.querySelector("button"); btn.disabled = true; btn.innerHTML = '<span class="spin"></span>';
     code = ci.value.replace(/[^A-Z0-9]/gi, "");
     try { await load(); localStorage.setItem(KEY, code); render(); }
-    catch (err) { code = ""; document.getElementById("lerr").textContent = errText(err); btn.disabled = false; btn.textContent = "Enter"; }
+    catch (err) { if (/account_inactive/.test(err.message || "")) return; code = ""; const le = document.getElementById("lerr"); if (le) le.textContent = errText(err); if (btn.isConnected) { btn.disabled = false; btn.textContent = "Enter"; } }
   };
   ci.focus();
+}
+// Shown when an admin has switched the account off. The code is kept, so if the
+// account is switched back on, "Check again" lets them straight back in.
+function showInactive() {
+  data = null;
+  app.innerHTML = `<main class="login"><div class="box">
+    <a class="brand" href="../"><span class="logo"></span>BIRDBOOST</a>
+    <div class="card" style="margin-top:22px" role="alert"><h2 style="font-size:30px">Account inactive</h2>
+      <p>Your account is currently inactive. Please contact an administrator.</p>
+      <div class="row" style="margin-top:14px"><button class="btn g" id="again">Check again</button><button class="btn" id="other">Use a different code</button></div></div>
+  </div></main>`;
+  document.getElementById("again").onclick = async (e) => { e.target.disabled = true;
+    try { await load(); localStorage.setItem(KEY, code); render(); } catch (err) { if (!isCodeErr(err)) { toast(errText(err), 1); e.target.disabled = false; } else if (/account_inactive/.test(err.message)) toast("Still inactive", 1); } };
+  document.getElementById("other").onclick = () => logout();
 }
 function logout(msg) { localStorage.removeItem(KEY); code = ""; data = null; showLogin(msg || ""); }
 
@@ -268,6 +285,11 @@ dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); });
     return;
   }
   db = supabase.createClient(CFG.SUPABASE_URL, CFG.SUPABASE_ANON_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
+  // Re-check every minute and whenever the page comes back into view, so a
+  // switched-off account or a revoked code loses access straight away.
+  const recheck = async () => { if (!data || document.hidden || (dlg && dlg.open)) return; try { await load(); } catch (e) {} };
+  setInterval(recheck, 60000);
+  document.addEventListener("visibilitychange", recheck);
   if (!code) return showLogin();
   try { await load(); render(); } catch (e) { if (!isCodeErr(e)) showLogin(errText(e)); }
 })();

@@ -33,8 +33,12 @@ create table if not exists public.ambassadors (
   code_status      text not null default 'active' check (code_status in ('active','revoked')),
   code_expires_at  timestamptz,
   code_last_used   timestamptz,
+  is_active        boolean not null default true,   -- false = account switched off (nothing deleted)
   created_at       timestamptz not null default now()
 );
+
+-- Added later: lets admins switch an account off without deleting it.
+alter table public.ambassadors add column if not exists is_active boolean not null default true;
 
 create table if not exists public.tasks (
   id          uuid primary key default gen_random_uuid(),
@@ -357,6 +361,8 @@ begin
     delete from public.code_failures where tried_at < now() - interval '1 day';
     r := null; r.full_name := 'invalid_code'; return r;
   end if;
+  -- A switched-off account is blocked even if its code is still valid.
+  if not r.is_active then r.id := null; r.full_name := 'account_inactive'; return r; end if;
   if r.code_status <> 'active' then r.id := null; r.full_name := 'code_revoked'; return r; end if;
   if r.code_expires_at is not null and r.code_expires_at < now() then
     r.id := null; r.full_name := 'code_expired'; return r;

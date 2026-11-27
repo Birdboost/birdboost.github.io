@@ -64,18 +64,25 @@ The pages are hosted on GitHub Pages, like the application page. The data (ambas
 ## Everyday use
 
 ### Add an ambassador
-**Ambassadors**, then **+ Add ambassador**. Fill in their name and WhatsApp number, then press **Create account and code**. You get:
-- an **access code** (like `K7PM-3XQD`) that they use to log in, and
-- a **store code** (like `BBTANAKA482`) for their sales.
+1. Go to **Ambassadors** and press **+ Add ambassador**.
+2. Fill in their name and WhatsApp number.
+3. The page suggests one access code, like `GrumpyPigeon0397`. Press **↻ Shuffle** for a different one, as many times as you like. When you like it, press **✓ Use this code**. Nothing is saved until you do.
+4. Press **Create account**.
 
-Press **Send on WhatsApp** to send them a ready-made welcome message, or **Copy message** to paste it anywhere.
+You then get their **access code**, for logging in, and their **store code** (like `BBTANAKA482`), for sales. Press **Send on WhatsApp** to send them a ready-made welcome message, or **Copy message** to paste it anywhere. Access codes work in any mix of capitals.
 
-### Renew, revoke or replace a code
-Click the ambassador's name, then:
-- **Revoke code** switches it off straight away. They're logged out the next time the page loads anything.
-- **Switch code back on** undoes a revoke.
+### Switch an account off or on
+In the **Ambassadors** list, each person shows **🟢 Active** or **🔴 Inactive**.
+- **Deactivate** blocks them from the portal straight away, even if they're already logged in or still have their code. Nothing is deleted: their code, tasks, events and sales all stay.
+- **Activate** lets them back in with the same code.
+
+### Change someone's code
+Press **Change code** next to their name. The page shows their current code and warns you that it's being replaced. Shuffle until you like the new one, then press **✓ Use this code** and confirm. The old code stops working straight away. If you press **Cancel**, nothing changes.
+
+### More code options
+Press **Manage** next to their name, then:
+- **Revoke code** switches off just the code. **Switch code back on** undoes that.
 - **Renew** adds 30 days, 90 days or 1 year, or sets the code to never expire.
-- **Make a new code** replaces the code if it has leaked. The old one stops working.
 
 ### Tasks
 **Tasks**, then fill in the form and press **Post to all ambassadors**. Ambassadors press **Mark done** and can add a link to their post. You see who has done it, with links to their posts.

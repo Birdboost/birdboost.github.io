@@ -34,7 +34,7 @@ label .hint{display:block;font-weight:400;color:var(--mute);font-size:13px;margi
 .cards{display:grid;gap:14px}
 .cards.two{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;background:#222;color:var(--ink);text-transform:uppercase;letter-spacing:.04em}
+.pill{white-space:nowrap;display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;background:#222;color:var(--ink);text-transform:uppercase;letter-spacing:.04em}
 .pill.g{background:#173a16;color:var(--g2)}
 .pill.warn{background:#3a3112;color:var(--warn)}
 .pill.bad{background:#3a1713;color:var(--bad)}

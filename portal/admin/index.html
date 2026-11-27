@@ -165,56 +165,119 @@ const AMB_FIELDS = [
 ];
 const VALIDITY = [["", "Never expires"], ["30", "30 days"], ["90", "90 days"], ["180", "6 months"], ["365", "1 year"]];
 function salesQty(id) { return D.sales.filter((s) => s.ambassador_id === id).reduce((n, s) => n + (s.quantity || 0), 0); }
+function statusPill(a) { return a.is_active === false ? '<span class="pill bad">🔴 Inactive</span>' : '<span class="pill g">🟢 Active</span>'; }
+function codeNote(a) {
+  if (a.code_status === "revoked") return '<div class="small" style="color:var(--bad)">Code revoked</div>';
+  if (a.code_expires_at && new Date(a.code_expires_at) < new Date()) return '<div class="small" style="color:var(--warn)">Code expired</div>';
+  return a.code_expires_at ? `<div class="small mute">until ${fmt(a.code_expires_at, false)}</div>` : "";
+}
 function vAmb(v) {
-  const n = D.ambassadors.length, active = D.ambassadors.filter((a) => a.code_status === "active" && !(a.code_expires_at && new Date(a.code_expires_at) < new Date())).length;
+  const n = D.ambassadors.length, active = D.ambassadors.filter((a) => a.is_active !== false).length;
   v.innerHTML = `<div class="bar"><h2>Ambassadors</h2><button class="btn g" id="add">+ Add ambassador</button></div>
-    <div class="kpis"><div class="kpi"><b>${n}</b><span>ambassadors</span></div><div class="kpi"><b>${active}</b><span>with a working code</span></div>
+    <div class="kpis"><div class="kpi"><b>${n}</b><span>ambassadors</span></div><div class="kpi"><b>${active}</b><span>active accounts</span></div>
       <div class="kpi"><b>${D.ambassadors.filter((a) => a.code_last_used).length}</b><span>have logged in</span></div></div>
-    ${n ? `<input id="q" placeholder="Search by name, city or store code" style="margin-bottom:12px">
-    <div class="tablewrap"><table><thead><tr><th>Name</th><th>Store code</th><th>Access code</th><th>Last login</th><th>Tasks</th><th>Sold</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>`
+    ${n ? `<input id="q" placeholder="Search by name, city, store code or access code" style="margin-bottom:12px">
+    <div class="tablewrap"><table><thead><tr><th>Ambassador</th><th>Status</th><th>Access code</th><th>Actions</th><th>Last login</th><th>Tasks</th><th>Sold</th></tr></thead><tbody id="rows"></tbody></table></div>`
     : `<div class="empty">No ambassadors yet. Pick people from your applications, then press “Add ambassador”.</div>`}`;
   document.getElementById("add").onclick = addAmbassador;
   const rows = document.getElementById("rows"); if (!rows) return;
   const draw = (q = "") => {
     q = q.toLowerCase();
-    rows.innerHTML = D.ambassadors.filter((a) => !q || [a.full_name, a.city, a.store_code].join(" ").toLowerCase().includes(q)).map((a) => `<tr>
-      <td><button class="linkish" data-open="${a.id}">${esc(a.full_name)}</button><div class="small mute">${esc(a.city || "")}</div></td>
-      <td><code>${esc(a.store_code)}</code></td><td>${codeState(a)}</td>
+    rows.innerHTML = D.ambassadors.filter((a) => !q || [a.full_name, a.city, a.store_code, a.access_code].join(" ").toLowerCase().includes(q)).map((a) => `<tr${a.is_active === false ? ' style="opacity:.75"' : ""}>
+      <td><button class="linkish" data-open="${a.id}">${esc(a.full_name)}</button><div class="small mute">${esc(a.city || "")}${a.city ? " · " : ""}store code <code>${esc(a.store_code)}</code></div></td>
+      <td>${statusPill(a)}</td>
+      <td><code style="font-weight:700">${esc(pretty(a.access_code))}</code>${codeNote(a)}</td>
+      <td><div class="row" style="flex-wrap:nowrap">${a.is_active === false ? `<button class="btn g sm" data-act="${a.id}">Activate</button>` : `<button class="btn bad sm" data-deact="${a.id}">Deactivate</button>`}
+        <button class="btn sm" data-code="${a.id}">Change code</button><button class="btn sm" data-open="${a.id}">Manage</button></div></td>
       <td class="small">${a.code_last_used ? fmt(a.code_last_used) : '<span class="mute">Never</span>'}</td>
-      <td>${D.task_done.filter((t) => t.ambassador_id === a.id).length}</td><td>${salesQty(a.id)}</td>
-      <td><button class="btn sm" data-open="${a.id}">Manage</button></td></tr>`).join("");
+      <td>${D.task_done.filter((t) => t.ambassador_id === a.id).length}</td><td>${salesQty(a.id)}</td></tr>`).join("");
     rows.querySelectorAll("[data-open]").forEach((b) => b.onclick = () => manageAmbassador(b.dataset.open));
+    rows.querySelectorAll("[data-code]").forEach((b) => b.onclick = () => changeCode(b.dataset.code));
+    rows.querySelectorAll("[data-act]").forEach((b) => b.onclick = () => setActive(b, b.dataset.act, true));
+    rows.querySelectorAll("[data-deact]").forEach((b) => b.onclick = () => setActive(b, b.dataset.deact, false));
   };
   draw(); document.getElementById("q").oninput = (e) => draw(e.target.value);
 }
-// Access code picker: fun suggestions to tap, a shuffle button, or type your own.
-function codePickerHtml() {
-  return `<div style="grid-column:1/-1;margin-bottom:12px"><label style="margin-bottom:6px">Access code *<input name="access_code" id="acode" required autocomplete="off" spellcheck="false" style="font-weight:800;font-size:20px">
-    <span class="hint">Tap a suggestion, press Shuffle for more, or type your own (letters and numbers, at least 8).</span></label>
-    <div class="row" id="sugs"><span class="spin"></span></div></div>`;
+// Switch an account on or off. Nothing is deleted: the code, history and sales stay.
+async function setActive(btn, id, on, after) {
+  const a = byId(D.ambassadors, id);
+  if (!on && !confirm(`Deactivate ${a.full_name}?\n\nThey lose access to the portal straight away, even with their code. Nothing is deleted, and you can activate them again any time.`)) return;
+  await busy(btn, async () => ok(await db.from("ambassadors").update({ is_active: on }).eq("id", id)), on ? `${a.full_name} is active again` : `${a.full_name} is now inactive`);
+  await loadAll(); render(); if (after) after();
 }
-async function fillSuggestions(first) {
-  const box = document.getElementById("sugs"), inp = document.getElementById("acode");
-  box.innerHTML = '<span class="spin"></span>';
-  try {
-    const list = ok(await db.rpc("admin_suggest_codes", { p_count: 6 }));
-    if (first && !inp.value) inp.value = list[0];
-    box.innerHTML = list.map((c) => `<button type="button" class="btn sm" data-sug="${esc(c)}">${esc(c)}</button>`).join("") + `<button type="button" class="btn sm" id="shuf">↻ Shuffle</button>`;
-    box.querySelectorAll("[data-sug]").forEach((b) => b.onclick = () => { inp.value = b.dataset.sug; });
-    document.getElementById("shuf").onclick = () => fillSuggestions(false);
-  } catch (e) { box.innerHTML = `<span class="small mute">Couldn't load suggestions. ${esc(errText(e))}</span>`; }
+
+// ---------- Access code picker ----------
+// Shows ONE suggested code. "Shuffle" swaps it for a different one. "Use this code"
+// confirms it. Suggestions are never saved: only a confirmed code is, and only when
+// the admin finishes (creating the account, or replacing the code).
+function codePickerHtml(title = "Access code") {
+  return `<div style="grid-column:1/-1;margin:4px 0 14px" id="picker">
+    <div style="font-size:14px;font-weight:600;margin-bottom:6px">${esc(title)}</div>
+    <div class="codebox" id="pcode" aria-live="polite"><span class="spin"></span></div>
+    <p class="small mute" id="pstate" style="margin:8px 0">Not saved yet. Shuffle until you like it, then press “Use this code”.</p>
+    <div class="row" id="pbtns"><button type="button" class="btn" id="shuf">↻ Shuffle</button><button type="button" class="btn g" id="useit" disabled>✓ Use this code</button></div>
+  </div>`;
 }
+function mountPicker({ onConfirm, confirmLabel = "✓ Use this code" } = {}) {
+  const box = document.getElementById("pcode"), st = document.getElementById("pstate"), shuf = document.getElementById("shuf"), use = document.getElementById("useit");
+  use.textContent = confirmLabel;
+  const P = { code: null, confirmed: false };
+  const show = () => { box.textContent = P.code || ""; box.style.borderStyle = P.confirmed ? "solid" : "dashed"; };
+  P.shuffle = async () => {
+    P.confirmed = false; shuf.disabled = use.disabled = true; box.innerHTML = '<span class="spin"></span>';
+    try {
+      let next, tries = 0;
+      do { next = ok(await db.rpc("admin_suggest_codes", { p_count: 1 }))[0]; } while (next === P.code && ++tries < 5);
+      P.code = next; show();
+      st.textContent = "Not saved yet. Shuffle until you like it, then press “Use this code”.";
+    } catch (e) { box.textContent = "—"; st.textContent = "Couldn't make a code: " + errText(e); }
+    shuf.disabled = false; use.disabled = !P.code;
+    use.style.display = ""; shuf.textContent = "↻ Shuffle";
+  };
+  P.reset = () => { P.confirmed = false; use.style.display = ""; shuf.textContent = "↻ Shuffle"; show(); st.textContent = "Not saved yet. Shuffle until you like it, then press “Use this code”."; };
+  shuf.onclick = () => P.confirmed ? P.reset() : P.shuffle();
+  use.onclick = async () => {
+    if (!P.code) return;
+    if (onConfirm) return onConfirm(P.code, use);
+    P.confirmed = true; show(); use.style.display = "none"; shuf.textContent = "Change";
+    st.innerHTML = `<span style="color:var(--g2);font-weight:700">✓ Code chosen.</span> It's saved when you create the account.`;
+  };
+  P.shuffle();
+  return P;
+}
+
 function addAmbassador() {
   const extra = [{ k: "store_code", label: "Store code", hint: "Leave empty to make one from their name. Letters and numbers only." }, { k: "valid", label: "Access code lasts", type: "select", options: VALIDITY }];
-  openDlg("Add ambassador", `<form id="f"><div class="grid2">${fieldsHtml([...AMB_FIELDS.slice(0, 6), ...extra])}${codePickerHtml()}${fieldsHtml([AMB_FIELDS[6]])}</div><button class="btn g">Create account and code</button></form>`);
-  fillSuggestions(true);
+  openDlg("Add ambassador", `<form id="f"><div class="grid2">${fieldsHtml([...AMB_FIELDS.slice(0, 6), ...extra])}${codePickerHtml()}${fieldsHtml([AMB_FIELDS[6]])}</div><button class="btn g" id="create">Create account</button></form>`);
+  const picker = mountPicker();
   document.getElementById("f").onsubmit = async (e) => {
     e.preventDefault(); const f = e.target, v = readForm(f, [...AMB_FIELDS, ...extra]);
-    const a = await busy(f.querySelector("button"), async () => ok(await db.rpc("admin_create_ambassador", {
-      p_full_name: v.full_name, p_phone: v.phone, p_email: v.email, p_city: v.city, p_instagram: v.instagram, p_tiktok: v.tiktok,
-      p_notes: v.notes, p_store_code: v.store_code, p_valid_days: v.valid ? +v.valid : null, p_access_code: f.access_code.value.trim() || null })), "Ambassador created");
-    await loadAll(); render(); showInvite(a.id ? a : byId(D.ambassadors, a.id), true);
+    if (!picker.confirmed) { toast("Choose the access code first: press “Use this code”.", 1); document.getElementById("picker").scrollIntoView({ block: "center" }); return; }
+    let a;
+    try {
+      a = await busy(document.getElementById("create"), async () => ok(await db.rpc("admin_create_ambassador", {
+        p_full_name: v.full_name, p_phone: v.phone, p_email: v.email, p_city: v.city, p_instagram: v.instagram, p_tiktok: v.tiktok,
+        p_notes: v.notes, p_store_code: v.store_code, p_valid_days: v.valid ? +v.valid : null, p_access_code: picker.code })), "Ambassador created");
+    } catch (err) { if (/code_taken/.test(err.message || "")) picker.shuffle(); return; }
+    await loadAll(); render(); showInvite(a, true);
   };
+}
+// Replace an ambassador's code: warn first, pick one, confirm, then save.
+function changeCode(id, back) {
+  const a = byId(D.ambassadors, id); if (!a) return;
+  openDlg("Change code: " + a.full_name, `<div class="card" style="border-color:#5a4a1a;background:#1f1b0f;margin-bottom:14px" role="note">
+      <b style="color:var(--warn)">⚠ This replaces ${esc(a.full_name)}'s current code</b>
+      <p class="small" style="margin:6px 0 0">Current code: <code style="font-weight:700">${esc(pretty(a.access_code))}</code>. Once you confirm a new one, the old code stops working straight away and they'll need the new code to log in.</p></div>
+    <div class="grid2">${codePickerHtml("New access code")}</div>
+    <div class="row"><button type="button" class="btn" id="cancel">Cancel</button></div>`);
+  document.getElementById("cancel").onclick = () => back ? manageAmbassador(id) : dlg.close();
+  mountPicker({ confirmLabel: "✓ Use this code", onConfirm: async (code, btn) => {
+    if (!confirm(`Replace ${pretty(a.access_code)} with ${code}?\n\nThe old code stops working straight away.`)) return;
+    let r;
+    try { r = await busy(btn, async () => ok(await db.rpc("admin_new_access_code", { p_id: id, p_valid_days: null, p_access_code: code })), "New code saved"); }
+    catch (err) { return; }
+    await loadAll(); render(); showInvite(r);
+  } });
 }
 function inviteText(a) {
   return `Welcome to the Birdboost Flock, ${a.full_name.split(" ")[0]}!\n\nLog in to the ambassador portal here: ${PORTAL_URL}\nYour access code: ${pretty(a.access_code)}\n\nYour store code: ${a.store_code}\nWhen someone buys a piece, ask them to give your store code so the sale counts for you.\n\nKeep your access code private.`;
@@ -239,14 +302,18 @@ function manageAmbassador(id) {
   const evs = D.event_people.filter((p) => p.ambassador_id === id).map((p) => ({ ...p, ev: byId(D.events, p.event_id) })).filter((p) => p.ev);
   const sales = D.sales.filter((s) => s.ambassador_id === id);
   openDlg(a.full_name, `
+    <div class="card" style="margin-bottom:14px"><div class="row" style="justify-content:space-between"><h3>Account</h3>${statusPill(a)}</div>
+      <p class="small mute">${a.is_active === false ? "Inactive: they can't get into the portal, even with their code. Nothing has been deleted." : "Active: they can log in with their access code."}</p>
+      ${a.is_active === false ? `<button class="btn g sm" id="actbtn">Activate account</button>` : `<button class="btn bad sm" id="actbtn">Deactivate account</button>`}</div>
     <div class="card" style="margin-bottom:14px"><div class="row" style="justify-content:space-between"><h3>Access code</h3>${codeState(a)}</div>
+      <p style="margin:4px 0"><code style="font-weight:800;font-size:18px">${esc(pretty(a.access_code))}</code></p>
       <p class="small mute">Last login: ${a.code_last_used ? fmt(a.code_last_used) : "never"}</p>
       <div class="row"><button class="btn g sm" id="show">Show code and invite</button>
       ${a.code_status === "revoked" ? `<button class="btn sm" id="restore">Switch code back on</button>` : `<button class="btn bad sm" id="revoke">Revoke code</button>`}
-      <button class="btn sm" id="newc">Make a new code</button></div>
+      <button class="btn sm" id="newc">Change code</button></div>
       <div class="row" style="margin-top:10px"><span class="small mute">Renew:</span>
         <button class="btn sm" data-renew="30">+30 days</button><button class="btn sm" data-renew="90">+90 days</button><button class="btn sm" data-renew="365">+1 year</button><button class="btn sm" data-renew="0">Never expires</button></div>
-      <p class="small mute" style="margin-top:8px">Revoke switches the code off straight away. “Make a new code” lets you pick a new one, and the old one stops working.</p></div>
+      <p class="small mute" style="margin-top:8px">Revoke switches the code off straight away. “Change code” lets you pick a new one, and the old one stops working.</p></div>
     <div class="card" style="margin-bottom:14px"><h3>Activity</h3>
       <p class="small">Store code <b>${esc(a.store_code)}</b> · ${salesQty(id)} pieces sold · ${D.task_done.filter((t) => t.ambassador_id === id).length} tasks done</p>
       ${evs.length ? `<p class="small">${evs.map((p) => `${esc(p.ev.title)} <span class="pill">${p.status}</span>`).join("<br>")}</p>` : `<p class="small mute">No events yet.</p>`}
@@ -257,16 +324,8 @@ function manageAmbassador(id) {
   document.getElementById("show").onclick = () => showInvite(a);
   const rv = document.getElementById("revoke"); if (rv) rv.onclick = (e) => { if (confirm(`Revoke ${a.full_name}'s code? They'll be logged out straight away.`)) upd(e.currentTarget, { code_status: "revoked" }, "Code revoked"); };
   const rs = document.getElementById("restore"); if (rs) rs.onclick = (e) => upd(e.currentTarget, { code_status: "active" }, "Code switched back on");
-  document.getElementById("newc").onclick = () => {
-    openDlg("New code for " + a.full_name, `<form id="nc"><div class="grid2">${codePickerHtml()}</div>
-      <p class="small mute">The old code stops working as soon as you save.</p>
-      <div class="row"><button class="btn g">Save new code</button><button type="button" class="btn" id="back">Back</button></div></form>`);
-    fillSuggestions(true);
-    document.getElementById("back").onclick = () => manageAmbassador(id);
-    document.getElementById("nc").onsubmit = async (e) => { e.preventDefault();
-      const r = await busy(e.target.querySelector("button"), async () => ok(await db.rpc("admin_new_access_code", { p_id: id, p_valid_days: null, p_access_code: e.target.access_code.value.trim() || null })), "New code saved");
-      await loadAll(); render(); showInvite(r); };
-  };
+  document.getElementById("newc").onclick = () => changeCode(id, true);
+  document.getElementById("actbtn").onclick = (e) => setActive(e.currentTarget, id, a.is_active === false, () => manageAmbassador(id));
   dlg.querySelectorAll("[data-renew]").forEach((b) => b.onclick = () => {
     const d = +b.dataset.renew;
     if (!d) return upd(b, { code_expires_at: null, code_status: "active" }, "Code never expires now");
@@ -276,7 +335,7 @@ function manageAmbassador(id) {
   document.getElementById("f").onsubmit = (e) => { e.preventDefault(); const v = readForm(e.target, [...AMB_FIELDS, { k: "store_code" }]); v.store_code = clean(v.store_code);
     upd(e.target.querySelector("button"), v, "Saved"); };
   document.getElementById("del").onclick = async (e) => {
-    if (!confirm(`Delete ${a.full_name}? Their code stops working and their task and event history is removed. Their sales stay on record without a name.`)) return;
+    if (!confirm(`Delete ${a.full_name} for good? Their task and event history is removed. Their sales stay on record without a name.\n\nTo just block them, press Cancel and use Deactivate instead. Nothing is lost that way.`)) return;
     await busy(e.currentTarget, async () => ok(await db.from("ambassadors").delete().eq("id", id)), "Deleted"); dlg.close(); refresh();
   };
 }
@@ -289,7 +348,7 @@ const TASK_FIELDS = [
   { k: "due_date", label: "Due date (optional)", type: "date" },
 ];
 function vTasks(v) {
-  const total = D.ambassadors.length;
+  const total = D.ambassadors.filter((a) => a.is_active !== false).length;
   v.innerHTML = `<div class="bar"><h2>Tasks</h2></div>
     <form id="nf" class="card" style="margin-bottom:22px"><h3>Post a task</h3><div class="grid2">${fieldsHtml(TASK_FIELDS)}</div><button class="btn g">Post to all ambassadors</button></form>
     ${D.tasks.length ? `<div class="cards">${D.tasks.map((t) => {
@@ -297,7 +356,7 @@ function vTasks(v) {
       return `<article class="card"><div class="row" style="justify-content:space-between"><h3>${esc(t.title)}</h3>
         <div class="row">${t.is_open ? '<span class="pill g">Open</span>' : '<span class="pill">Closed</span>'}${t.due_date ? `<span class="pill warn">Due ${fmt(t.due_date, false)}</span>` : ""}</div></div>
         ${t.details ? `<p class="brief small">${esc(t.details)}</p>` : ""}${safeUrl(t.link) ? `<p class="small"><a href="${esc(t.link)}" target="_blank" rel="noopener">${esc(t.link)}</a></p>` : ""}
-        <p><b>${done.length}</b> of ${total} ambassadors done</p>
+        <p><b>${done.length}</b> of ${total} active ambassadors done</p>
         ${done.length ? `<details><summary class="small">See who</summary><div class="who">${done.map((d) => { const a = byId(D.ambassadors, d.ambassador_id);
           return `<div><span>${esc(a ? a.full_name : "Removed")}</span><span class="mute">${fmt(d.done_at)}</span>${safeUrl(d.proof_link) ? `<a href="${esc(d.proof_link)}" target="_blank" rel="noopener">See post</a>` : ""}</div>`; }).join("")}</div></details>` : ""}
         <div class="row" style="margin-top:10px"><button class="btn sm" data-edit="${t.id}">Edit</button>
@@ -358,7 +417,7 @@ function eventTeam(id) {
   const list = [...D.ambassadors].sort((x, y) => (order[st(x.id)?.status] ?? 9) - (order[st(y.id)?.status] ?? 9) || x.full_name.localeCompare(y.full_name));
   openDlg(e.title, `<p class="small mute">Applied: they asked to go. Suggested: you'd like them there, and they can accept. On the team: confirmed. Ambassadors see their status in the portal.</p>
     <div class="tablewrap"><table><thead><tr><th>Ambassador</th><th>Status</th></tr></thead><tbody>${list.map((a) => { const p = st(a.id);
-      return `<tr><td><b>${esc(a.full_name)}</b><div class="small mute">${esc(a.city || "")}</div>${p && p.message ? `<div class="small">“${esc(p.message)}”</div>` : ""}</td>
+      return `<tr><td><b>${esc(a.full_name)}</b>${a.is_active === false ? ' <span class="pill bad">Inactive</span>' : ""}<div class="small mute">${esc(a.city || "")}</div>${p && p.message ? `<div class="small">“${esc(p.message)}”</div>` : ""}</td>
       <td><select data-amb="${a.id}" aria-label="Status for ${esc(a.full_name)}">${[["", "Not involved"], ["suggested", "Suggest them"], ["applied", "Applied"], ["assigned", "On the team"], ["declined", "Declined"]]
         .map(([k, n]) => `<option value="${k}"${(p?.status || "") === k ? " selected" : ""}>${n}</option>`).join("")}</select></td></tr>`; }).join("") || `<tr><td colspan="2" class="mute">Add ambassadors first.</td></tr>`}</tbody></table></div>`);
   dlg.querySelectorAll("select[data-amb]").forEach((s) => s.onchange = async () => {
