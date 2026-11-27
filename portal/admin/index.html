@@ -27,6 +27,49 @@ td .btn{margin:2px 0}
 .check input{width:auto}
 .brief{white-space:pre-wrap}
 .section-gap{margin-top:34px}
+#pg .stage3d{aspect-ratio:4/3}
+/* header + tabs */
+.who-am-i{font-size:13px;color:var(--mute);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tabs{scroll-padding:0 24px}
+.tabs button{display:inline-flex;align-items:center;gap:6px}
+.badge{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--warn);color:#1a1405;font-size:12px;font-weight:800}
+.tabs button[aria-selected=true] .badge{background:#1a1405;color:var(--warn)}
+.ibtn{width:40px;padding:0}
+/* needs attention */
+.attn{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-bottom:18px}
+.attn button{display:flex;gap:10px;align-items:center;text-align:left;background:#1f1b0f;border:1px solid #5a4a1a;border-radius:14px;padding:12px 14px;color:var(--ink);font:600 14px Inter,sans-serif;cursor:pointer}
+.attn button b{font-family:Anton,Impact,sans-serif;font-weight:400;font-size:26px;color:var(--warn);line-height:1}
+.attn button:hover{border-color:var(--warn)}
+.allgood{display:flex;gap:8px;align-items:center;color:var(--g2);font-weight:600;font-size:14px;margin:-4px 0 18px}
+/* filters */
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.filters input{flex:1;min-width:200px}
+.chip{background:none;border:1px solid var(--line);color:var(--mute);font:600 14px Inter,sans-serif;padding:8px 14px;border-radius:999px;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--card2);color:var(--ink);border-color:#555}
+.sub{display:flex;align-items:baseline;gap:10px;margin:26px 0 12px}
+.sub h3{margin:0}
+/* tables become stacked cards on small screens */
+@media (max-width:720px){
+  .tabs{-webkit-mask:linear-gradient(90deg,#000 0,#000 calc(100% - 28px),transparent);mask:linear-gradient(90deg,#000 0,#000 calc(100% - 28px),transparent)}
+  header.top .wrap{min-height:56px;gap:8px}
+  .who-am-i,.hide-sm{display:none}
+  .kpis{grid-template-columns:repeat(3,1fr)}
+  .kpi{padding:10px}
+  .kpi b{font-size:24px}
+  .kpi span{font-size:12px}
+  .tablewrap{border:0;overflow:visible}
+  table.rt thead{display:none}
+  table.rt,table.rt tbody,table.rt tr,table.rt td{display:block;width:100%}
+  table.rt tr{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin-bottom:10px}
+  table.rt td{display:flex;justify-content:space-between;align-items:center;gap:12px;border:0;padding:6px 0;text-align:right}
+  table.rt td[data-label]::before{content:attr(data-label);color:var(--mute);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;text-align:left;flex:none}
+  table.rt td.lead{display:block;text-align:left;padding-bottom:8px;border-bottom:1px solid var(--line);margin-bottom:4px}
+  table.rt td.lead::before{display:none}
+  table.rt td.acts{justify-content:flex-start;flex-wrap:wrap;padding-top:10px}
+  table.rt td.acts::before{display:none}
+  table.rt td:empty{display:none}
+  table.rt td.acts .row{flex-wrap:wrap!important}
+}
 </style>
 </head>
 <body>
@@ -56,11 +99,34 @@ const fromLocalInput = (v) => v ? v + ":00+02:00" : null;
 const todayHarare = () => new Date(Date.now() + 2 * 3600e3).toISOString().slice(0, 10);
 const money = (n, cur) => n == null ? "" : new Intl.NumberFormat("en", { style: "currency", currency: cur || "USD" }).format(n);
 const byId = (list, id) => list.find((x) => x.id === id);
-function toast(msg, bad) { const t = document.createElement("div"); t.className = "toast" + (bad ? " bad" : ""); t.textContent = msg; t.setAttribute("role", "status"); document.body.appendChild(t); setTimeout(() => t.remove(), 3500); }
+// One message at a time: a new one replaces the last.
+let toastTimer;
+function toast(msg, bad) {
+  let t = document.getElementById("toast");
+  if (!t) { t = document.createElement("div"); t.id = "toast"; t.setAttribute("role", "status"); t.setAttribute("aria-live", "polite"); document.body.appendChild(t); }
+  t.className = "toast" + (bad ? " bad" : ""); t.textContent = msg; t.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, bad ? 5000 : 3000);
+}
+// Give every table cell its column name, so tables can stack into cards on phones.
+function labelTables(root) {
+  root.querySelectorAll("table").forEach((tb) => {
+    const heads = [...tb.querySelectorAll("thead th")].map((th) => th.textContent.trim());
+    tb.classList.add("rt");
+    tb.querySelectorAll("tbody tr").forEach((tr) => [...tr.children].forEach((td, i) => { if (heads[i] && !td.classList.contains("lead") && !td.classList.contains("acts")) td.dataset.label = heads[i]; }));
+  });
+}
 const ERR = { store_code_taken: "That store code is already used by another ambassador.", name_required: "Add the ambassador's name.", not_admin: "This login isn't on the admin list.", "duplicate key": "That already exists.", code_taken: "Another ambassador already has that access code. Pick a different one.", code_length: "Access codes need 8 to 30 letters and numbers.", code_mix: "Access codes need both letters and numbers, like BigBird1234." };
 const errText = (e) => { const m = (e && e.message) || String(e); for (const k in ERR) if (m.includes(k)) return ERR[k]; return m; };
 const ok = ({ data, error }) => { if (error) throw error; return data; };
-function openDlg(title, html) { document.getElementById("dlgTitle").textContent = title; document.getElementById("dlgBody").innerHTML = html; if (!dlg.open) dlg.showModal(); dlg.querySelector(".dbody").scrollTop = 0; }
+let dlgReturn = null;
+function openDlg(title, html) {
+  document.getElementById("dlgTitle").textContent = title; const body = document.getElementById("dlgBody"); body.innerHTML = html;
+  if (!dlg.open) { dlgReturn = document.activeElement; dlg.showModal(); }
+  body.scrollTop = 0; labelTables(body);
+  const first = body.querySelector("input:not([type=hidden]):not([readonly]),select,textarea:not([readonly])"); if (first && matchMedia("(pointer:fine)").matches) first.focus();
+}
+// Put the keyboard focus back where it was when a window closes.
+dlg.addEventListener("close", () => { if (dlgReturn && dlgReturn.isConnected) dlgReturn.focus(); dlgReturn = null; });
 dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); });
 // Errors already shown to the admin as a message don't need to go anywhere else.
 addEventListener("unhandledrejection", (e) => { if (e.reason && e.reason.__shown) e.preventDefault(); });
@@ -141,17 +207,42 @@ async function start() {
 
 // ---------- shell ----------
 const TABS = [["ambassadors", "Ambassadors"], ["tasks", "Tasks"], ["events", "Events"], ["merch", "Preview store"], ["sales", "Sales"], ["settings", "Settings"]];
+// Things waiting on an admin, used for the tab counts and the "needs attention" panel.
+function attention() {
+  const soon = Date.now() + 14 * 864e5;
+  return {
+    applicants: D.event_people.filter((p) => p.status === "applied" && byId(D.events, p.event_id)).length,
+    preorders: D.preorders.filter((o) => o.status === "requested").length,
+    expiring: D.ambassadors.filter((a) => a.is_active !== false && a.code_status === "active" && a.code_expires_at && new Date(a.code_expires_at).getTime() < soon).length,
+    unmatched: D.sales.filter((x) => !x.ambassador_id).length,
+    noWhatsApp: !D.settings.whatsapp_link,
+  };
+}
 function render() {
+  const at = attention();
+  const badge = { events: at.applicants, merch: at.preorders, sales: at.unmatched };
+  const scrollY = window.scrollY, same = render.last === tab; render.last = tab;
   app.innerHTML = `<header class="top"><div class="wrap"><a class="brand" href="#ambassadors"><span class="logo"></span>FLOCK ADMIN</a><span class="sp"></span>
-    <a class="btn sm" href="${PORTAL_URL}" target="_blank" rel="noopener">Ambassador view</a><button class="btn sm" id="rf">Refresh</button><button class="btn sm" id="out">Log out</button></div>
-    <div class="wrap"><nav class="tabs" role="tablist">${TABS.map(([k, n]) => `<button role="tab" data-tab="${k}" aria-selected="${tab === k}">${n}</button>`).join("")}</nav></div></header>
-    <main class="wrap"><section class="view" id="view"></section></main>`;
+    <span class="who-am-i" title="${esc(user.email)}">${esc(user.email)}</span>
+    <a class="btn sm" href="${PORTAL_URL}" target="_blank" rel="noopener" aria-label="Ambassador view (opens in a new tab)" title="Open the ambassador portal in a new tab"><span class="hide-sm" aria-hidden="true">Ambassador view</span><span aria-hidden="true">↗</span></a>
+    <button class="btn sm ibtn" id="rf" title="Refresh" aria-label="Refresh">↻</button><button class="btn sm" id="out">Log out</button></div>
+    <div class="wrap"><nav class="tabs" role="tablist" aria-label="Admin sections">${TABS.map(([k, n]) => `<button role="tab" id="tab-${k}" aria-controls="view" data-tab="${k}" aria-selected="${tab === k}" tabindex="${tab === k ? 0 : -1}">${n}${badge[k] ? `<span class="badge" aria-label="${badge[k]} waiting">${badge[k]}</span>` : ""}</button>`).join("")}</nav></div></header>
+    <main class="wrap"><section class="view" id="view" role="tabpanel" aria-labelledby="tab-${tab}"></section></main>`;
   document.getElementById("out").onclick = async () => { await db.auth.signOut(); showLogin(); };
   document.getElementById("rf").onclick = (e) => busy(e.currentTarget, refresh, "Up to date");
-  app.querySelectorAll(".tabs button").forEach((b) => b.onclick = () => { tab = b.dataset.tab; history.replaceState(null, "", "#" + tab); render(); });
+  const tabBtns = [...app.querySelectorAll(".tabs button")];
+  tabBtns.forEach((b, i) => {
+    b.onclick = () => go(b.dataset.tab);
+    // Arrow keys move between tabs.
+    b.onkeydown = (e) => { const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0; if (!d) return; e.preventDefault(); const n = tabBtns[(i + d + tabBtns.length) % tabBtns.length]; go(n.dataset.tab); document.getElementById("tab-" + n.dataset.tab).focus(); };
+  });
+  const sel = app.querySelector(".tabs [aria-selected=true]"); if (sel) sel.scrollIntoView({ block: "nearest", inline: "nearest" });
   const v = document.getElementById("view");
   ({ ambassadors: vAmb, tasks: vTasks, events: vEvents, merch: vMerch, sales: vSales, settings: vSettings }[tab] || vAmb)(v);
+  labelTables(v);
+  if (same) window.scrollTo(0, scrollY); // stay in place after saving something
 }
+function go(t) { tab = t; history.replaceState(null, "", "#" + t); render(); window.scrollTo(0, 0); }
 
 // ================= AMBASSADORS =================
 const AMB_FIELDS = [
@@ -171,31 +262,53 @@ function codeNote(a) {
   if (a.code_expires_at && new Date(a.code_expires_at) < new Date()) return '<div class="small" style="color:var(--warn)">Code expired</div>';
   return a.code_expires_at ? `<div class="small mute">until ${fmt(a.code_expires_at, false)}</div>` : "";
 }
+let ambFilter = "all";
 function vAmb(v) {
-  const n = D.ambassadors.length, active = D.ambassadors.filter((a) => a.is_active !== false).length;
+  const n = D.ambassadors.length, active = D.ambassadors.filter((a) => a.is_active !== false).length, at = attention();
+  const items = [
+    at.applicants && ["events", at.applicants, at.applicants === 1 ? "event applicant to review" : "event applicants to review"],
+    at.preorders && ["merch", at.preorders, at.preorders === 1 ? "pre-order to confirm" : "pre-orders to confirm"],
+    at.expiring && ["ambassadors:expiring", at.expiring, at.expiring === 1 ? "access code expiring within 2 weeks" : "access codes expiring within 2 weeks"],
+    at.unmatched && ["sales", at.unmatched, at.unmatched === 1 ? "sale with an unknown store code" : "sales with an unknown store code"],
+    at.noWhatsApp && ["settings", "!", "Add the WhatsApp group link"],
+  ].filter(Boolean);
   v.innerHTML = `<div class="bar"><h2>Ambassadors</h2><button class="btn g" id="add">+ Add ambassador</button></div>
-    <div class="kpis"><div class="kpi"><b>${n}</b><span>ambassadors</span></div><div class="kpi"><b>${active}</b><span>active accounts</span></div>
+    ${items.length ? `<h3 class="sr-only">Needs your attention</h3><div class="attn">${items.map(([to, num, label]) => `<button data-go="${to}"><b>${num}</b><span>${esc(label)}</span></button>`).join("")}</div>`
+      : n ? `<p class="allgood">✓ Nothing waiting on you right now.</p>` : ""}
+    <div class="kpis"><div class="kpi"><b>${n}</b><span>ambassadors</span></div><div class="kpi"><b>${active}</b><span>active</span></div>
       <div class="kpi"><b>${D.ambassadors.filter((a) => a.code_last_used).length}</b><span>have logged in</span></div></div>
-    ${n ? `<input id="q" placeholder="Search by name, city, store code or access code" style="margin-bottom:12px">
-    <div class="tablewrap"><table><thead><tr><th>Ambassador</th><th>Status</th><th>Access code</th><th>Actions</th><th>Last login</th><th>Tasks</th><th>Sold</th></tr></thead><tbody id="rows"></tbody></table></div>`
-    : `<div class="empty">No ambassadors yet. Pick people from your applications, then press “Add ambassador”.</div>`}`;
+    ${n ? `<div class="filters"><input id="q" type="search" placeholder="Search name, city or code" aria-label="Search ambassadors">
+      <div class="row" role="group" aria-label="Show">${[["all", "All"], ["active", "Active"], ["inactive", "Inactive"], ["expiring", "Code expiring"]].map(([k, l]) => `<button class="chip" data-f="${k}" aria-pressed="${ambFilter === k}">${l}</button>`).join("")}</div></div>
+    <div class="tablewrap"><table><thead><tr><th>Ambassador</th><th>Status</th><th>Access code</th><th>Actions</th><th>Last login</th><th>Tasks</th><th>Sold</th></tr></thead><tbody id="rows"></tbody></table></div>
+    <p class="small mute" id="count" style="margin-top:8px"></p>`
+    : `<div class="empty"><h3>No ambassadors yet</h3><p>Pick people from your applications, then press “+ Add ambassador”. Each one gets a fun access code to log in with and a store code for their sales.</p></div>`}`;
   document.getElementById("add").onclick = addAmbassador;
+  v.querySelectorAll("[data-go]").forEach((b) => b.onclick = () => { const [t, f] = b.dataset.go.split(":"); if (f) { ambFilter = f; render(); } else go(t); });
   const rows = document.getElementById("rows"); if (!rows) return;
+  const soon = Date.now() + 14 * 864e5;
+  const match = { all: () => true, active: (a) => a.is_active !== false, inactive: (a) => a.is_active === false,
+    expiring: (a) => a.code_expires_at && new Date(a.code_expires_at).getTime() < soon };
   const draw = (q = "") => {
     q = q.toLowerCase();
-    rows.innerHTML = D.ambassadors.filter((a) => !q || [a.full_name, a.city, a.store_code, a.access_code].join(" ").toLowerCase().includes(q)).map((a) => `<tr${a.is_active === false ? ' style="opacity:.75"' : ""}>
-      <td><button class="linkish" data-open="${a.id}">${esc(a.full_name)}</button><div class="small mute">${esc(a.city || "")}${a.city ? " · " : ""}store code <code>${esc(a.store_code)}</code></div></td>
+    const list = D.ambassadors.filter(match[ambFilter]).filter((a) => !q || [a.full_name, a.city, a.store_code, a.access_code].join(" ").toLowerCase().includes(q));
+    rows.innerHTML = list.map((a) => `<tr${a.is_active === false ? ' style="opacity:.75"' : ""}>
+      <td class="lead"><button class="linkish" data-open="${a.id}">${esc(a.full_name)}</button><div class="small mute">${esc(a.city || "")}${a.city ? " · " : ""}store code <code>${esc(a.store_code)}</code></div></td>
       <td>${statusPill(a)}</td>
-      <td><code style="font-weight:700">${esc(pretty(a.access_code))}</code>${codeNote(a)}</td>
-      <td><div class="row" style="flex-wrap:nowrap">${a.is_active === false ? `<button class="btn g sm" data-act="${a.id}">Activate</button>` : `<button class="btn bad sm" data-deact="${a.id}">Deactivate</button>`}
-        <button class="btn sm" data-code="${a.id}">Change code</button><button class="btn sm" data-open="${a.id}">Manage</button></div></td>
+      <td><div style="text-align:inherit"><code style="font-weight:700">${esc(pretty(a.access_code))}</code>${codeNote(a)}</div></td>
+      <td class="acts"><div class="row" style="flex-wrap:nowrap">${a.is_active === false ? `<button class="btn g sm" data-act="${a.id}" aria-label="Activate ${esc(a.full_name)}">Activate</button>` : `<button class="btn bad sm" data-deact="${a.id}" aria-label="Deactivate ${esc(a.full_name)}">Deactivate</button>`}
+        <button class="btn sm" data-code="${a.id}" aria-label="Change access code for ${esc(a.full_name)}">Change code</button><button class="btn sm" data-open="${a.id}" aria-label="Manage ${esc(a.full_name)}">Manage</button></div></td>
       <td class="small">${a.code_last_used ? fmt(a.code_last_used) : '<span class="mute">Never</span>'}</td>
-      <td>${D.task_done.filter((t) => t.ambassador_id === a.id).length}</td><td>${salesQty(a.id)}</td></tr>`).join("");
+      <td>${D.task_done.filter((t) => t.ambassador_id === a.id).length}</td><td>${salesQty(a.id)}</td></tr>`).join("")
+      || `<tr><td colspan="7" class="lead mute" style="text-align:center;padding:22px">No ambassadors match. <button class="linkish" id="clr">Show everyone</button></td></tr>`;
+    document.getElementById("count").textContent = list.length === n ? `${n} ambassador${n === 1 ? "" : "s"}` : `Showing ${list.length} of ${n}`;
+    labelTables(rows.closest(".tablewrap"));
     rows.querySelectorAll("[data-open]").forEach((b) => b.onclick = () => manageAmbassador(b.dataset.open));
     rows.querySelectorAll("[data-code]").forEach((b) => b.onclick = () => changeCode(b.dataset.code));
     rows.querySelectorAll("[data-act]").forEach((b) => b.onclick = () => setActive(b, b.dataset.act, true));
     rows.querySelectorAll("[data-deact]").forEach((b) => b.onclick = () => setActive(b, b.dataset.deact, false));
+    const clr = document.getElementById("clr"); if (clr) clr.onclick = () => { ambFilter = "all"; document.getElementById("q").value = ""; render(); };
   };
+  v.querySelectorAll("[data-f]").forEach((b) => b.onclick = () => { ambFilter = b.dataset.f; v.querySelectorAll("[data-f]").forEach((c) => c.setAttribute("aria-pressed", c === b)); draw(document.getElementById("q").value); });
   draw(); document.getElementById("q").oninput = (e) => draw(e.target.value);
 }
 // Switch an account on or off. Nothing is deleted: the code, history and sales stay.
@@ -349,21 +462,26 @@ const TASK_FIELDS = [
 ];
 function vTasks(v) {
   const total = D.ambassadors.filter((a) => a.is_active !== false).length;
-  v.innerHTML = `<div class="bar"><h2>Tasks</h2></div>
-    <form id="nf" class="card" style="margin-bottom:22px"><h3>Post a task</h3><div class="grid2">${fieldsHtml(TASK_FIELDS)}</div><button class="btn g">Post to all ambassadors</button></form>
-    ${D.tasks.length ? `<div class="cards">${D.tasks.map((t) => {
+  const card = (t) => {
       const done = D.task_done.filter((d) => d.task_id === t.id);
       return `<article class="card"><div class="row" style="justify-content:space-between"><h3>${esc(t.title)}</h3>
         <div class="row">${t.is_open ? '<span class="pill g">Open</span>' : '<span class="pill">Closed</span>'}${t.due_date ? `<span class="pill warn">Due ${fmt(t.due_date, false)}</span>` : ""}</div></div>
         ${t.details ? `<p class="brief small">${esc(t.details)}</p>` : ""}${safeUrl(t.link) ? `<p class="small"><a href="${esc(t.link)}" target="_blank" rel="noopener">${esc(t.link)}</a></p>` : ""}
-        <p><b>${done.length}</b> of ${total} active ambassadors done</p>
+        <div style="margin:6px 0"><div class="small"><b>${done.length}</b> of ${total} active ambassadors done</div><div style="height:6px;background:#222;border-radius:9px;margin-top:6px;overflow:hidden" role="presentation"><div style="height:100%;width:${total ? Math.min(100, Math.round(done.length / total * 100)) : 0}%;background:var(--g)"></div></div></div>
         ${done.length ? `<details><summary class="small">See who</summary><div class="who">${done.map((d) => { const a = byId(D.ambassadors, d.ambassador_id);
           return `<div><span>${esc(a ? a.full_name : "Removed")}</span><span class="mute">${fmt(d.done_at)}</span>${safeUrl(d.proof_link) ? `<a href="${esc(d.proof_link)}" target="_blank" rel="noopener">See post</a>` : ""}</div>`; }).join("")}</div></details>` : ""}
         <div class="row" style="margin-top:10px"><button class="btn sm" data-edit="${t.id}">Edit</button>
-          <button class="btn sm" data-toggle="${t.id}">${t.is_open ? "Close task" : "Reopen"}</button><button class="btn bad sm" data-del="${t.id}">Delete</button></div></article>`; }).join("")}</div>`
-    : `<div class="empty">No tasks yet.</div>`}`;
-  document.getElementById("nf").onsubmit = async (e) => { e.preventDefault(); const f = e.target;
-    await busy(f.querySelector("button"), async () => ok(await db.from("tasks").insert(readForm(f, TASK_FIELDS))), "Task posted"); refresh(); };
+          <button class="btn sm" data-toggle="${t.id}">${t.is_open ? "Close task" : "Reopen"}</button><button class="btn bad sm" data-del="${t.id}">Delete</button></div></article>`; };
+  const open = D.tasks.filter((t) => t.is_open), closed = D.tasks.filter((t) => !t.is_open);
+  v.innerHTML = `<div class="bar"><h2>Tasks</h2><button class="btn g" id="add">+ Post a task</button></div>
+    ${open.length ? `<div class="cards">${open.map(card).join("")}</div>`
+      : `<div class="empty"><h3>No open tasks</h3><p>Post a task, like “Share the drop teaser on your story”, and every active ambassador sees it. They mark it done and can add a link to their post.</p></div>`}
+    ${closed.length ? `<details class="section-gap"><summary><h3 style="display:inline">Closed tasks (${closed.length})</h3></summary><div class="cards" style="margin-top:12px">${closed.map(card).join("")}</div></details>` : ""}`;
+  document.getElementById("add").onclick = () => {
+    openDlg("Post a task", `<form id="f"><div class="grid2">${fieldsHtml(TASK_FIELDS)}</div><button class="btn g">Post to all ambassadors</button></form>`);
+    document.getElementById("f").onsubmit = async (e) => { e.preventDefault(); const f = e.target;
+      await busy(f.querySelector("button"), async () => ok(await db.from("tasks").insert(readForm(f, TASK_FIELDS))), "Task posted"); dlg.close(); refresh(); };
+  };
   v.querySelectorAll("[data-toggle]").forEach((b) => b.onclick = async () => { const t = byId(D.tasks, b.dataset.toggle);
     await busy(b, async () => ok(await db.from("tasks").update({ is_open: !t.is_open }).eq("id", t.id))); refresh(); });
   v.querySelectorAll("[data-del]").forEach((b) => b.onclick = async () => { if (!confirm("Delete this task and everyone's progress on it?")) return;
@@ -389,15 +507,21 @@ const evRead = (f) => { const v = readForm(f, EVENT_FIELDS); v.starts_at = fromL
 const evVals = (e) => ({ ...e, starts_at: toLocalInput(e.starts_at), ends_at: toLocalInput(e.ends_at) });
 const ST_PILL = { applied: '<span class="pill blue">Applied</span>', suggested: '<span class="pill warn">Suggested</span>', assigned: '<span class="pill g">On the team</span>', declined: '<span class="pill">Declined</span>' };
 function vEvents(v) {
-  v.innerHTML = `<div class="bar"><h2>Events</h2><button class="btn g" id="add">+ Post an event</button></div>
-    ${D.events.length ? `<div class="cards two">${D.events.map((e) => {
+  // Past = ended (or started, if no end time) more than a day ago.
+  const isPast = (e) => { const t = e.ends_at || e.starts_at; return t && new Date(t).getTime() < Date.now() - 864e5; };
+  const card = (e) => {
       const ppl = D.event_people.filter((p) => p.event_id === e.id), c = (s) => ppl.filter((p) => p.status === s).length;
       return `<article class="card"><div class="small" style="color:var(--g2);font-weight:800">${esc(fmt(e.starts_at)) || "Date to be set"}</div>
         <div class="row" style="justify-content:space-between"><h3>${esc(e.title)}</h3>${e.is_open ? '<span class="pill g">Open</span>' : '<span class="pill">Closed</span>'}</div>
         ${e.location ? `<p class="small">${esc(e.location)}</p>` : ""}
-        <p class="small">${c("assigned")}${e.spots ? ` of ${e.spots}` : ""} on the team · ${c("applied")} applied · ${c("suggested")} suggested</p>
-        <div class="row"><button class="btn g sm" data-team="${e.id}">Team and applicants</button><button class="btn sm" data-edit="${e.id}">Edit</button><button class="btn bad sm" data-del="${e.id}">Delete</button></div></article>`; }).join("")}</div>`
-    : `<div class="empty">No events yet.</div>`}`;
+        <p class="small">${c("assigned")}${e.spots ? ` of ${e.spots}` : ""} on the team · ${c("suggested")} suggested</p>
+        ${c("applied") ? `<p class="small" style="color:var(--warn);font-weight:700">${c("applied")} applicant${c("applied") === 1 ? "" : "s"} waiting for your answer</p>` : ""}
+        <div class="row"><button class="btn g sm" data-team="${e.id}">Team and applicants</button><button class="btn sm" data-edit="${e.id}" aria-label="Edit ${esc(e.title)}">Edit</button><button class="btn bad sm" data-del="${e.id}" aria-label="Delete ${esc(e.title)}">Delete</button></div></article>`; };
+  const upcoming = D.events.filter((e) => !isPast(e)), past = D.events.filter(isPast).reverse();
+  v.innerHTML = `<div class="bar"><h2>Events</h2><button class="btn g" id="add">+ Post an event</button></div>
+    ${upcoming.length ? `<div class="cards two">${upcoming.map(card).join("")}</div>`
+      : `<div class="empty"><h3>No upcoming events</h3><p>Post an event with a brief. Ambassadors read it and apply, and you choose the team.</p></div>`}
+    ${past.length ? `<details class="section-gap"><summary><h3 style="display:inline">Past events (${past.length})</h3></summary><div class="cards two" style="margin-top:12px">${past.map(card).join("")}</div></details>` : ""}`;
   document.getElementById("add").onclick = () => editEvent();
   v.querySelectorAll("[data-edit]").forEach((b) => b.onclick = () => editEvent(byId(D.events, b.dataset.edit)));
   v.querySelectorAll("[data-team]").forEach((b) => b.onclick = () => eventTeam(b.dataset.team));
@@ -457,9 +581,9 @@ function vMerch(v) {
     ${D.products.length ? `<div class="cards two" id="pg"></div>` : `<div class="empty">No pieces yet. Add one with a front photo (and a back photo if you have it) to show it in 3D.</div>`}
     <h2 class="section-gap">Pre-orders</h2>
     ${D.preorders.length ? `<div class="tablewrap"><table><thead><tr><th>Ambassador</th><th>Piece</th><th>Size</th><th>Qty</th><th>Note</th><th>When</th><th>Status</th></tr></thead><tbody>
-      ${D.preorders.map((o) => `<tr><td>${esc(byId(D.ambassadors, o.ambassador_id)?.full_name || "Removed")}</td><td>${esc(byId(D.products, o.product_id)?.name || "")}</td>
+      ${D.preorders.map((o) => `<tr><td class="lead"><b>${esc(byId(D.ambassadors, o.ambassador_id)?.full_name || "Removed")}</b></td><td>${esc(byId(D.products, o.product_id)?.name || "")}</td>
       <td>${esc(o.size || "")}</td><td>${o.quantity}</td><td class="small">${esc(o.note || "")}</td><td class="small">${fmt(o.created_at)}</td>
-      <td><select data-po="${o.id}" aria-label="Pre-order status">${["requested", "confirmed", "cancelled"].map((s) => `<option${s === o.status ? " selected" : ""}>${s}</option>`).join("")}</select></td></tr>`).join("")}</tbody></table></div>`
+      <td><select data-po="${o.id}" aria-label="Pre-order status">${[["requested", "Requested"], ["confirmed", "Confirmed"], ["cancelled", "Cancelled"]].map(([k, l]) => `<option value="${k}"${k === o.status ? " selected" : ""}>${l}</option>`).join("")}</select></td></tr>`).join("")}</tbody></table></div>`
     : `<div class="empty">No pre-orders yet.</div>`}`;
   document.getElementById("add").onclick = () => editProduct();
   const pg = document.getElementById("pg");
@@ -476,7 +600,7 @@ function vMerch(v) {
       await busy(e.currentTarget, async () => ok(await db.from("products").delete().eq("id", p.id)), "Deleted"); refresh(); };
   });
   v.querySelectorAll("select[data-po]").forEach((s) => s.onchange = async () => {
-    try { ok(await db.from("preorders").update({ status: s.value }).eq("id", s.dataset.po)); toast("Updated"); await loadAll(); } catch (e) { toast(errText(e), 1); } });
+    try { ok(await db.from("preorders").update({ status: s.value }).eq("id", s.dataset.po)); toast("Pre-order " + s.value); await refresh(); } catch (e) { toast(errText(e), 1); } });
 }
 function editProduct(p) {
   openDlg(p ? "Edit " + p.name : "Add a piece", `<form id="f"><div class="grid2">${fieldsHtml(PROD_FIELDS, p || {})}</div>
@@ -503,8 +627,8 @@ function vSales(v) {
     s.forEach((x) => { if (x.amount != null) tot[x.currency] = (tot[x.currency] || 0) + Number(x.amount); });
     return { a, qty: s.reduce((n, x) => n + x.quantity, 0), tot }; }).filter((r) => r.qty).sort((x, y) => y.qty - x.qty);
   const unmatched = D.sales.filter((s) => !s.ambassador_id);
-  v.innerHTML = `<div class="bar"><h2>Sales by store code</h2><button class="btn sm" id="csv">Download CSV</button></div>
-    <form id="sf" class="card" style="margin-bottom:22px"><h3>Record a sale</h3><div class="grid2">
+  const totals = {}; D.sales.forEach((x) => { if (x.amount != null) totals[x.currency] = (totals[x.currency] || 0) + Number(x.amount); });
+  const saleForm = `<form id="sf"><div class="grid2">
       <label>Store code *<input name="store_code" required autocapitalize="characters"><span class="hint" id="who">The code the customer gave.</span></label>
       <label>Piece<select name="product_id"><option value="">Other (type below)</option>${D.products.map((p) => `<option value="${p.id}">${esc(p.name)}</option>`).join("")}</select></label>
       <label>Item (if not in the list)<input name="item"></label>
@@ -514,27 +638,23 @@ function vSales(v) {
       <label>Customer (optional)<input name="customer"></label>
       <label>Date<input name="sold_on" type="date" value="${todayHarare()}" required></label>
       <label style="grid-column:1/-1">Note<input name="note"></label></div>
-      <button class="btn g">Save sale</button></form>
+      <button class="btn g">Save sale</button></form>`;
+  v.innerHTML = `<div class="bar"><h2>Sales</h2><div class="row"><button class="btn sm" id="csv"${D.sales.length ? "" : " disabled"}>Download CSV</button><button class="btn g" id="addsale">+ Record a sale</button></div></div>
+    <div class="kpis"><div class="kpi"><b>${D.sales.reduce((n, x) => n + x.quantity, 0)}</b><span>pieces sold</span></div>
+      <div class="kpi"><b>${Object.entries(totals).map(([c, n]) => esc(money(n, c))).join(" + ") || "—"}</b><span>total value</span></div>
+      <div class="kpi"><b>${board.length}</b><span>ambassadors selling</span></div></div>
     <h3>Leaderboard</h3>
-    ${board.length ? `<div class="tablewrap" style="margin-bottom:22px"><table><thead><tr><th>#</th><th>Ambassador</th><th>Store code</th><th>Pieces</th><th>Value</th></tr></thead><tbody>
-      ${board.map((r, i) => `<tr><td>${i + 1}</td><td>${esc(r.a.full_name)}</td><td><code>${esc(r.a.store_code)}</code></td><td><b>${r.qty}</b></td><td>${Object.entries(r.tot).map(([c, n]) => esc(money(n, c))).join(" + ")}</td></tr>`).join("")}</tbody></table></div>`
-    : `<div class="empty" style="margin-bottom:22px">No sales recorded yet.</div>`}
+    ${board.length ? `<div class="tablewrap" style="margin-bottom:22px"><table><thead><tr><th>Ambassador</th><th>Store code</th><th>Pieces</th><th>Value</th></tr></thead><tbody>
+      ${board.map((r, i) => `<tr><td class="lead"><span class="mute">${i + 1}.</span> ${i < 3 ? ["🥇", "🥈", "🥉"][i] + " " : ""}<b>${esc(r.a.full_name)}</b></td><td><code>${esc(r.a.store_code)}</code></td><td><b>${r.qty}</b></td><td>${Object.entries(r.tot).map(([c, n]) => esc(money(n, c))).join(" + ")}</td></tr>`).join("")}</tbody></table></div>`
+    : `<div class="empty" style="margin-bottom:22px"><h3>No sales yet</h3><p>When someone buys with an ambassador's store code, press “+ Record a sale”. The leaderboard fills in here.</p></div>`}
     ${unmatched.length ? `<p style="color:var(--warn)">${unmatched.length} sale(s) used a store code that doesn't belong to any ambassador. They're marked below.</p>` : ""}
-    <h3>All sales</h3>
-    ${D.sales.length ? `<div class="tablewrap"><table><thead><tr><th>Date</th><th>Code</th><th>Ambassador</th><th>Item</th><th>Qty</th><th>Amount</th><th>Customer</th><th></th></tr></thead><tbody>
-      ${D.sales.map((s) => `<tr><td class="small">${fmt(s.sold_on, false)}</td><td><code>${esc(s.store_code)}</code></td>
+    <h3 style="margin-top:26px">All sales</h3>
+    ${D.sales.length ? `<div class="tablewrap"><table><thead><tr><th>Sale</th><th>Store code</th><th>Ambassador</th><th>Qty</th><th>Amount</th><th>Customer</th><th></th></tr></thead><tbody>
+      ${D.sales.map((s) => `<tr><td class="small lead"><b>${esc(s.item || "Sale")}</b> · ${fmt(s.sold_on, false)}</td><td><code>${esc(s.store_code)}</code></td>
       <td>${s.ambassador_id ? esc(byId(D.ambassadors, s.ambassador_id)?.full_name) : '<span class="pill warn">No match</span>'}</td>
-      <td>${esc(s.item || "")}</td><td>${s.quantity}</td><td>${esc(money(s.amount, s.currency))}</td><td class="small">${esc(s.customer || "")}</td>
-      <td><button class="btn bad sm" data-del="${s.id}">Delete</button></td></tr>`).join("")}</tbody></table></div>` : ""}`;
-  const f = document.getElementById("sf"), who = document.getElementById("who");
-  f.store_code.oninput = () => { const c = clean(f.store_code.value), a = D.ambassadors.find((x) => x.store_code === c);
-    who.innerHTML = !c ? "The code the customer gave." : a ? `<span style="color:var(--g2)">✓ ${esc(a.full_name)}</span>` : `<span style="color:var(--warn)">No ambassador has this code</span>`; };
-  f.onsubmit = async (e) => { e.preventDefault();
-    const vals = { store_code: clean(f.store_code.value), product_id: f.product_id.value || null, item: f.item.value.trim() || null, quantity: +f.quantity.value || 1,
-      amount: f.amount.value === "" ? null : +f.amount.value, currency: (f.currency.value.trim() || "USD").toUpperCase(), customer: f.customer.value.trim() || null, sold_on: f.sold_on.value, note: f.note.value.trim() || null };
-    if (vals.product_id && !vals.item) vals.item = byId(D.products, vals.product_id).name;
-    if (!D.ambassadors.some((a) => a.store_code === vals.store_code) && !confirm("No ambassador has this store code. Save the sale anyway?")) return;
-    await busy(f.querySelector("button"), async () => ok(await db.from("sales").insert(vals)), "Sale saved"); refresh(); };
+      <td>${s.quantity}</td><td>${esc(money(s.amount, s.currency)) || '<span class="mute">—</span>'}</td><td class="small">${esc(s.customer || "")}</td>
+      <td class="acts"><button class="btn bad sm" data-del="${s.id}" aria-label="Delete sale of ${esc(s.item || "item")} on ${fmt(s.sold_on, false)}">Delete</button></td></tr>`).join("")}</tbody></table></div>` : ""}`;
+  document.getElementById("addsale").onclick = () => { openDlg("Record a sale", saleForm); wireSaleForm(); };
   v.querySelectorAll("[data-del]").forEach((b) => b.onclick = async () => { if (!confirm("Delete this sale?")) return;
     await busy(b, async () => ok(await db.from("sales").delete().eq("id", b.dataset.del)), "Deleted"); refresh(); });
   document.getElementById("csv").onclick = () => {
@@ -543,6 +663,17 @@ function vSales(v) {
     const csv = rows.map((r) => r.map((x) => `"${String(x ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
     const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = `birdboost-sales-${todayHarare()}.csv`; a.click();
   };
+}
+function wireSaleForm() {
+  const f = document.getElementById("sf"), who = document.getElementById("who");
+  f.store_code.oninput = () => { const c = clean(f.store_code.value), a = D.ambassadors.find((x) => x.store_code === c);
+    who.innerHTML = !c ? "The code the customer gave." : a ? `<span style="color:var(--g2)">✓ ${esc(a.full_name)}</span>` : `<span style="color:var(--warn)">No ambassador has this code</span>`; };
+  f.onsubmit = async (e) => { e.preventDefault();
+    const vals = { store_code: clean(f.store_code.value), product_id: f.product_id.value || null, item: f.item.value.trim() || null, quantity: +f.quantity.value || 1,
+      amount: f.amount.value === "" ? null : +f.amount.value, currency: (f.currency.value.trim() || "USD").toUpperCase(), customer: f.customer.value.trim() || null, sold_on: f.sold_on.value, note: f.note.value.trim() || null };
+    if (vals.product_id && !vals.item) vals.item = byId(D.products, vals.product_id).name;
+    if (!D.ambassadors.some((a) => a.store_code === vals.store_code) && !confirm("No ambassador has this store code. Save the sale anyway?")) return;
+    await busy(f.querySelector("button"), async () => ok(await db.from("sales").insert(vals)), "Sale saved"); dlg.close(); refresh(); };
 }
 
 // ================= SETTINGS =================
