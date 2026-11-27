@@ -33,6 +33,43 @@ nav.bottom button[aria-selected=true]{color:var(--g2)}
 .price{font-family:Anton,Impact,sans-serif;font-size:24px}
 .wa{background:linear-gradient(160deg,#173a16,#0f100f);border:1px solid #2f5a2d}
 .brief{white-space:pre-wrap}
+/* compact greeting on the other tabs */
+.hello.mini{padding:16px 0 14px;border-bottom-width:4px}
+.hello.mini .row{justify-content:space-between}
+.hello.mini h1{font-size:30px}
+.minicode{display:inline-flex;align-items:center;gap:8px;background:#11200f;border:1px solid #2f5a2d;border-radius:999px;padding:6px 6px 6px 14px;font-size:13px;color:var(--g2);font-weight:700}
+.minicode code{font:800 15px ui-monospace,Menlo,Consolas,monospace;color:var(--ink)}
+.minicode .btn{min-height:30px;padding:0 10px;font-size:12px}
+.ibtn{width:40px;padding:0}
+/* nav: top tabs on wide screens, bottom bar on phones */
+nav.bottom button{position:relative}
+nav.bottom .dot{position:absolute;top:4px;left:calc(50% + 6px);min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--warn);color:#1a1405;font-size:11px;font-weight:800;display:grid;place-items:center}
+.toptabs{display:none}
+@media (min-width:821px){
+  nav.bottom{display:none}
+  .toptabs{display:flex;gap:4px}
+  .toptabs button{background:none;border:0;color:var(--mute);font:700 15px Inter,sans-serif;padding:9px 14px;border-radius:999px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+  .toptabs button[aria-selected=true]{background:var(--ink);color:#0b0b0b}
+  .toptabs .dot{min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--warn);color:#1a1405;font-size:11px;font-weight:800;display:inline-grid;place-items:center}
+  section.view{padding-bottom:60px}
+}
+.sub{margin:28px 0 12px}
+.caughtup{display:flex;flex-direction:column;align-items:center;gap:6px;padding:30px 20px;text-align:center;border:1px dashed var(--line);border-radius:16px;color:var(--mute)}
+.caughtup b{color:var(--ink);font-size:18px}
+.caughtup .big{font-size:38px;color:var(--g)}
+/* store: two across on phones */
+@media (max-width:560px){
+  #pg{grid-template-columns:1fr 1fr;gap:10px}
+  #pg .prod{padding:8px}
+  #pg .meta{padding:8px 2px 2px}
+  #pg h3{font-size:17px}
+  #pg .price{font-size:18px}
+  #pg .pill{font-size:10px;padding:2px 7px}
+  #pg .hint3d{display:none}
+}
+.prod:focus-within{outline:2px solid #2f5a2d}
+.plist{display:grid;gap:8px}
+.plist .card{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px}
 </style>
 </head>
 <body>
@@ -56,9 +93,13 @@ const safeUrl = (u) => /^https?:\/\//i.test(u || "") ? u : "";
 const fmtDate = (d, withTime = true) => d ? new Date(d.length === 10 ? d + "T12:00:00+02:00" : d).toLocaleString("en-GB", { timeZone: TZ, weekday: "short", day: "numeric", month: "short", ...(withTime && d.length > 10 ? { hour: "2-digit", minute: "2-digit" } : {}) }) : "";
 const money = (p) => p.price == null ? "Price coming soon" : new Intl.NumberFormat("en", { style: "currency", currency: p.currency || "USD" }).format(p.price);
 const pretty = (c) => c ? c.slice(0, 4) + "-" + c.slice(4) : "";
+// One message at a time: a new one replaces the last.
+let toastTimer;
 function toast(msg, bad) {
-  const t = document.createElement("div"); t.className = "toast" + (bad ? " bad" : ""); t.textContent = msg; t.setAttribute("role", "status");
-  document.body.appendChild(t); setTimeout(() => t.remove(), 3200);
+  let t = document.getElementById("toast");
+  if (!t) { t = document.createElement("div"); t.id = "toast"; t.setAttribute("role", "status"); t.setAttribute("aria-live", "polite"); document.body.appendChild(t); }
+  t.className = "toast" + (bad ? " bad" : ""); t.textContent = msg; t.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, bad ? 5000 : 3000);
 }
 const ERR = {
   invalid_code: "That code doesn't match. Check it and try again, or ask a Birdboost admin.",
@@ -132,15 +173,16 @@ const ICONS = {
 const TABS = [["home", "Tasks"], ["events", "Events"], ["store", "Preview store"], ["chat", "Chat"]];
 
 function render() {
-  const me = data.me;
+  const me = data.me, first = esc(me.name.split(" ")[0]);
   const done = data.tasks.filter((t) => t.done).length;
   const myEvents = data.events.filter((e) => e.my_status === "assigned").length;
-  app.innerHTML = `
-  <header class="top"><div class="wrap"><a class="brand" href="#home"><span class="logo"></span>THE FLOCK</a><span class="sp"></span>
-    <button class="btn sm" id="refresh" aria-label="Refresh">Refresh</button><button class="btn sm" id="out">Log out</button></div></header>
-  <div class="hello"><div class="wrap">
+  // Counts on the nav for things waiting on the ambassador.
+  const dots = { home: data.tasks.filter((t) => !t.done && t.is_open).length, events: data.events.filter((e) => e.my_status === "suggested").length };
+  const tabBtn = (k, n, withIcon) => `<button role="tab" data-tab="${k}" aria-selected="${tab === k}"${tab === k ? ' aria-current="page"' : ""}>${withIcon ? ICONS[k] : ""}${n}${dots[k] ? `<span class="dot" aria-label="${dots[k]} new">${dots[k]}</span>` : ""}</button>`;
+  const shareBtn = navigator.share ? `<button class="btn sm" id="sharesc">Share</button>` : "";
+  const hero = tab === "home" ? `<div class="hello"><div class="wrap">
     <p class="mute" style="margin:0">Welcome back</p>
-    <h1>${esc(me.name.split(" ")[0])}</h1>
+    <h1>${first}</h1>
     ${data.settings.welcome_message ? `<p style="margin-top:8px;max-width:40em">${esc(data.settings.welcome_message)}</p>` : ""}
     <div class="stats">
       <div class="stat"><b>${done}</b><span>tasks done</span></div>
@@ -149,39 +191,51 @@ function render() {
     </div>
     <div class="storecode"><div style="flex:1;min-width:180px"><div class="small" style="font-weight:700">YOUR STORE CODE</div><code>${esc(me.store_code)}</code>
       <div class="small">Customers give this code when they buy, so the sale counts as yours.</div></div>
-      <button class="btn sm" id="copysc">Copy code</button></div>
+      <div class="row"><button class="btn sm" id="copysc">Copy code</button>${shareBtn}</div></div>
     ${me.code_expires_at ? `<p class="small mute">Your access code works until ${fmtDate(me.code_expires_at, false)}.</p>` : ""}
-  </div></div>
+  </div></div>`
+  : `<div class="hello mini"><div class="wrap"><div class="row"><h1>Hi ${first}</h1>
+      <span class="minicode">Store code <code>${esc(me.store_code)}</code><button class="btn sm" id="copysc" aria-label="Copy store code">Copy</button></span></div></div></div>`;
+  app.innerHTML = `
+  <header class="top"><div class="wrap"><a class="brand" href="#home"><span class="logo"></span>THE FLOCK</a>
+    <nav class="toptabs" role="tablist" aria-label="Sections">${TABS.map(([k, n]) => tabBtn(k, n, false)).join("")}</nav><span class="sp"></span>
+    <button class="btn sm ibtn" id="refresh" aria-label="Refresh" title="Refresh">↻</button><button class="btn sm" id="out">Log out</button></div></header>
+  ${hero}
   <main class="wrap"><section class="view" id="view"></section></main>
-  <nav class="bottom" role="tablist">${TABS.map(([k, n]) => `<button role="tab" data-tab="${k}" aria-selected="${tab === k}">${ICONS[k]}${n}</button>`).join("")}</nav>`;
-  document.getElementById("out").onclick = () => logout();
-  document.getElementById("refresh").onclick = async () => { try { await load(); render(); toast("Up to date"); } catch (e) { if (!isCodeErr(e)) toast(errText(e), 1); } };
-  document.getElementById("copysc").onclick = () => navigator.clipboard.writeText(me.store_code).then(() => toast("Store code copied"));
-  app.querySelectorAll("nav.bottom button").forEach((b) => b.onclick = () => { tab = b.dataset.tab; history.replaceState(null, "", "#" + tab); render(); scrollTo(0, 0); });
+  <nav class="bottom" role="tablist" aria-label="Sections">${TABS.map(([k, n]) => tabBtn(k, n, true)).join("")}</nav>`;
+  document.getElementById("out").onclick = () => { if (confirm("Log out? You'll need your access code to log back in.")) logout(); };
+  document.getElementById("refresh").onclick = async (e) => { const b = e.currentTarget; b.disabled = true; b.innerHTML = '<span class="spin"></span>';
+    try { await load(); render(); toast("Up to date"); } catch (err) { if (!isCodeErr(err)) { toast(errText(err), 1); b.disabled = false; b.textContent = "↻"; } } };
+  document.getElementById("copysc").onclick = () => navigator.clipboard.writeText(me.store_code).then(() => toast("Store code copied"), () => toast("Couldn't copy. Your code is " + me.store_code));
+  const sh = document.getElementById("sharesc");
+  if (sh) sh.onclick = () => navigator.share({ text: `Shopping Birdboost? Use my store code ${me.store_code} when you buy.` }).catch(() => {});
+  app.querySelectorAll("[data-tab]").forEach((b) => b.onclick = () => { tab = b.dataset.tab; history.replaceState(null, "", "#" + tab); render(); scrollTo(0, 0); });
   ({ home: viewTasks, events: viewEvents, store: viewStore, chat: viewChat }[tab] || viewTasks)(document.getElementById("view"));
 }
 addEventListener("hashchange", () => { const h = location.hash.slice(1); if (data && TABS.some(([k]) => k === h) && h !== tab) { tab = h; render(); } });
 
 async function act(btn, fn, okMsg) {
-  btn.disabled = true;
-  try { await fn(); await load(); render(); if (okMsg) toast(okMsg); }
-  catch (e) { if (!isCodeErr(e)) { toast(errText(e), 1); btn.disabled = false; } }
+  const label = btn.innerHTML; btn.disabled = true; btn.innerHTML = '<span class="spin"></span>';
+  const y = scrollY;
+  try { await fn(); await load(); render(); scrollTo(0, y); if (okMsg) toast(okMsg); }
+  catch (e) { if (!isCodeErr(e)) { toast(errText(e), 1); if (btn.isConnected) { btn.disabled = false; btn.innerHTML = label; } } }
 }
 
 // ---------- Tasks ----------
 function viewTasks(v) {
   const open = data.tasks.filter((t) => !t.done && t.is_open), done = data.tasks.filter((t) => t.done);
   const card = (t) => `<article class="card task ${t.done ? "done" : ""}">
-    <div class="row" style="justify-content:space-between"><h3>${esc(t.title)}</h3>${t.done ? '<span class="pill g">Done</span>' : t.due_date ? `<span class="pill warn">Due ${fmtDate(t.due_date, false)}</span>` : ""}</div>
+    <div class="row" style="justify-content:space-between"><h3>${esc(t.title)}</h3>${t.done ? '<span class="pill g">✓ Done</span>' : t.due_date ? (new Date(t.due_date + "T23:59:59+02:00") < new Date() ? `<span class="pill bad">Overdue</span>` : `<span class="pill warn">Due ${fmtDate(t.due_date, false)}</span>`) : ""}</div>
     ${t.details ? `<p class="brief">${esc(t.details)}</p>` : ""}
     ${safeUrl(t.link) ? `<p><a href="${esc(t.link)}" target="_blank" rel="noopener">Open the link for this task</a></p>` : ""}
     ${t.done ? `${safeUrl(t.proof_link) ? `<p class="small">Your post: <a href="${esc(t.proof_link)}" target="_blank" rel="noopener">${esc(t.proof_link)}</a></p>` : ""}
       ${t.is_open ? `<button class="btn sm" data-undo="${t.id}">Mark as not done</button>` : ""}`
-    : `<form class="row" data-done="${t.id}" style="margin-top:8px"><input name="proof" type="url" placeholder="Link to your post (optional)" style="flex:1;min-width:200px"><button class="btn g sm">Mark done</button></form>`}
+    : `<form class="row" data-done="${t.id}" style="margin-top:8px"><input name="proof" type="url" placeholder="Link to your post (optional)" aria-label="Link to your post (optional)" style="flex:1;min-width:200px"><button class="btn g sm">Mark done</button></form>`}
   </article>`;
-  v.innerHTML = `<h2>Your tasks</h2>
-    ${open.length ? `<div class="cards">${open.map(card).join("")}</div>` : `<div class="empty">No open tasks right now. Check back soon.</div>`}
-    ${done.length ? `<h3 style="margin:28px 0 12px">Done</h3><div class="cards">${done.map(card).join("")}</div>` : ""}`;
+  v.innerHTML = `<h2>Your tasks${open.length ? ` <span class="mute" style="font-size:.6em">${open.length} to do</span>` : ""}</h2>
+    ${open.length ? `<div class="cards">${open.map(card).join("")}</div>`
+      : `<div class="caughtup"><span class="big" aria-hidden="true">✓</span><b>You're all caught up</b><span>New tasks from the Birdboost team will show up here.</span></div>`}
+    ${done.length ? `<details class="sub"${open.length ? "" : " open"}><summary><h3 style="display:inline">Done (${done.length})</h3></summary><div class="cards" style="margin-top:12px">${done.map(card).join("")}</div></details>` : ""}`;
   v.querySelectorAll("form[data-done]").forEach((f) => f.onsubmit = (e) => { e.preventDefault();
     act(f.querySelector("button"), () => rpc("amb_task_done", { p_task: f.dataset.done, p_done: true, p_proof_link: f.proof.value || null }), "Nice work. Task marked done."); });
   v.querySelectorAll("[data-undo]").forEach((b) => b.onclick = () => act(b, () => rpc("amb_task_done", { p_task: b.dataset.undo, p_done: false })));
@@ -212,8 +266,13 @@ function viewEvents(v) {
       ${st ? `<p class="small mute">${st[1]}</p>` : ""}
       <div class="row">${actions}</div></article>`;
   };
+  const isPast = (e) => { const t = e.ends_at || e.starts_at; return t && new Date(t).getTime() < Date.now() - 864e5; };
+  const rank = { suggested: 0, assigned: 1, applied: 2 };
+  const upcoming = data.events.filter((e) => !isPast(e)).sort((a, b) => (rank[a.my_status] ?? 3) - (rank[b.my_status] ?? 3)), past = data.events.filter(isPast);
   v.innerHTML = `<h2>Events</h2><p class="mute">See what Birdboost is planning, read the brief, and apply for the ones you can make.</p>
-    ${data.events.length ? `<div class="cards two">${data.events.map(card).join("")}</div>` : `<div class="empty">No events posted yet.</div>`}`;
+    ${upcoming.length ? `<div class="cards two">${upcoming.map(card).join("")}</div>`
+      : `<div class="caughtup"><span class="big" aria-hidden="true">📅</span><b>No events right now</b><span>When Birdboost plans something, it shows up here and you can apply.</span></div>`}
+    ${past.length ? `<details class="sub"><summary><h3 style="display:inline">Past events (${past.length})</h3></summary><div class="cards two" style="margin-top:12px">${past.map(card).join("")}</div></details>` : ""}`;
   v.querySelectorAll("[data-apply]").forEach((b) => b.onclick = () => {
     if (b.dataset.accept) return act(b, () => rpc("amb_event_apply", { p_event: b.dataset.apply }), "You're in. An admin will confirm.");
     const ev = data.events.find((e) => e.id === b.dataset.apply);
@@ -227,20 +286,22 @@ function viewEvents(v) {
 // ---------- Preview store ----------
 function viewStore(v) {
   v.innerHTML = `<h2>Preview store</h2><p class="mute">Designs that aren't out yet. You see them first, and you can pre-order before anyone else. This is not the main Birdboost shop.</p>
-    ${data.products.length ? `<div class="cards two" id="pg"></div>` : `<div class="empty">No previews yet. New drops will show up here first.</div>`}
-    ${data.preorders.length ? `<h3 style="margin:30px 0 12px">Your pre-orders</h3><div class="tablewrap"><table><thead><tr><th>Piece</th><th>Size</th><th>Qty</th><th>Status</th><th></th></tr></thead><tbody>
-      ${data.preorders.map((o) => `<tr><td>${esc(o.product)}</td><td>${esc(o.size || "")}</td><td>${o.quantity}</td><td>${{ requested: '<span class="pill blue">Requested</span>', confirmed: '<span class="pill g">Confirmed</span>', cancelled: '<span class="pill">Cancelled</span>' }[o.status]}</td>
-      <td>${o.status === "requested" ? `<button class="btn sm" data-cancel="${o.id}">Cancel</button>` : ""}</td></tr>`).join("")}</tbody></table></div>` : ""}`;
+    ${data.products.length ? `<div class="cards two" id="pg"></div>` : `<div class="caughtup"><span class="big" aria-hidden="true">👕</span><b>Nothing to preview yet</b><span>New designs show up here before anyone else sees them.</span></div>`}
+    ${data.preorders.length ? `<h3 class="sub">Your pre-orders</h3><div class="plist">
+      ${data.preorders.map((o) => `<div class="card"><div><b>${esc(o.product)}</b><div class="small mute">${o.size ? "Size " + esc(o.size) + " · " : ""}${o.quantity} piece${o.quantity === 1 ? "" : "s"} · ${fmtDate(o.created_at, false)}</div></div>
+      <div class="row">${{ requested: '<span class="pill blue">Waiting for confirmation</span>', confirmed: '<span class="pill g">✓ Confirmed</span>', cancelled: '<span class="pill">Cancelled</span>' }[o.status]}
+      ${o.status === "requested" ? `<button class="btn sm" data-cancel="${o.id}" aria-label="Cancel pre-order for ${esc(o.product)}">Cancel</button>` : ""}</div></div>`).join("")}</div>` : ""}`;
   const pg = v.querySelector("#pg");
   data.products.forEach((p) => {
     const c = document.createElement("article"); c.className = "card prod";
     c.innerHTML = `<div class="s3"></div><div class="meta"><div class="row" style="justify-content:space-between"><h3>${esc(p.name)}</h3>${p.stage === "preorder" ? '<span class="pill g">Pre-order open</span>' : '<span class="pill">Preview</span>'}</div>
-      <div class="price">${esc(money(p))}</div>${p.release_note ? `<p class="small mute">${esc(p.release_note)}</p>` : ""}<button class="btn sm" style="margin-top:6px">See details</button></div>`;
+      <div class="price">${esc(money(p))}</div>${p.release_note ? `<p class="small mute">${esc(p.release_note)}</p>` : ""}<button class="btn sm${p.stage === "preorder" ? " g" : ""}" style="margin-top:6px">${p.stage === "preorder" ? "Pre-order" : "See details"}</button></div>`;
     pg.appendChild(c);
     BB3D.mount(c.querySelector(".s3"), p);
     c.querySelector(".meta button").onclick = () => openProduct(p);
+    c.querySelector(".meta h3").style.cursor = "pointer"; c.querySelector(".meta h3").onclick = () => openProduct(p);
   });
-  v.querySelectorAll("[data-cancel]").forEach((b) => b.onclick = () => act(b, () => rpc("amb_preorder_cancel", { p_id: b.dataset.cancel }), "Pre-order cancelled"));
+  v.querySelectorAll("[data-cancel]").forEach((b) => b.onclick = () => confirm("Cancel this pre-order?") && act(b, () => rpc("amb_preorder_cancel", { p_id: b.dataset.cancel }), "Pre-order cancelled"));
 }
 function openProduct(p) {
   const sizes = (p.sizes || "").split(",").map((s) => s.trim()).filter(Boolean);
@@ -275,7 +336,12 @@ function viewChat(v) {
       ${tt ? `<a class="btn" href="https://www.tiktok.com/@${encodeURIComponent(tt)}" target="_blank" rel="noopener">TikTok @${esc(tt)}</a>` : ""}</div></div>`;
 }
 
-function openDlg(title, html) { document.getElementById("dlgTitle").textContent = title; document.getElementById("dlgBody").innerHTML = html; dlg.showModal(); }
+let dlgReturn = null;
+function openDlg(title, html) {
+  document.getElementById("dlgTitle").textContent = title; document.getElementById("dlgBody").innerHTML = html;
+  if (!dlg.open) { dlgReturn = document.activeElement; dlg.showModal(); }
+}
+dlg.addEventListener("close", () => { if (dlgReturn && dlgReturn.isConnected) dlgReturn.focus(); dlgReturn = null; });
 dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); });
 
 // ---------- Start ----------
