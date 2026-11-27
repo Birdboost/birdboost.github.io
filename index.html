@@ -99,22 +99,37 @@ textarea{min-height:96px;resize:vertical}
 .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
 .err{color:light-dark(#b3261e,#ff8a80);font-size:14px;min-height:20px;margin-top:4px}
 footer{text-align:center;color:var(--mute);font-size:14px}
+/* polish */
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.topbar .login{color:#cfd0cb;font-weight:600;font-size:14px;text-decoration:none;border:1px solid #2f5a2d;border-radius:999px;padding:8px 14px;min-height:40px;display:inline-flex;align-items:center}
+.topbar .login:hover{color:#fff;border-color:var(--g)}
+.topbar .login:focus-visible{outline:3px solid #9be38f;outline-offset:3px}
+input[aria-invalid=true],textarea[aria-invalid=true]{border-color:light-dark(#b3261e,#ff8a80);box-shadow:0 0 0 1px light-dark(#b3261e,#ff8a80)}
+.sizes[aria-invalid=true] span{border-color:light-dark(#b3261e,#ff8a80)}
+.chk.bad{color:light-dark(#b3261e,#ff8a80)}
+.err:not(:empty){background:light-dark(#fde9e7,#3a1614);border-radius:10px;padding:10px 14px;margin:6px 0 12px;font-weight:600}
+.fhint{font-size:13px;color:light-dark(#555,#a9aba6);margin-top:5px;font-weight:400}
+#sub[disabled]{opacity:.7;cursor:default}
+.float{position:fixed;left:16px;right:16px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:50;box-shadow:0 10px 30px #000a;transform:translateY(140%);transition:transform .3s;display:none}
+.float.on{transform:none}
+@media(max-width:860px){.float{display:flex}}
+@media (prefers-reduced-motion:reduce){.float{transition:none}}
 @media(max-width:860px){.hgrid,.two,.tees{grid-template-columns:minmax(0,1fr)}.perks{grid-template-columns:repeat(2,minmax(0,1fr))}.fig{min-height:340px}}
-@media(max-width:520px){.perks{grid-template-columns:minmax(0,1fr)}.perk{height:170px}.ages{grid-template-columns:minmax(0,1fr)}.row{grid-template-columns:minmax(0,1fr)}.step{grid-template-columns:minmax(0,1fr);gap:2px}.fig{min-height:280px}}
+@media(max-width:520px){.perks{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.perk{height:150px}.face{padding:14px}.front .big{font-size:21px}.back{font-size:13px;line-height:1.35}.back .big{font-size:19px!important}.sizes{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}.sizes span{min-width:0;width:100%}.ages{grid-template-columns:minmax(0,1fr)}.row{grid-template-columns:minmax(0,1fr)}.step{grid-template-columns:minmax(0,1fr);gap:2px}.fig{min-height:280px}}
 </style>
 </head>
 <body>
 
 <section class="hero band">
   <div class="wrap">
-    <div class="brand"><span class="logo" aria-hidden="true"></span>birdboost.inc</div>
+    <div class="topbar"><div class="brand"><span class="logo" aria-hidden="true"></span>birdboost.inc</div><a class="login" href="portal/">Already in the Flock? Log in →</a></div>
     <div class="hgrid">
       <div>
         <h1>Join the <span class="g">Flock.</span><br>Become a Birdboost ambassador</h1>
         <div class="ten"><b>10</b> spots only. That's the whole team.</div>
         <p class="lead">We're building the crew that carries Birdboost into the drop on 28 December. Wear the pieces, make the content, bring your people, and rep a brand that puts faith first.</p>
         <a class="cta g" href="#apply">Apply for a spot</a>
-        <div class="clock" id="clock" aria-live="polite">
+        <div class="clock" id="clock" role="timer" aria-label="Time left to apply">
           <div><b id="cd">–</b><span>days</span></div>
           <div><b id="ch">–</b><span>hours</span></div>
           <div><b id="cm">–</b><span>minutes</span></div>
@@ -178,7 +193,7 @@ footer{text-align:center;color:var(--mute);font-size:14px}
             <p hidden><label>Leave this empty <input name="_gotcha" tabindex="-1" autocomplete="off"></label></p>
       <input type="hidden" name="source" id="h_source"><input type="hidden" name="campaign" id="h_campaign"><input type="hidden" name="ref" id="h_ref"><input type="hidden" name="latest_source" id="h_latest"><input type="hidden" name="referrer" id="h_referrer"><input type="hidden" name="first_visit" id="h_first"><input type="hidden" name="visits" id="h_visits"><input type="hidden" name="device" id="h_device"><input type="hidden" name="spot_picked" id="h_spot">
       <h2>Apply for a spot</h2>
-      <p class="mute">Fill this in and send it straight to our WhatsApp. Only 10 spots, so tell us why it should be you.</p>
+      <p class="mute">It takes about two minutes, and it goes straight to the Birdboost team. Only 10 spots, so tell us why it should be you.</p>
       <div class="row">
         <div class="fld"><label for="name">Full name</label><input id="name" name="name" autocomplete="name" required></div>
         <div class="fld"><label for="age">Age</label><input id="age" name="age" type="number" inputmode="numeric" min="10" max="60" required></div>
@@ -194,7 +209,7 @@ footer{text-align:center;color:var(--mute);font-size:14px}
       </div>
       <div class="row">
         <div class="fld"><label for="city">City or town</label><input id="city" name="city" required></div>
-        <div class="fld"><label for="phone">Your WhatsApp number</label><input id="phone" name="whatsapp" type="tel" inputmode="tel" required></div>
+        <div class="fld"><label for="phone">Your WhatsApp number</label><input id="phone" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" required placeholder="e.g. 077 123 4567"></div>
       </div>
       <div class="fld"><label for="email">Email address</label><input id="email" name="email" type="email" inputmode="email" autocomplete="email" required placeholder="you@example.com"></div>
       <div class="fld"><label for="handles">Instagram and TikTok handles</label><input id="handles" name="handles" placeholder="@yourname on both" required></div>
@@ -218,6 +233,8 @@ footer{text-align:center;color:var(--mute);font-size:14px}
     </form>
   </div>
 </section>
+
+<a class="cta g float" id="float" href="#apply" aria-hidden="true" tabindex="-1">Apply for a spot</a>
 
 <footer class="band"><span class="logo" aria-hidden="true" style="width:30px;height:32px;vertical-align:middle"></span> Birdboost · faith-driven clothing and community, Zimbabwe<br><span style="display:inline-flex;flex-wrap:wrap;gap:4px 20px;justify-content:center"><span style="display:inline-flex;align-items:center;min-height:44px">Follow us:</span><a href="https://www.instagram.com/birdboost_impact" target="_blank" rel="noopener" style="color:inherit;font-weight:600;display:inline-flex;align-items:center;min-height:44px">Instagram @birdboost_impact</a><a href="https://www.tiktok.com/@official_birdboost.inc" target="_blank" rel="noopener" style="color:inherit;font-weight:600;display:inline-flex;align-items:center;min-height:44px">TikTok @official_birdboost.inc</a></span></footer>
 
@@ -316,18 +333,40 @@ const fields = ['name','age','city','phone','email','handles','why','pname','pph
 try { const saved = JSON.parse(localStorage.getItem('bb-amb')||'{}'); fields.forEach(k=>{ if(saved[k]) $(k).value = saved[k]; }); ageState(); } catch(e){}
 $('f').addEventListener('input', () => { try { const o={}; fields.forEach(k=>o[k]=$(k).value); localStorage.setItem('bb-amb', JSON.stringify(o)); } catch(e){} });
 
+/* Show which fields need attention, and take the person to the first one. */
+const clearMarks = () => { document.querySelectorAll('[aria-invalid=true]').forEach(el=>el.removeAttribute('aria-invalid')); document.querySelectorAll('.chk.bad').forEach(el=>el.classList.remove('bad')); };
+const mark = ids => {
+  ids.forEach(k => { const el = $(k); if (!el) return; if (el.type === 'checkbox') el.closest('.chk').classList.add('bad'); else el.setAttribute('aria-invalid','true'); });
+  const first = $(ids[0]); if (!first) return;
+  const target = first.id === 'sizes' ? first.querySelector('input') : first;
+  target.focus({preventScroll:true}); (first.closest('.fld')||first).scrollIntoView({behavior:'smooth', block:'center'});
+};
+$('f').addEventListener('input', e => { const el = e.target; if (el.getAttribute('aria-invalid')) el.removeAttribute('aria-invalid'); if (el.name==='size') $('sizes').removeAttribute('aria-invalid'); if (el.type==='checkbox') el.closest('.chk')?.classList.remove('bad'); });
+$('f').addEventListener('change', e => { if (e.target.name==='size') $('sizes').removeAttribute('aria-invalid'); });
+
+/* Floating "Apply" button on phones: shows after the hero, hides once the form is on screen. */
+if ('IntersectionObserver' in window) {
+  let pastHero = false, formSeen = false;
+  const fl = $('float'), upd = () => fl.classList.toggle('on', pastHero && !formSeen && Date.now() < DEADLINE);
+  new IntersectionObserver(([en]) => { pastHero = !en.isIntersecting; upd(); }).observe(document.querySelector('.hero .cta'));
+  new IntersectionObserver(([en]) => { formSeen = en.isIntersecting; upd(); }, {rootMargin:'0px 0px -30% 0px'}).observe($('apply'));
+}
+
 $('f').addEventListener('submit', e => {
   e.preventDefault();
   const a = ageState(), err = $('err'); err.textContent = '';
+  clearMarks();
   const v = k => $(k).value.trim();
   const size = (document.querySelector('input[name=size]:checked')||{}).value || '';
   const miss = [['name','your name'],['age','your age'],['city','your city'],['phone','your WhatsApp number'],['email','your email address'],['handles','your handles'],['why','why Birdboost']].filter(([k])=>!v(k)).map(x=>x[1]);
   if (!size) miss.push('your size');
-  if (!miss.length && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v('email'))) { err.textContent = 'Please check your email address. It should look like name@example.com.'; return; }
-  if (miss.length) { err.textContent = 'Please add ' + miss.join(', ') + '.'; return; }
+  const missIds = ['name','age','city','phone','email','handles','why'].filter(k=>!v(k));
+  if (!size) missIds.push('sizes');
+  if (!miss.length && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v('email'))) { err.textContent = 'Please check your email address. It should look like name@example.com.'; mark(['email']); return; }
+  if (miss.length) { err.textContent = 'Please add ' + (miss.length > 1 ? miss.slice(0,-1).join(', ') + ' and ' + miss[miss.length-1] : miss[0]) + '.'; mark(missIds); return; }
   if (a < 16) { err.textContent = 'Ambassadors need to be 16 or older for this round.'; $('young').scrollIntoView({block:'center'}); return; }
-  if (a < 18 && (!v('pname') || !v('pphone') || !$('pok').checked)) { err.textContent = 'Please add your parent or guardian\'s name and number, and tick that they\'re happy for you to apply.'; return; }
-  if (!$('agree').checked) { err.textContent = 'Please tick that you can make the shoot day and post twice a week.'; return; }
+  if (a < 18 && (!v('pname') || !v('pphone') || !$('pok').checked)) { err.textContent = 'Please add your parent or guardian\'s name and number, and tick that they\'re happy for you to apply.'; mark(['pname','pphone','pok'].filter(k=>k==='pok'?!$('pok').checked:!v(k))); return; }
+  if (!$('agree').checked) { err.textContent = 'Please tick that you can make the shoot day and post twice a week.'; mark(['agree']); return; }
   const lines = [
     'BIRDBOOST AMBASSADOR APPLICATION',
     'Name: ' + v('name'), 'Age: ' + a, 'City: ' + v('city'), 'WhatsApp: ' + v('phone'), 'Email: ' + v('email'),
