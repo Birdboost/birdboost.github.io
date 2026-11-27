@@ -118,6 +118,7 @@ footer{text-align:center;color:var(--mute);font-size:14px}
           <div><b id="cd">–</b><span>days</span></div>
           <div><b id="ch">–</b><span>hours</span></div>
           <div><b id="cm">–</b><span>minutes</span></div>
+          <div><b id="cs">–</b><span>seconds</span></div>
           <div style="text-align:left;min-width:140px"><span>Applications close</span><b style="font-size:22px">6 December</b></div>
         </div>
       </div>
@@ -264,11 +265,11 @@ $('perks').addEventListener('click', e => { const b = e.target.closest('.perk');
 
 const tick = () => {
   let ms = Math.max(0, DEADLINE - Date.now());
-  const d = Math.floor(ms/864e5), h = Math.floor(ms%864e5/36e5), m = Math.floor(ms%36e5/6e4);
-  $('cd').textContent = d; $('ch').textContent = h; $('cm').textContent = m;
-  if (!ms) $('clock').innerHTML = '<div style="text-align:left"><b style="font-size:22px">Applications have closed</b><span>Thank you, Flock. Watch for the launch on 28 December.</span></div>';
+  const d = Math.floor(ms/864e5), h = Math.floor(ms%864e5/36e5), m = Math.floor(ms%36e5/6e4), s = Math.floor(ms%6e4/1e3);
+  $('cd').textContent = d; $('ch').textContent = h; $('cm').textContent = m; $('cs').textContent = String(s).padStart(2,'0');
+  if (!ms) { clearInterval(clk); } if (!ms) $('clock').innerHTML = '<div style="text-align:left"><b style="font-size:22px">Applications have closed</b><span>Thank you, Flock. Watch for the launch on 28 December.</span></div>';
 };
-tick(); const clk = setInterval(tick, 30000);
+const clk = setInterval(tick, 1000); tick();
 
 /* V formation of 10 birds; the lead bird is the logo */
 const svg = $('flock');
