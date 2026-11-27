@@ -172,7 +172,7 @@ end $$;
 -- ---------------------------------------------------------------------
 -- Code generators
 -- ---------------------------------------------------------------------
--- 8 characters, no look-alikes (no 0/O, 1/I/L). Shown to people as ABCD-EFGH.
+-- Random letters for store codes (no look-alikes like 0/O, 1/I/L).
 create or replace function public._random_code(len int default 8) returns text
 language plpgsql volatile set search_path = public, extensions as $$
 declare
@@ -186,22 +186,90 @@ begin
   return out;
 end $$;
 
+-- Fun access codes: a word + a bird + 4 digits, e.g. BigBird4821, SneakyPigeon0397.
+-- 50 x 40 x 10,000 = 20 million possible codes.
+create or replace function public._fun_code() returns text
+language plpgsql volatile set search_path = public, extensions as $$
+declare
+  words text[] := array['Big','Tiny','Funky','Sneaky','Lucky','Fluffy','Cheeky','Jolly','Zippy','Bouncy',
+                        'Sassy','Fancy','Snappy','Wiggly','Groovy','Swift','Mighty','Dizzy','Goofy','Sunny',
+                        'Spicy','Breezy','Chunky','Cosmic','Crispy','Dapper','Feisty','Fuzzy','Giddy','Gutsy',
+                        'Jazzy','Nifty','Peppy','Perky','Quirky','Rowdy','Sparky','Wacky','Zesty','Bold',
+                        'Angry','Grumpy','Cranky','Hangry','Salty','Sleepy','Bossy','Nosy','Silly','Wobbly'];
+  birds text[] := array['Bird','Robin','Eagle','Pigeon','Parrot','Penguin','Hawk','Owl','Falcon','Sparrow',
+                        'Flamingo','Toucan','Pelican','Finch','Hornbill','Weaver','Kingfisher','Hoopoe','Ostrich','Stork',
+                        'Crane','Heron','Swallow','Starling','Lovebird','Peacock','Turaco','Bulbul','Canary','Dove',
+                        'Kestrel','Raven','Magpie','Puffin','Seagull','Swan','Goose','Duck','Kiwi','Condor'];
+  b bytea := extensions.gen_random_bytes(6);
+  n int := ((get_byte(b, 2) << 16) | (get_byte(b, 3) << 8) | get_byte(b, 4)) % 10000;
+begin
+  return words[1 + get_byte(b, 0) % array_length(words, 1)]
+      || birds[1 + get_byte(b, 1) % array_length(birds, 1)]
+      || lpad(n::text, 4, '0');
+end $$;
+
 create or replace function public._clean_code(c text) returns text
 language sql immutable as $$
   select upper(regexp_replace(coalesce(c, ''), '[^A-Za-z0-9]', '', 'g'));
 $$;
 
+-- Codes are case-insensitive: BigBird4821, bigbird4821 and BIGBIRD4821 are the same code.
+create unique index if not exists ambassadors_access_code_upper on public.ambassadors (upper(access_code));
+
+create or replace function public._new_access_code() returns text
+language plpgsql volatile set search_path = public as $$
+declare ac text;
+begin
+  loop
+    ac := public._fun_code();
+    exit when not exists (select 1 from public.ambassadors where upper(access_code) = upper(ac));
+  end loop;
+  return ac;
+end $$;
+
+-- Check a code an admin picked or typed. Returns it cleaned up, or raises.
+create or replace function public._check_chosen_code(p text, p_except uuid default null) returns text
+language plpgsql set search_path = public as $$
+declare c text := regexp_replace(coalesce(p, ''), '[^A-Za-z0-9]', '', 'g');
+begin
+  if length(c) < 8 or length(c) > 30 then raise exception 'code_length'; end if;
+  if c !~ '[0-9]' or c !~ '[A-Za-z]' then raise exception 'code_mix'; end if;
+  if exists (select 1 from public.ambassadors where upper(access_code) = upper(c)
+              and id is distinct from p_except) then
+    raise exception 'code_taken';
+  end if;
+  return c;
+end $$;
+
+-- Admin: a few unused fun codes to choose from.
+create or replace function public.admin_suggest_codes(p_count int default 6) returns text[]
+language plpgsql security definer set search_path = public as $$
+declare out text[] := '{}'; c text;
+begin
+  if not public.is_admin() then raise exception 'not_admin'; end if;
+  while coalesce(array_length(out, 1), 0) < least(greatest(p_count, 1), 20) loop
+    c := public._new_access_code();
+    if not c = any(out) then out := out || c; end if;
+  end loop;
+  return out;
+end $$;
+
+-- Older versions had fewer options; remove them so there is only one of each.
+drop function if exists public.admin_create_ambassador(text,text,text,text,text,text,text,text,int);
+drop function if exists public.admin_new_access_code(uuid,int);
+
 -- Admin: create an ambassador. Returns the new row (with codes).
+-- p_access_code: a code the admin picked; leave empty to make one.
 create or replace function public.admin_create_ambassador(
   p_full_name text, p_phone text default null, p_email text default null,
   p_city text default null, p_instagram text default null, p_tiktok text default null,
-  p_notes text default null, p_store_code text default null, p_valid_days int default null
+  p_notes text default null, p_store_code text default null, p_valid_days int default null,
+  p_access_code text default null
 ) returns public.ambassadors
 language plpgsql security definer set search_path = public as $$
 declare
   r public.ambassadors;
   sc text := public._clean_code(p_store_code);
-  ac text;
   base text;
 begin
   if not public.is_admin() then raise exception 'not_admin'; end if;
@@ -218,33 +286,29 @@ begin
     raise exception 'store_code_taken';
   end if;
 
-  loop
-    ac := public._random_code(8);
-    exit when not exists (select 1 from public.ambassadors where access_code = ac);
-  end loop;
-
   insert into public.ambassadors (full_name, phone, email, city, instagram, tiktok, notes,
                                   store_code, access_code, code_expires_at)
   values (trim(p_full_name), p_phone, p_email, p_city, p_instagram, p_tiktok, p_notes,
-          sc, ac, case when p_valid_days is null then null
+          sc, case when coalesce(p_access_code, '') = '' then public._new_access_code()
+                   else public._check_chosen_code(p_access_code) end,
+          case when p_valid_days is null then null
                        else now() + make_interval(days => p_valid_days) end)
   returning * into r;
   return r;
 end $$;
 
 -- Admin: give an ambassador a brand-new access code (old one stops working).
-create or replace function public.admin_new_access_code(p_id uuid, p_valid_days int default null)
+create or replace function public.admin_new_access_code(p_id uuid, p_valid_days int default null,
+                                                       p_access_code text default null)
 returns public.ambassadors
 language plpgsql security definer set search_path = public as $$
-declare r public.ambassadors; ac text;
+declare r public.ambassadors;
 begin
   if not public.is_admin() then raise exception 'not_admin'; end if;
-  loop
-    ac := public._random_code(8);
-    exit when not exists (select 1 from public.ambassadors where access_code = ac);
-  end loop;
   update public.ambassadors
-     set access_code = ac, code_status = 'active',
+     set access_code = case when coalesce(p_access_code, '') = '' then public._new_access_code()
+                            else public._check_chosen_code(p_access_code, p_id) end,
+         code_status = 'active',
          -- no days given: keep the current expiry date if it's still ahead, otherwise no expiry
          code_expires_at = case when p_valid_days is not null then now() + make_interval(days => p_valid_days)
                                 when code_expires_at > now() then code_expires_at
@@ -256,27 +320,65 @@ end $$;
 
 -- ---------------------------------------------------------------------
 -- Ambassador side. Every call passes the access code.
+-- Wrong codes are counted per device/network: after 10 wrong tries in
+-- 15 minutes, that network has to wait. This stops code guessing.
 -- ---------------------------------------------------------------------
+create table if not exists public.code_failures (
+  ip         text not null,
+  tried_at   timestamptz not null default now()
+);
+create index if not exists code_failures_ip_time on public.code_failures (ip, tried_at);
+alter table public.code_failures enable row level security;
+revoke all on public.code_failures from anon, authenticated;
+
+create or replace function public._client_ip() returns text
+language plpgsql stable as $$
+declare h json;
+begin
+  begin h := nullif(current_setting('request.headers', true), '')::json;
+  exception when others then h := null; end;
+  return coalesce(h ->> 'cf-connecting-ip', split_part(h ->> 'x-forwarded-for', ',', 1), 'unknown');
+end $$;
+
+-- Returns the ambassador, or a row with an empty id plus an error word in full_name.
+-- It never raises for a bad code, so the wrong-try counter is saved.
 create or replace function public._amb(p_code text) returns public.ambassadors
 language plpgsql security definer set search_path = public as $$
-declare r public.ambassadors;
+declare r public.ambassadors; v_ip text := public._client_ip();
 begin
+  if (select count(*) from public.code_failures
+       where ip = v_ip and tried_at > now() - interval '15 minutes') >= 10 then
+    r.full_name := 'too_many_tries'; return r;
+  end if;
   select * into r from public.ambassadors
-   where access_code = public._clean_code(p_code);
-  if not found then raise exception 'invalid_code'; end if;
-  if r.code_status <> 'active' then raise exception 'code_revoked'; end if;
+   where upper(access_code) = public._clean_code(p_code);
+  if not found then
+    insert into public.code_failures (ip) values (v_ip);
+    delete from public.code_failures where tried_at < now() - interval '1 day';
+    r := null; r.full_name := 'invalid_code'; return r;
+  end if;
+  if r.code_status <> 'active' then r.id := null; r.full_name := 'code_revoked'; return r; end if;
   if r.code_expires_at is not null and r.code_expires_at < now() then
-    raise exception 'code_expired';
+    r.id := null; r.full_name := 'code_expired'; return r;
   end if;
   update public.ambassadors set code_last_used = now() where id = r.id;
   return r;
 end $$;
+
+-- Old versions returned other types; remove them so the new ones can be created.
+drop function if exists public.amb_home(text);
+drop function if exists public.amb_task_done(text, uuid, boolean, text);
+drop function if exists public.amb_event_apply(text, uuid, text);
+drop function if exists public.amb_event_withdraw(text, uuid);
+drop function if exists public.amb_preorder(text, uuid, text, int, text);
+drop function if exists public.amb_preorder_cancel(text, uuid);
 
 -- Everything the ambassador's page needs, in one go.
 create or replace function public.amb_home(p_code text) returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare me public.ambassadors := public._amb(p_code);
 begin
+  if me.id is null then return jsonb_build_object('error', me.full_name); end if;
   return jsonb_build_object(
     'me', jsonb_build_object(
       'name', me.full_name, 'city', me.city, 'store_code', me.store_code,
@@ -330,9 +432,10 @@ end $$;
 
 create or replace function public.amb_task_done(p_code text, p_task uuid, p_done boolean,
                                                 p_proof_link text default null)
-returns void language plpgsql security definer set search_path = public as $$
+returns jsonb language plpgsql security definer set search_path = public as $$
 declare me public.ambassadors := public._amb(p_code);
 begin
+  if me.id is null then return jsonb_build_object('error', me.full_name); end if;
   if p_done then
     if not exists (select 1 from public.tasks where id = p_task and is_open) then
       raise exception 'task_closed';
@@ -344,17 +447,19 @@ begin
   else
     delete from public.task_done where task_id = p_task and ambassador_id = me.id;
   end if;
+  return jsonb_build_object('ok', true);
 end $$;
 
 -- Apply to an event, or accept an admin's suggestion.
 create or replace function public.amb_event_apply(p_code text, p_event uuid,
                                                   p_message text default null)
-returns text language plpgsql security definer set search_path = public as $$
+returns jsonb language plpgsql security definer set search_path = public as $$
 declare me public.ambassadors := public._amb(p_code); cur text;
 begin
+  if me.id is null then return jsonb_build_object('error', me.full_name); end if;
   select status into cur from public.event_people
    where event_id = p_event and ambassador_id = me.id;
-  if cur in ('assigned','declined') then return cur; end if;
+  if cur in ('assigned','declined') then return jsonb_build_object('ok', true, 'status', cur); end if;
   if cur is null and not exists (select 1 from public.events where id = p_event and is_open) then
     raise exception 'event_closed';
   end if;
@@ -364,22 +469,25 @@ begin
   do update set status = 'applied',
                 message = coalesce(excluded.message, public.event_people.message),
                 updated_at = now();
-  return 'applied';
+  return jsonb_build_object('ok', true, 'status', 'applied');
 end $$;
 
 create or replace function public.amb_event_withdraw(p_code text, p_event uuid)
-returns void language plpgsql security definer set search_path = public as $$
+returns jsonb language plpgsql security definer set search_path = public as $$
 declare me public.ambassadors := public._amb(p_code);
 begin
+  if me.id is null then return jsonb_build_object('error', me.full_name); end if;
   delete from public.event_people
    where event_id = p_event and ambassador_id = me.id and status in ('applied','suggested');
+  return jsonb_build_object('ok', true);
 end $$;
 
 create or replace function public.amb_preorder(p_code text, p_product uuid, p_size text,
                                                p_quantity int default 1, p_note text default null)
-returns uuid language plpgsql security definer set search_path = public as $$
+returns jsonb language plpgsql security definer set search_path = public as $$
 declare me public.ambassadors := public._amb(p_code); new_id uuid;
 begin
+  if me.id is null then return jsonb_build_object('error', me.full_name); end if;
   if not exists (select 1 from public.products
                   where id = p_product and is_visible and stage = 'preorder') then
     raise exception 'not_preorderable';
@@ -388,15 +496,17 @@ begin
   values (p_product, me.id, nullif(trim(p_size), ''), greatest(1, least(coalesce(p_quantity, 1), 50)),
           nullif(trim(p_note), ''))
   returning id into new_id;
-  return new_id;
+  return jsonb_build_object('ok', true, 'id', new_id);
 end $$;
 
 create or replace function public.amb_preorder_cancel(p_code text, p_id uuid)
-returns void language plpgsql security definer set search_path = public as $$
+returns jsonb language plpgsql security definer set search_path = public as $$
 declare me public.ambassadors := public._amb(p_code);
 begin
+  if me.id is null then return jsonb_build_object('error', me.full_name); end if;
   update public.preorders set status = 'cancelled'
    where id = p_id and ambassador_id = me.id and status = 'requested';
+  return jsonb_build_object('ok', true);
 end $$;
 
 -- Link a sale to the ambassador who owns the store code.
@@ -415,8 +525,9 @@ create trigger sales_link_ambassador before insert or update of store_code on pu
 revoke execute on all functions in schema public from public, anon, authenticated;
 grant execute on function public.is_admin() to authenticated;
 grant execute on function public._clean_code(text) to anon, authenticated;
-grant execute on function public.admin_create_ambassador(text,text,text,text,text,text,text,text,int) to authenticated;
-grant execute on function public.admin_new_access_code(uuid,int) to authenticated;
+grant execute on function public.admin_create_ambassador(text,text,text,text,text,text,text,text,int,text) to authenticated;
+grant execute on function public.admin_new_access_code(uuid,int,text) to authenticated;
+grant execute on function public.admin_suggest_codes(int) to authenticated;
 grant execute on function public.amb_home(text) to anon, authenticated;
 grant execute on function public.amb_task_done(text,uuid,boolean,text) to anon, authenticated;
 grant execute on function public.amb_event_apply(text,uuid,text) to anon, authenticated;

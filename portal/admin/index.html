@@ -47,7 +47,8 @@ let D = { ambassadors: [], tasks: [], task_done: [], events: [], event_people: [
 // ---------- helpers ----------
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const safeUrl = (u) => /^https?:\/\//i.test(u || "") ? u : "";
-const pretty = (c) => c ? c.slice(0, 4) + "-" + c.slice(4) : "";
+// Old-style codes (ABCDEFGH) are shown as ABCD-EFGH; fun codes (BigBird1234) as they are.
+const pretty = (c) => !c ? "" : /^[A-Z0-9]{8}$/.test(c) && !/[a-z]/.test(c) ? c.slice(0, 4) + "-" + c.slice(4) : c;
 const clean = (c) => String(c || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
 const fmt = (d, time = true) => d ? new Date(d.length === 10 ? d + "T12:00:00+02:00" : d).toLocaleString("en-GB", { timeZone: TZ, day: "numeric", month: "short", year: "numeric", ...(time && d.length > 10 ? { hour: "2-digit", minute: "2-digit" } : {}) }) : "";
 const toLocalInput = (iso) => iso ? new Date(new Date(iso).getTime() + 2 * 3600e3).toISOString().slice(0, 16) : ""; // Harare is UTC+2 all year
@@ -56,7 +57,7 @@ const todayHarare = () => new Date(Date.now() + 2 * 3600e3).toISOString().slice(
 const money = (n, cur) => n == null ? "" : new Intl.NumberFormat("en", { style: "currency", currency: cur || "USD" }).format(n);
 const byId = (list, id) => list.find((x) => x.id === id);
 function toast(msg, bad) { const t = document.createElement("div"); t.className = "toast" + (bad ? " bad" : ""); t.textContent = msg; t.setAttribute("role", "status"); document.body.appendChild(t); setTimeout(() => t.remove(), 3500); }
-const ERR = { store_code_taken: "That store code is already used by another ambassador.", name_required: "Add the ambassador's name.", not_admin: "This login isn't on the admin list.", "duplicate key": "That already exists." };
+const ERR = { store_code_taken: "That store code is already used by another ambassador.", name_required: "Add the ambassador's name.", not_admin: "This login isn't on the admin list.", "duplicate key": "That already exists.", code_taken: "Another ambassador already has that access code. Pick a different one.", code_length: "Access codes need 8 to 30 letters and numbers.", code_mix: "Access codes need both letters and numbers, like BigBird1234." };
 const errText = (e) => { const m = (e && e.message) || String(e); for (const k in ERR) if (m.includes(k)) return ERR[k]; return m; };
 const ok = ({ data, error }) => { if (error) throw error; return data; };
 function openDlg(title, html) { document.getElementById("dlgTitle").textContent = title; document.getElementById("dlgBody").innerHTML = html; if (!dlg.open) dlg.showModal(); dlg.querySelector(".dbody").scrollTop = 0; }
@@ -186,14 +187,32 @@ function vAmb(v) {
   };
   draw(); document.getElementById("q").oninput = (e) => draw(e.target.value);
 }
+// Access code picker: fun suggestions to tap, a shuffle button, or type your own.
+function codePickerHtml() {
+  return `<div style="grid-column:1/-1;margin-bottom:12px"><label style="margin-bottom:6px">Access code *<input name="access_code" id="acode" required autocomplete="off" spellcheck="false" style="font-weight:800;font-size:20px">
+    <span class="hint">Tap a suggestion, press Shuffle for more, or type your own (letters and numbers, at least 8).</span></label>
+    <div class="row" id="sugs"><span class="spin"></span></div></div>`;
+}
+async function fillSuggestions(first) {
+  const box = document.getElementById("sugs"), inp = document.getElementById("acode");
+  box.innerHTML = '<span class="spin"></span>';
+  try {
+    const list = ok(await db.rpc("admin_suggest_codes", { p_count: 6 }));
+    if (first && !inp.value) inp.value = list[0];
+    box.innerHTML = list.map((c) => `<button type="button" class="btn sm" data-sug="${esc(c)}">${esc(c)}</button>`).join("") + `<button type="button" class="btn sm" id="shuf">↻ Shuffle</button>`;
+    box.querySelectorAll("[data-sug]").forEach((b) => b.onclick = () => { inp.value = b.dataset.sug; });
+    document.getElementById("shuf").onclick = () => fillSuggestions(false);
+  } catch (e) { box.innerHTML = `<span class="small mute">Couldn't load suggestions. ${esc(errText(e))}</span>`; }
+}
 function addAmbassador() {
   const extra = [{ k: "store_code", label: "Store code", hint: "Leave empty to make one from their name. Letters and numbers only." }, { k: "valid", label: "Access code lasts", type: "select", options: VALIDITY }];
-  openDlg("Add ambassador", `<form id="f"><div class="grid2">${fieldsHtml([...AMB_FIELDS.slice(0, 6), ...extra, AMB_FIELDS[6]])}</div><button class="btn g">Create account and code</button></form>`);
+  openDlg("Add ambassador", `<form id="f"><div class="grid2">${fieldsHtml([...AMB_FIELDS.slice(0, 6), ...extra])}${codePickerHtml()}${fieldsHtml([AMB_FIELDS[6]])}</div><button class="btn g">Create account and code</button></form>`);
+  fillSuggestions(true);
   document.getElementById("f").onsubmit = async (e) => {
     e.preventDefault(); const f = e.target, v = readForm(f, [...AMB_FIELDS, ...extra]);
     const a = await busy(f.querySelector("button"), async () => ok(await db.rpc("admin_create_ambassador", {
       p_full_name: v.full_name, p_phone: v.phone, p_email: v.email, p_city: v.city, p_instagram: v.instagram, p_tiktok: v.tiktok,
-      p_notes: v.notes, p_store_code: v.store_code, p_valid_days: v.valid ? +v.valid : null })), "Ambassador created");
+      p_notes: v.notes, p_store_code: v.store_code, p_valid_days: v.valid ? +v.valid : null, p_access_code: f.access_code.value.trim() || null })), "Ambassador created");
     await loadAll(); render(); showInvite(a.id ? a : byId(D.ambassadors, a.id), true);
   };
 }
@@ -227,7 +246,7 @@ function manageAmbassador(id) {
       <button class="btn sm" id="newc">Make a new code</button></div>
       <div class="row" style="margin-top:10px"><span class="small mute">Renew:</span>
         <button class="btn sm" data-renew="30">+30 days</button><button class="btn sm" data-renew="90">+90 days</button><button class="btn sm" data-renew="365">+1 year</button><button class="btn sm" data-renew="0">Never expires</button></div>
-      <p class="small mute" style="margin-top:8px">Revoke switches the code off straight away. “Make a new code” replaces it, so the old one stops working.</p></div>
+      <p class="small mute" style="margin-top:8px">Revoke switches the code off straight away. “Make a new code” lets you pick a new one, and the old one stops working.</p></div>
     <div class="card" style="margin-bottom:14px"><h3>Activity</h3>
       <p class="small">Store code <b>${esc(a.store_code)}</b> · ${salesQty(id)} pieces sold · ${D.task_done.filter((t) => t.ambassador_id === id).length} tasks done</p>
       ${evs.length ? `<p class="small">${evs.map((p) => `${esc(p.ev.title)} <span class="pill">${p.status}</span>`).join("<br>")}</p>` : `<p class="small mute">No events yet.</p>`}
@@ -238,10 +257,15 @@ function manageAmbassador(id) {
   document.getElementById("show").onclick = () => showInvite(a);
   const rv = document.getElementById("revoke"); if (rv) rv.onclick = (e) => { if (confirm(`Revoke ${a.full_name}'s code? They'll be logged out straight away.`)) upd(e.currentTarget, { code_status: "revoked" }, "Code revoked"); };
   const rs = document.getElementById("restore"); if (rs) rs.onclick = (e) => upd(e.currentTarget, { code_status: "active" }, "Code switched back on");
-  document.getElementById("newc").onclick = async (e) => {
-    if (!confirm("Make a new code? The old code stops working straight away.")) return;
-    const r = await busy(e.currentTarget, async () => ok(await db.rpc("admin_new_access_code", { p_id: id, p_valid_days: null })), "New code made");
-    await loadAll(); render(); showInvite(r);
+  document.getElementById("newc").onclick = () => {
+    openDlg("New code for " + a.full_name, `<form id="nc"><div class="grid2">${codePickerHtml()}</div>
+      <p class="small mute">The old code stops working as soon as you save.</p>
+      <div class="row"><button class="btn g">Save new code</button><button type="button" class="btn" id="back">Back</button></div></form>`);
+    fillSuggestions(true);
+    document.getElementById("back").onclick = () => manageAmbassador(id);
+    document.getElementById("nc").onsubmit = async (e) => { e.preventDefault();
+      const r = await busy(e.target.querySelector("button"), async () => ok(await db.rpc("admin_new_access_code", { p_id: id, p_valid_days: null, p_access_code: e.target.access_code.value.trim() || null })), "New code saved");
+      await loadAll(); render(); showInvite(r); };
   };
   dlg.querySelectorAll("[data-renew]").forEach((b) => b.onclick = () => {
     const d = +b.dataset.renew;

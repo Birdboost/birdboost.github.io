@@ -12,7 +12,7 @@
 <style>
 .login{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(120% 90% at 80% 0%,#163d17 0,#0b0b0b 60%)}
 .login .box{width:min(440px,100%)}
-.login .codein{font:800 26px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.18em;text-align:center;text-transform:uppercase;padding:16px}
+.login .codein{font:800 24px Inter,system-ui,sans-serif;letter-spacing:.04em;text-align:center;padding:16px}
 .hello{padding:26px 0 6px;border-bottom:6px solid var(--g);background:radial-gradient(120% 90% at 80% 0%,#163d17 0,#0b0b0b 65%)}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}
 .stat{background:#111;border:1px solid var(--line);border-radius:14px;padding:12px 14px}
@@ -64,6 +64,7 @@ const ERR = {
   invalid_code: "That code doesn't match. Check it and try again, or ask a Birdboost admin.",
   code_revoked: "This access code has been switched off. Ask a Birdboost admin for a new one.",
   code_expired: "This access code has expired. Ask a Birdboost admin to renew it.",
+  too_many_tries: "Too many wrong codes. Wait 15 minutes, then try again.",
   event_closed: "Applications for this event are closed.",
   task_closed: "This task is closed.",
   not_preorderable: "This piece isn't open for pre-orders right now.",
@@ -74,6 +75,7 @@ const isCodeErr = (e) => /invalid_code|code_revoked|code_expired/.test((e && e.m
 async function rpc(fn, args = {}) {
   const { data: d, error } = await db.rpc(fn, { p_code: code, ...args });
   if (error) { if (isCodeErr(error)) { logout(errText(error)); } throw error; }
+  if (d && d.error) { const err = new Error(d.error); if (isCodeErr(err)) logout(errText(err)); throw err; }
   return d;
 }
 async function load() { data = await rpc("amb_home"); }
@@ -85,21 +87,17 @@ function showLogin(msg = "") {
     <h1 style="margin:22px 0 8px">The <span style="color:var(--g)">Flock</span></h1>
     <p class="mute">Ambassadors only. Enter the access code a Birdboost admin gave you.</p>
     <form id="lf" class="card" style="margin-top:18px">
-      <label>Access code<input id="ci" class="codein" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" placeholder="ABCD-EFGH" maxlength="12" required></label>
+      <label>Access code<input id="ci" class="codein" autocomplete="one-time-code" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="e.g. BigBird1234" maxlength="40" required></label>
       <p id="lerr" role="alert" style="color:var(--bad);min-height:1.2em">${esc(msg)}</p>
       <button class="btn g" style="width:100%">Enter</button>
     </form>
     <p class="small mute" style="margin-top:16px">Not an ambassador yet? <a href="../">Apply to join the Flock</a>.</p>
   </div></main>`;
   const ci = document.getElementById("ci");
-  ci.addEventListener("input", () => {
-    const raw = ci.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8);
-    ci.value = raw.length > 4 ? raw.slice(0, 4) + "-" + raw.slice(4) : raw;
-  });
   document.getElementById("lf").onsubmit = async (e) => {
     e.preventDefault();
     const btn = e.target.querySelector("button"); btn.disabled = true; btn.innerHTML = '<span class="spin"></span>';
-    code = ci.value.replace(/[^A-Z0-9]/gi, "").toUpperCase();
+    code = ci.value.replace(/[^A-Z0-9]/gi, "");
     try { await load(); localStorage.setItem(KEY, code); render(); }
     catch (err) { code = ""; document.getElementById("lerr").textContent = errText(err); btn.disabled = false; btn.textContent = "Enter"; }
   };
