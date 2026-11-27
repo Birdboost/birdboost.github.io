@@ -196,6 +196,7 @@ footer{text-align:center;color:var(--mute);font-size:14px}
         <div class="fld"><label for="city">City or town</label><input id="city" name="city" required></div>
         <div class="fld"><label for="phone">Your WhatsApp number</label><input id="phone" name="whatsapp" type="tel" inputmode="tel" required></div>
       </div>
+      <div class="fld"><label for="email">Email address</label><input id="email" name="email" type="email" inputmode="email" autocomplete="email" required placeholder="you@example.com"></div>
       <div class="fld"><label for="handles">Instagram and TikTok handles</label><input id="handles" name="handles" placeholder="@yourname on both" required></div>
       <div class="fld"><label>Your size</label><div class="sizes" id="sizes"><label><input type="radio" name="size" value="XS"><span>XS</span></label><label><input type="radio" name="size" value="S"><span>S</span></label><label><input type="radio" name="size" value="M"><span>M</span></label><label><input type="radio" name="size" value="L"><span>L</span></label><label><input type="radio" name="size" value="XL"><span>XL</span></label><label><input type="radio" name="size" value="XXL"><span>XXL</span></label></div></div>
       <div class="fld"><label for="why">Why Birdboost? Why you?</label><textarea id="why" name="why" required placeholder="A few lines is perfect."></textarea></div>
@@ -311,7 +312,7 @@ const ageState = () => {
 };
 $('age').addEventListener('input', ageState);
 
-const fields = ['name','age','city','phone','handles','why','pname','pphone'];
+const fields = ['name','age','city','phone','email','handles','why','pname','pphone'];
 try { const saved = JSON.parse(localStorage.getItem('bb-amb')||'{}'); fields.forEach(k=>{ if(saved[k]) $(k).value = saved[k]; }); ageState(); } catch(e){}
 $('f').addEventListener('input', () => { try { const o={}; fields.forEach(k=>o[k]=$(k).value); localStorage.setItem('bb-amb', JSON.stringify(o)); } catch(e){} });
 
@@ -320,15 +321,16 @@ $('f').addEventListener('submit', e => {
   const a = ageState(), err = $('err'); err.textContent = '';
   const v = k => $(k).value.trim();
   const size = (document.querySelector('input[name=size]:checked')||{}).value || '';
-  const miss = [['name','your name'],['age','your age'],['city','your city'],['phone','your WhatsApp number'],['handles','your handles'],['why','why Birdboost']].filter(([k])=>!v(k)).map(x=>x[1]);
+  const miss = [['name','your name'],['age','your age'],['city','your city'],['phone','your WhatsApp number'],['email','your email address'],['handles','your handles'],['why','why Birdboost']].filter(([k])=>!v(k)).map(x=>x[1]);
   if (!size) miss.push('your size');
+  if (!miss.length && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v('email'))) { err.textContent = 'Please check your email address. It should look like name@example.com.'; return; }
   if (miss.length) { err.textContent = 'Please add ' + miss.join(', ') + '.'; return; }
   if (a < 16) { err.textContent = 'Ambassadors need to be 16 or older for this round.'; $('young').scrollIntoView({block:'center'}); return; }
   if (a < 18 && (!v('pname') || !v('pphone') || !$('pok').checked)) { err.textContent = 'Please add your parent or guardian\'s name and number, and tick that they\'re happy for you to apply.'; return; }
   if (!$('agree').checked) { err.textContent = 'Please tick that you can make the shoot day and post twice a week.'; return; }
   const lines = [
     'BIRDBOOST AMBASSADOR APPLICATION',
-    'Name: ' + v('name'), 'Age: ' + a, 'City: ' + v('city'), 'WhatsApp: ' + v('phone'),
+    'Name: ' + v('name'), 'Age: ' + a, 'City: ' + v('city'), 'WhatsApp: ' + v('phone'), 'Email: ' + v('email'),
     'Handles: ' + v('handles'), 'Size: ' + size
   ];
   if (a < 18) lines.push('Parent or guardian: ' + v('pname') + ', ' + v('pphone') + ' (knows I am applying)');
