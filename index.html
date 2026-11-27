@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Birdboost · Enter the Flock</title>
-<meta name="description" content="Birdboost is faith-driven clothing and community from Zimbabwe. One bird is you. The flock is us. The nest is where the pieces live.">
+<title>Birdboost · Faith-driven clothing from Zimbabwe</title>
+<meta name="description" content="Birdboost is faith-driven clothing from Zimbabwe. The Righteous tee is out now in green, nude and grey.">
 <meta name="theme-color" content="#0a0a0a">
-<meta property="og:title" content="Birdboost · Enter the Flock">
-<meta property="og:description" content="Faith-driven clothing and community from Zimbabwe.">
+<meta property="og:title" content="Birdboost · Made on purpose">
+<meta property="og:description" content="Faith-driven clothing from Zimbabwe. The Righteous tee, out now.">
 <meta property="og:image" content="tees.jpg">
 <link rel="icon" href="assets/logo.png">
 <script>
@@ -21,40 +21,57 @@ else if(/[?&](src|utm_source|utm_campaign|ref|c)=/.test(q)||h==='#apply')locatio
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/bb.css">
 <style>
-/* ---------- opening ---------- */
-.open{position:relative;min-height:100svh;display:grid;align-items:center;padding:120px 0 70px;overflow:hidden;isolation:isolate}
-.open .sky{position:absolute;inset:0;z-index:-2;background:radial-gradient(70% 55% at 72% 62%,#14381a 0,#0b160c 38%,transparent 70%),radial-gradient(60% 40% at 20% 100%,#0f2410 0,transparent 70%),var(--bg)}
-.open .word{position:absolute;left:50%;top:50%;z-index:-1;transform:translate(-50%,-50%);font:400 clamp(120px,27vw,420px)/.8 var(--display);letter-spacing:.01em;color:transparent;-webkit-text-stroke:1px #ffffff12;white-space:nowrap;pointer-events:none;user-select:none}
-.open .horizon{position:absolute;left:0;right:0;bottom:22%;height:1px;background:linear-gradient(90deg,transparent,#3fae3a55 30%,#3fae3a55 70%,transparent);z-index:-1;transform-origin:center;animation:hz 2.2s var(--ease) .2s both}
-@keyframes hz{from{transform:scaleX(0)}}
-.ogrid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:clamp(24px,5vw,70px);align-items:center}
-.open h1{font:400 clamp(56px,7.6vw,124px)/.9 var(--display);text-transform:uppercase;margin:0 0 26px}
+/* ---------- opening: the brand and the clothes, first ---------- */
+.open{position:relative;min-height:100svh;display:grid;align-items:center;padding:110px 0 64px;overflow:hidden;isolation:isolate}
+.open .sky{position:absolute;inset:0;z-index:-2;background:radial-gradient(70% 55% at 72% 58%,#14381a 0,#0b160c 38%,transparent 70%),radial-gradient(60% 40% at 20% 100%,#0f2410 0,transparent 70%),var(--bg)}
+.ogrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,5vw,70px);align-items:center}
+.eyebrow{font:600 12px var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--g2);margin-bottom:20px;animation:fade 1s var(--ease) .1s both}
+.open h1{font:400 clamp(64px,8.6vw,140px)/.88 var(--display);text-transform:uppercase;margin:0 0 24px}
 .open h1 .ln{display:block;overflow:hidden;padding-bottom:.04em}
-.open h1 .ln>span{display:inline-block;animation:up 1.2s var(--ease) both}
-.open h1 .ln:nth-child(2)>span{animation-delay:.12s}.open h1 .ln:nth-child(3)>span{animation-delay:.24s}
-.open h1 .serif{font-size:.86em;color:var(--g2);padding-right:.1em}
+.open h1 .ln>span{display:inline-block;animation:up 1.1s var(--ease) both}
+.open h1 .ln:nth-child(2)>span{animation-delay:.1s}
+.open h1 .serif{font-size:.84em;color:var(--g2);padding-right:.1em}
 @keyframes up{from{transform:translateY(105%)}}
-.open .sub{font-size:clamp(17px,1.5vw,20px);color:#cfcfc8;max-width:30em;animation:fade 1.2s var(--ease) .6s both}
-.open .ctas{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px;animation:fade 1.2s var(--ease) .8s both}
-@keyframes fade{from{opacity:0;transform:translateY(16px)}}
-.fan{position:relative;height:clamp(360px,46vw,560px);animation:fade 1.6s var(--ease) .35s both}
-.fan figure{position:absolute;margin:0;width:min(64%,370px);aspect-ratio:333/385;border-radius:20px;overflow:hidden;box-shadow:0 40px 80px -20px #000,0 0 0 1px #ffffff14;background:#111}
+.open .sub{font-size:clamp(17px,1.4vw,19px);color:#cfcfc8;max-width:28em;animation:fade 1.1s var(--ease) .5s both}
+.open .ctas{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px;animation:fade 1.1s var(--ease) .65s both}
+@keyframes fade{from{opacity:0;transform:translateY(14px)}}
+.fan{position:relative;height:clamp(380px,44vw,580px);animation:fade 1.4s var(--ease) .3s both}
+.fan figure{position:absolute;margin:0;width:min(62%,370px);aspect-ratio:333/385;border-radius:20px;overflow:hidden;box-shadow:0 40px 80px -20px #000,0 0 0 1px #ffffff14;background:#111}
 .fan figure img{width:100%;height:100%;object-fit:cover}
 .fan .f1{left:50%;top:50%;transform:translate(-50%,-46%);z-index:3}
-.fan .f2{left:4%;top:50%;transform:translate(0,-42%) rotate(-7deg) scale(.86);z-index:2;filter:brightness(.7)}
-.fan .f3{right:4%;top:50%;transform:translate(0,-40%) rotate(7deg) scale(.86);z-index:1;filter:brightness(.6)}
-.fan figcaption{position:absolute;left:14px;bottom:12px;font:600 12px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:#fff;text-shadow:0 1px 8px #000}
-.cue{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;font:600 11px var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--mute);text-decoration:none;animation:fade 1s 1.6s both}
-.cue i{width:1px;height:44px;background:linear-gradient(var(--mute),transparent);animation:drip 2.4s ease-in-out infinite}
-@keyframes drip{0%{transform:scaleY(0);transform-origin:top}45%{transform:scaleY(1);transform-origin:top}55%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+.fan .f2{left:3%;top:50%;transform:translate(0,-42%) rotate(-7deg) scale(.86);z-index:2;filter:brightness(.7)}
+.fan .f3{right:3%;top:50%;transform:translate(0,-40%) rotate(7deg) scale(.86);z-index:1;filter:brightness(.6)}
+.fan figcaption,.swipe figcaption{position:absolute;left:14px;bottom:12px;font:600 12px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:#fff;text-shadow:0 1px 8px #000}
+.swipe{display:none}
 @supports (animation-timeline:scroll()){
-  .open .word{animation:drift linear both;animation-timeline:scroll();animation-range:0 100vh}
-  @keyframes drift{to{transform:translate(-50%,-30%)}}
   .fan{animation:lift linear both;animation-timeline:scroll();animation-range:0 100vh}
-  @keyframes lift{to{transform:translateY(-12%)}}
+  @keyframes lift{to{transform:translateY(-10%)}}
 }
 
-/* ---------- one bird ---------- */
+/* ---------- the strip ---------- */
+.strip{border-block:1px solid var(--line)}
+.strip ul{list-style:none;margin:0 auto;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.strip li{padding:20px 0;display:flex;flex-direction:column;gap:2px;font-size:14px;color:var(--mute)}
+.strip li+li{padding-left:24px;border-left:1px solid var(--line)}
+.strip b{font:600 15px var(--sans);color:var(--ink)}
+
+/* ---------- the collection ---------- */
+.coll .grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:clamp(30px,6vw,90px);align-items:center}
+.stage{position:relative;aspect-ratio:333/385;max-width:520px;border-radius:24px;overflow:hidden;background:#111;box-shadow:0 30px 70px -30px #000}
+.stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.03);transition:opacity .6s var(--ease),transform 1.2s var(--ease)}
+.stage img.on{opacity:1;transform:none}
+.coll .h2{font-size:clamp(46px,6.4vw,96px)}
+.price{font:400 44px/1 var(--display);margin:6px 0 18px}
+.price small{font:400 15px var(--sans);color:var(--mute);margin-left:8px}
+.sw{display:flex;gap:10px;margin:22px 0 8px}
+.sw button{display:inline-flex;align-items:center;gap:10px;min-height:48px;padding:0 18px 0 8px;border-radius:999px;border:1px solid #ffffff26;background:none;color:var(--ink);font:600 14px var(--sans);cursor:pointer;transition:border-color .2s}
+.sw button i{width:30px;height:30px;border-radius:50%;background:var(--c);box-shadow:inset 0 0 0 1px #ffffff30}
+.sw button[aria-pressed=true]{border-color:var(--ink)}
+.facts{list-style:none;padding:0;margin:22px 0 28px;border-top:1px solid var(--line)}
+.facts li{display:flex;justify-content:space-between;gap:16px;padding:13px 0;border-bottom:1px solid var(--line);font-size:15px}
+.facts span{color:var(--mute)}
+
+/* ---------- story ---------- */
 .one .grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(30px,6vw,96px);align-items:center}
 .one figure{margin:0;position:relative}
 .one .frame{aspect-ratio:4/5;max-width:440px;margin-left:auto;background:#111}
@@ -63,153 +80,195 @@ else if(/[?&](src|utm_source|utm_campaign|ref|c)=/.test(q)||h==='#apply')locatio
 blockquote{margin:34px 0 0;padding:0 0 0 22px;border-left:1px solid var(--g);font:400 clamp(24px,2.4vw,32px)/1.25 var(--serif);font-style:italic;color:#ecebe4;max-width:22em}
 blockquote cite{display:block;margin-top:12px;font:600 12px var(--sans);font-style:normal;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
 
-/* ---------- the flock ---------- */
+/* ---------- identity band ---------- */
+.ident{background:var(--g);color:#06140a;overflow:hidden;padding:clamp(70px,10vw,140px) 0}
+.ident .wrap{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,.7fr);gap:40px;align-items:center}
+.ident h2{font:400 clamp(64px,11vw,170px)/.86 var(--display);text-transform:uppercase;margin:0 0 20px}
+.ident p{font-size:clamp(17px,1.4vw,19px);max-width:30em;color:#0b2a0d;margin:0}
+.ident .logo{width:100%;max-width:300px;height:auto;aspect-ratio:30/32;justify-self:end;color:#06140a;opacity:.9}
+
+/* ---------- community ---------- */
 .flockband{background:radial-gradient(80% 70% at 50% 0%,#14361a 0,#0a1a0c 50%,var(--bg) 100%);overflow:hidden}
 .flockband .h2{max-width:11em}
-.ways{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:56px}
-.way{position:relative;border:1px solid #ffffff1a;border-radius:var(--r);padding:28px 24px 26px;background:#0a0a0a66;display:flex;flex-direction:column;gap:10px;min-height:250px;text-decoration:none;transition:border-color .3s,transform .4s var(--ease)}
+.ways{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:50px}
+.way{position:relative;border:1px solid #ffffff1a;border-radius:var(--r);padding:28px 24px 26px;background:#0a0a0a66;display:flex;flex-direction:column;gap:10px;min-height:230px;text-decoration:none;transition:border-color .3s,transform .4s var(--ease)}
 a.way:hover{border-color:var(--g);transform:translateY(-4px)}
 .way .n{font:400 22px var(--serif);font-style:italic;color:var(--g2)}
-.way h3{font:400 34px/1 var(--display);text-transform:uppercase}
+.way h3{font:400 32px/1 var(--display);text-transform:uppercase;overflow-wrap:anywhere}
 .way p{color:#cfcfc8;margin:0}
 .way .go{margin-top:auto;font-weight:700;font-size:14px;color:var(--ink)}
+.promo-wrap{margin-top:40px}
 
 /* ---------- the nest ---------- */
 .nestch{text-align:center}
 .nestch .lede{margin:0 auto}
-.nestart{position:relative;max-width:720px;margin:20px auto 0}
+.nestart{position:relative;max-width:640px;margin:10px auto 0}
 .nestart svg{width:100%;height:auto;overflow:visible}
 .nestart .rim{position:absolute;left:30%;right:30%;top:30%;height:2px}
 .nestart .glow{position:absolute;left:20%;right:20%;top:35%;height:40%;background:radial-gradient(closest-side,#3fae3a30,transparent);filter:blur(10px)}
-.pieces{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:60px;text-align:left}
-.piece{text-decoration:none;display:block}
-.piece .ph{aspect-ratio:333/385;border-radius:16px;overflow:hidden;background:#111}
-.piece img{width:100%;height:100%;object-fit:cover;transition:transform 1.2s var(--ease)}
-.piece:hover img{transform:scale(1.05)}
-.piece .t{display:flex;justify-content:space-between;gap:10px;margin-top:12px;font-weight:600}
-.piece .t span{color:var(--mute);font-weight:400}
-
-/* ---------- the journey ---------- */
-.journey .grid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(30px,6vw,90px)}
-.steps{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
-.steps li{display:grid;grid-template-columns:150px minmax(0,1fr);gap:20px;padding:24px 0;border-bottom:1px solid var(--line)}
-.steps b{font:400 26px/1.05 var(--display);text-transform:uppercase;color:var(--g)}
-.steps h3{font:700 18px var(--sans);margin:0 0 4px}
-.steps p{margin:0;color:var(--mute)}
-.count{display:flex;gap:10px;margin-top:30px;flex-wrap:wrap}
-.count div{min-width:84px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;text-align:center}
-.count b{display:block;font:400 40px/1 var(--display)}
-.count span{font-size:12px;color:var(--mute)}
 
 @media(max-width:860px){
-  .ogrid,.one .grid,.journey .grid{grid-template-columns:minmax(0,1fr)}
-  .open{padding-top:130px}
-  .fan{height:340px;order:2}
-  .one .frame{margin:0 auto}
-  .one figcaption{margin:12px auto 0}
-  .ways,.pieces{grid-template-columns:minmax(0,1fr)}
-  .pieces{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-  .piece .t{flex-direction:column;gap:0;font-size:14px}
-  .way{min-height:0}
+  .ogrid,.one .grid,.coll .grid,.ident .wrap{grid-template-columns:minmax(0,1fr)}
+  .open{min-height:0;padding:92px 0 36px;align-items:start}
+  .open h1{font-size:clamp(58px,17vw,96px);margin-bottom:16px}
+  .eyebrow{margin-bottom:14px}
+  .fan{display:none}
+  .swipe{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;margin:28px -20px 0;padding:0 20px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .swipe::-webkit-scrollbar{display:none}
+  .swipe a{position:relative;flex:0 0 78%;scroll-snap-align:center;aspect-ratio:333/385;border-radius:18px;overflow:hidden;background:#111;box-shadow:0 0 0 1px #ffffff14}
+  .swipe img{width:100%;height:100%;object-fit:cover}
+  .open .ctas{margin-top:22px}
+  .swipe{margin-top:26px}
+  .open .ctas .btn{flex:1 1 100%}
+  .strip ul{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .strip li{padding:16px 0}
+  .strip li+li{padding-left:0;border-left:0}
+  .strip li:nth-child(even){padding-left:18px;border-left:1px solid var(--line)}
+  .strip li:nth-child(n+3){border-top:1px solid var(--line)}
+  .stage{max-width:none}
+  .coll .info{order:2}
+  .sw{flex-wrap:wrap}
+  .coll .btn{width:100%}
+  .one .frame{margin:0 auto;max-width:none}
+  .one figcaption{margin:12px 0 0}
+  .ident .logo{display:none}
+  .ways{grid-template-columns:minmax(0,1fr);margin-top:32px;gap:12px}
+  .way{min-height:0;padding:22px 20px}
 }
-@media(max-width:520px){.steps li{grid-template-columns:minmax(0,1fr);gap:6px}.cue{display:none}.fan figure{width:58%}}
 </style>
 </head>
-<body class="grain" data-bird="solo" data-bird-delay="1100">
-<header class="nav"><div class="announce" data-until="2026-12-06T23:59:00+02:00">Only 10 ambassador spots. Applications close 6 December. <a href="flock/">Join the Flock</a></div>
+<body class="grain" data-bird="solo" data-bird-delay="1400">
+<header class="nav">
   <div class="in">
     <a class="brand" href="./" aria-label="Birdboost home"><span class="logo" aria-hidden="true"></span><b>BIRDBOOST</b></a>
-    <nav aria-label="Main"><ul class="links" id="links"><li><a href="./" aria-current="page">Home</a></li><li><a href="nest/">Shop</a></li><li><a href="#story">The Story</a></li><li><a href="#flock">The Flock</a></li><li><a href="flock/">Ambassadors</a></li><li><a href="#contact">Contact</a></li></ul></nav>
-    <div class="navr"><span data-me-slot></span><a class="cartbtn" href="nest/#cart" aria-label="Cart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 016 0"/></svg><b data-cart-count></b></a><button class="menubtn" type="button" aria-expanded="false" aria-controls="links" aria-label="Menu"><i></i></button></div>
+    <nav aria-label="Main" class="menu" id="menu"><ul class="links"><li><a href="./" aria-current="page">Home</a></li><li><a href="nest/">Shop</a></li><li><a href="#story">The Story</a></li><li><a href="#flock">The Flock</a></li><li><a href="flock/">Ambassadors</a></li><li><a href="#contact">Contact</a></li></ul>
+      <div class="menu-foot"><span data-me-slot-m></span><a href="https://www.instagram.com/birdboost_impact" target="_blank" rel="noopener">Instagram</a><a href="https://www.tiktok.com/@official_birdboost.inc" target="_blank" rel="noopener">TikTok</a></div></nav>
+    <div class="navr"><span data-me-slot></span><a class="cartbtn" href="nest/#cart" aria-label="Cart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 016 0"/></svg><b data-cart-count></b></a><button class="menubtn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Menu"><i></i></button></div>
   </div>
 </header>
 
 <main>
 <section class="open" aria-labelledby="h1">
-  <div class="sky"></div><div class="word" aria-hidden="true">BIRDBOOST</div><div class="horizon"></div>
+  <div class="sky"></div>
   <div class="wrap ogrid">
     <div>
-      <h1 id="h1"><span class="ln"><span>Every flock</span></span><span class="ln"><span>starts with</span></span><span class="ln"><span class="serif">one.</span></span></h1>
-      <p class="sub">Birdboost is faith-driven clothing and community from Zimbabwe. Made for the one who moves first, and for everyone who moves with them.</p>
-      <div class="ctas"><a class="btn w" href="nest/">Enter the Nest <span class="arr">→</span></a><a class="btn o" href="flock/">Join the Flock</a></div>
+      <div class="eyebrow">Faith-driven clothing from Zimbabwe</div>
+      <h1 id="h1"><span class="ln"><span>Made on</span></span><span class="ln"><span class="serif">purpose.</span></span></h1>
+      <p class="sub">The Righteous tee is out now in green, nude and grey. Heavy cotton, a topographic print, and Ephesians 2:10 where you can read it.</p>
+      <div class="ctas"><a class="btn w" href="nest/">Shop the collection <span class="arr">→</span></a><a class="btn o" href="#story">Our story</a></div>
+      <div class="swipe" aria-label="The Righteous tee in three colours">
+        <a href="nest/#righteous-green"><img src="assets/img/righteous-green.jpg" alt="The Righteous tee in green" width="333" height="385"><figcaption>Green · $15</figcaption></a>
+        <a href="nest/#righteous-nude"><img src="assets/img/righteous-nude.jpg" alt="The Righteous tee in nude" width="333" height="385" loading="lazy"><figcaption>Nude · $15</figcaption></a>
+        <a href="nest/#righteous-grey"><img src="assets/img/righteous-grey.jpg" alt="The Righteous tee in grey" width="333" height="385" loading="lazy"><figcaption>Grey · $15</figcaption></a>
+      </div>
     </div>
     <div class="fan" aria-label="The Righteous tee in green, nude and grey">
       <figure class="f2"><img src="assets/img/righteous-nude.jpg" alt="" width="333" height="385"></figure>
       <figure class="f3"><img src="assets/img/righteous-grey.jpg" alt="" width="333" height="385"></figure>
-      <figure class="f1" data-perch="0.72"><img src="assets/img/righteous-green.jpg" alt="The Righteous tee in green" width="333" height="385"><figcaption>Righteous · Green</figcaption></figure>
+      <figure class="f1" data-perch="0.72" data-perch-desktop><img src="assets/img/righteous-green.jpg" alt="The Righteous tee in green" width="333" height="385"><figcaption>Righteous · Green</figcaption></figure>
     </div>
   </div>
-  <a class="cue" href="#story">Scroll<i></i></a>
+</section>
+
+<section class="strip" aria-label="At a glance">
+  <ul class="wrap">
+    <li><b>Righteous Tee</b>Out now</li>
+    <li><b>Green · Nude · Grey</b>Three colourways</li>
+    <li><b>XS to XXL</b>Unisex fit</li>
+    <li><b>$15</b>Order online, we deliver</li>
+  </ul>
+</section>
+
+<section class="chap coll" id="collection" aria-labelledby="h-coll">
+  <div class="wrap grid">
+    <div class="stage reveal-img" data-perch="0.82" data-perch-scale="0.9" id="stage">
+      <img class="on" data-c="green" src="assets/img/righteous-green.jpg" alt="The Righteous tee in green" loading="lazy" width="333" height="385">
+      <img data-c="nude" src="assets/img/righteous-nude.jpg" alt="The Righteous tee in nude" loading="lazy" width="333" height="385">
+      <img data-c="grey" src="assets/img/righteous-grey.jpg" alt="The Righteous tee in grey" loading="lazy" width="333" height="385">
+    </div>
+    <div class="info">
+      <div class="kicker rv">The collection</div>
+      <h2 class="h2 rv" id="h-coll">Righteous <span class="serif">Tee.</span></h2>
+      <div class="price rv d1">$15 <small>USD</small></div>
+      <p class="lede rv d1">Our signature piece. A topographic RIGHTEOUS print across the chest, Ephesians 2:8-10 underneath, and the Birdboost mark on the sleeve.</p>
+      <div class="sw rv d2" role="group" aria-label="Colour">
+        <button type="button" aria-pressed="true" data-c="green" style="--c:#1f6b2a"><i></i>Green</button>
+        <button type="button" aria-pressed="false" data-c="nude" style="--c:#b49f84"><i></i>Nude</button>
+        <button type="button" aria-pressed="false" data-c="grey" style="--c:#a5a6a3"><i></i>Grey</button>
+      </div>
+      <ul class="facts rv d2">
+        <li><span>Sizes</span>XS, S, M, L, XL, XXL</li>
+        <li><span>Print</span>Topographic front, mark on sleeve</li>
+        <li><span>Ordering</span>Order online, we contact you to deliver</li>
+      </ul>
+      <a class="btn w rv d3" id="shopc" href="nest/#righteous-green">Shop the Green <span class="arr">→</span></a>
+    </div>
+  </div>
 </section>
 
 <section class="chap one" id="story" aria-labelledby="h-one">
   <div class="wrap grid">
     <div>
-      <div class="kicker rv">One bird</div>
-      <h2 class="h2 rv" id="h-one">The <span class="serif">individual.</span></h2>
-      <p class="lede rv d1">Before there's a flock, there's you. Not an accident and not a copy. Every Birdboost piece starts there: made on purpose, for someone made on purpose.</p>
+      <div class="kicker rv">Our story</div>
+      <h2 class="h2 rv" id="h-one">One bird. <span class="serif">Yours.</span></h2>
+      <p class="lede rv d1">Birdboost started with a simple belief: you are not an accident and not a copy. Every piece is made on purpose, for someone made on purpose, and worn by people who carry that out into the world.</p>
       <blockquote class="rv d2">“For we are God’s handiwork, created in Christ Jesus to do good works.”<cite>Ephesians 2:10 · printed on the Righteous tee</cite></blockquote>
     </div>
     <figure>
-      <div class="frame reveal-img" data-perch="0.18" data-perch-scale="0.9"><img src="assets/img/righteous-green.jpg" alt="Close look at the Righteous tee in green, with the topographic print and Ephesians reference" loading="lazy" width="333" height="385"></div>
+      <div class="frame reveal-img" data-perch="0.2" data-perch-scale="0.9"><img src="assets/img/righteous-nude.jpg" alt="The Righteous tee in nude, with the topographic print" loading="lazy" width="333" height="385"></div>
       <figcaption>The Righteous tee. Topographic print, Ephesians 2:8-10, the mark on the sleeve.</figcaption>
     </figure>
   </div>
 </section>
 
-<section class="chap flockband" id="flock" aria-labelledby="h-flock" data-flyby="9">
+<section class="ident" aria-labelledby="h-id">
   <div class="wrap">
-    <div class="kicker rv">The flock</div>
-    <h2 class="h2 rv" id="h-flock">One flies fast. <span class="serif">Together we fly far.</span></h2>
-    <p class="lede rv d1">Birdboost is built with the people who wear it. The friends who tag us, the ambassadors who carry the drop, everyone who shows up. You don't watch this brand. You move with it.</p>
+    <div>
+      <h2 id="h-id" class="rv">God<br>made me.</h2>
+      <p class="rv d1">Faith first, people close, nothing fake. That's what's behind every Birdboost piece, and it's why the people who wear it look out for each other.</p>
+    </div>
+    <span class="logo" aria-hidden="true"></span>
+  </div>
+</section>
+
+<section class="chap flockband" id="flock" aria-labelledby="h-flock" data-flyby="7">
+  <div class="wrap">
+    <div class="kicker rv">The community</div>
+    <h2 class="h2 rv" id="h-flock">Worn <span class="serif">together.</span></h2>
+    <p class="lede rv d1">Birdboost is built with the people who wear it. The friends who tag us, the ambassadors who carry the pieces, everyone who shows up in them.</p>
     <div class="ways">
-      <div class="way rv"><span class="n">Wear it</span><h3>Be seen</h3><p>Put the piece on and go live your life in it. That's the whole campaign.</p></div>
-      <a class="way rv d1" href="https://www.instagram.com/birdboost_impact" target="_blank" rel="noopener"><span class="n">Tag us</span><h3>@birdboost_impact</h3><p>Post in Birdboost and tag us on Instagram or TikTok. We share the flock.</p><span class="go">Follow on Instagram ↗</span></a>
-      <a class="way rv d2" href="flock/" data-perch="0.8"><span class="n">Lead it</span><h3>Become an ambassador</h3><p>Ten places in the first flock. Free piece, first look at new designs, your own code.</p><span class="go">Join the Flock →</span></a>
+      <a class="way rv" href="https://www.instagram.com/birdboost_impact" target="_blank" rel="noopener"><span class="n">Instagram</span><h3>Tag us</h3><p>Wearing Birdboost? Tag @birdboost_impact. We share the people who wear it.</p><span class="go">Follow on Instagram ↗</span></a>
+      <a class="way rv d1" href="https://www.tiktok.com/@official_birdboost.inc" target="_blank" rel="noopener"><span class="n">TikTok</span><h3>Behind the pieces</h3><p>Shoots, drops and the people behind them.</p><span class="go">Follow on TikTok ↗</span></a>
+      <a class="way rv d2" href="flock/" data-perch="0.8" data-perch-desktop><span class="n">Ambassadors</span><h3>Represent us</h3><p>Our ambassadors carry Birdboost in their city, with their own code and a share of every piece.</p><span class="go">Learn more →</span></a>
+    </div>
+    <div class="promo-wrap">
+      <aside class="promo rv" data-promo="amb-2026" data-until="2026-12-06T23:59:00+02:00" aria-label="Ambassador applications">
+        <div class="grow"><div class="tag">Now open · until 6 December</div><h3>Ambassador applications</h3><p>Ten places. A free piece, a first look at new designs and your own code.</p></div>
+        <a class="btn g" href="flock/">Apply now <span class="arr">→</span></a>
+        <button class="close" type="button" aria-label="Hide this">×</button>
+      </aside>
     </div>
   </div>
 </section>
 
 <section class="chap nestch" id="nest" aria-labelledby="h-nest">
   <div class="wrap">
-    <div class="kicker rv" style="justify-content:center">The nest</div>
-    <h2 class="h2 rv" id="h-nest">Where the flock <span class="serif">returns.</span></h2>
-    <p class="lede rv d1">The nest isn't just where birds live. It's where Birdboost's pieces come together.</p>
+    <div class="kicker rv" style="justify-content:center">The Nest</div>
+    <h2 class="h2 rv" id="h-nest">Come <span class="serif">home.</span></h2>
+    <p class="lede rv d1">The Nest is our shop. Pick your colour and size, place your order, and we'll be in touch to deliver.</p>
     <div class="nestart" data-draw><div class="glow"></div><svg data-nest role="img" aria-label="A woven nest"></svg><span class="rim" data-perch="0.5" data-perch-scale="0.85"></span></div>
-    <div class="pieces">
-      <a class="piece rv" href="nest/#righteous-green"><div class="ph"><img src="assets/img/righteous-green.jpg" alt="Righteous tee, green" loading="lazy" width="333" height="385"></div><div class="t">Righteous Tee <span>Green</span></div></a>
-      <a class="piece rv d1" href="nest/#righteous-nude"><div class="ph"><img src="assets/img/righteous-nude.jpg" alt="Righteous tee, nude" loading="lazy" width="333" height="385"></div><div class="t">Righteous Tee <span>Nude</span></div></a>
-      <a class="piece rv d2" href="nest/#righteous-grey"><div class="ph"><img src="assets/img/righteous-grey.jpg" alt="Righteous tee, grey" loading="lazy" width="333" height="385"></div><div class="t">Righteous Tee <span>Grey</span></div></a>
-    </div>
-    <p style="margin-top:44px"><a class="btn w" href="nest/">Enter the Nest <span class="arr">→</span></a></p>
-  </div>
-</section>
-
-<section class="chap journey" id="journey" aria-labelledby="h-j">
-  <div class="wrap grid">
-    <div>
-      <div class="kicker rv">The journey</div>
-      <h2 class="h2 rv" id="h-j">Where we're <span class="serif">headed.</span></h2>
-      <p class="lede rv d1">Birdboost is a way of moving through the world: faith first, people close, nothing fake. Here's the road to the first drop.</p>
-      <div class="count rv d2" id="count" role="timer" aria-label="Time until the drop on 28 December"><div><b id="cd">–</b><span>days</span></div><div><b id="ch">–</b><span>hours</span></div><div><b id="cm">–</b><span>minutes</span></div></div>
-    </div>
-    <ol class="steps">
-      <li class="rv"><b>6 Dec</b><div><h3>The first flock is chosen</h3><p>Ambassador applications close. Ten people get a place.</p></div></li>
-      <li class="rv d1"><b>December</b><div><h3>Shoot day</h3><p>The ambassadors and the team, together, in the first pieces.</p></div></li>
-      <li class="rv d2" data-perch="0.9" data-perch-scale="0.8"><b>28 Dec</b><div><h3>The drop goes live</h3><p>The first Birdboost drop opens to everyone. Limited stock.</p></div></li>
-      <li class="rv d3"><b>Then</b><div><h3>The flock grows</h3><p>Every piece worn brings someone new in. That's how a movement travels.</p></div></li>
-    </ol>
+    <p style="margin-top:28px"><a class="btn w" href="nest/">Enter the Nest <span class="arr">→</span></a></p>
   </div>
 </section>
 </main>
 
 <footer class="foot" id="contact"><div class="wrap">
   <div class="cols">
-    <div><div class="big">Talk to the flock</div><p>Orders, sizes, collaborations or just to say hi. A real person from Birdboost answers on WhatsApp.</p>
-      <a class="btn g" href="https://wa.me/263713875931" target="_blank" rel="noopener">WhatsApp +263 71 387 5931</a></div>
-    <div><h4>Explore</h4><a href="./">Home</a><a href="nest/">The Nest</a><a href="./#story" >The Story</a><a href="./#journey">The Journey</a></div>
+    <div><div class="big">Birdboost</div><p>Faith-driven clothing and community from Zimbabwe. Questions or collaborations? Message us on Instagram.</p>
+      <a class="btn o" href="https://www.instagram.com/birdboost_impact" target="_blank" rel="noopener">@birdboost_impact</a></div>
+    <div><h4>Explore</h4><a href="./">Home</a><a href="nest/">The Nest</a><a href="./#story" >The Story</a><a href="./#collection">The Collection</a></div>
     <div><h4>The Flock</h4><a href="flock/">Become an ambassador</a><a href="portal/">Ambassador log in</a><a href="./#flock">The community</a></div>
-    <div><h4>Follow</h4><a href="https://www.instagram.com/birdboost_impact" target="_blank" rel="noopener">Instagram</a><a href="https://www.tiktok.com/@official_birdboost.inc" target="_blank" rel="noopener">TikTok</a><a href="https://wa.me/263713875931" target="_blank" rel="noopener">WhatsApp</a></div>
+    <div><h4>Follow</h4><a href="https://www.instagram.com/birdboost_impact" target="_blank" rel="noopener">Instagram</a><a href="https://www.tiktok.com/@official_birdboost.inc" target="_blank" rel="noopener">TikTok</a></div>
   </div>
   <div class="fine"><span>© <span data-year>2026</span> Birdboost · Faith-driven clothing and community, Zimbabwe</span><span class="serif" style="font-size:17px">God made me.</span></div>
 </div></footer>
@@ -218,14 +277,15 @@ a.way:hover{border-color:var(--g);transform:translateY(-4px)}
 <script src="assets/bird.js"></script>
 <script>
 {
-  const DROP = Date.parse('2026-12-28T00:00:00+02:00');
-  const $ = (id) => document.getElementById(id);
-  const tick = () => {
-    const ms = Math.max(0, DROP - Date.now());
-    if (!ms) { $('count').innerHTML = '<div style="text-align:left"><b style="font-size:28px">The drop is live</b><span>Find it in the Nest.</span></div>'; return clearInterval(t); }
-    $('cd').textContent = Math.floor(ms / 864e5); $('ch').textContent = Math.floor(ms % 864e5 / 36e5); $('cm').textContent = Math.floor(ms % 36e5 / 6e4);
-  };
-  const t = setInterval(tick, 30000); tick();
+  /* The collection: switch colourway without leaving the page. */
+  const stage = document.getElementById('stage'), shop = document.getElementById('shopc');
+  document.querySelectorAll('.sw button').forEach((b) => b.addEventListener('click', () => {
+    const c = b.dataset.c;
+    document.querySelectorAll('.sw button').forEach((x) => x.setAttribute('aria-pressed', x === b));
+    stage.querySelectorAll('img').forEach((i) => i.classList.toggle('on', i.dataset.c === c));
+    shop.href = 'nest/#righteous-' + c;
+    shop.firstChild.textContent = 'Shop the ' + b.textContent.trim() + ' ';
+  }));
 }
 </script>
 </body>
