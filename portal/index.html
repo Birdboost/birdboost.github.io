@@ -69,16 +69,28 @@ nav.bottom .dot{position:absolute;top:4px;left:calc(50% + 6px);min-width:18px;he
 }
 .prod:focus-within{outline:2px solid #2f5a2d}
 .plist{display:grid;gap:8px}
+.flockcard{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:0;margin:0 0 18px;border:1px solid #2f5a2d;border-radius:16px;overflow:hidden;background:#0d150d}
+.fc-sky{position:relative;min-height:190px;background:radial-gradient(80% 90% at 70% 40%,#1b3d1a 0,#0d150d 70%)}
+.fc-sky canvas{position:absolute;inset:0;width:100%;height:100%}
+.fc-info{padding:16px 18px}
+.rank{font-family:Anton,Impact,sans-serif;font-size:34px;line-height:1.05;text-transform:uppercase;margin:2px 0 6px}
+.fc-bar{height:6px;border-radius:99px;background:#1f2a1f;overflow:hidden;margin-top:10px}
+.fc-bar i{display:block;height:100%;background:var(--g);border-radius:99px}
+.fc-stats{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px}
+.fc-stats b{display:block;font-family:Anton,Impact,sans-serif;font-weight:400;font-size:26px;line-height:1.1}
+.fc-stats span{font-size:12px;color:var(--mute)}
+@media(max-width:640px){.flockcard{grid-template-columns:minmax(0,1fr)}.fc-sky{min-height:150px}}
 .plist .card{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px}
 </style>
 </head>
-<body>
+<body data-bird="off">
 <div id="app"><div class="login"><span class="spin"></span></div></div>
 
 <dialog id="dlg"><div class="dhead"><h3 id="dlgTitle"></h3><button class="x" aria-label="Close" onclick="dlg.close()">×</button></div><div class="dbody" id="dlgBody"></div></dialog>
 
 <script src="config.js"></script>
 <script src="viewer3d.js"></script>
+<script src="../assets/bird.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
 const CFG = window.BB_CONFIG || {};
@@ -122,7 +134,14 @@ async function rpc(fn, args = {}) {
   if (d && d.error) { const err = new Error(d.error); if (isCodeErr(err)) blocked(err); throw err; }
   return d;
 }
-async function load() { data = await rpc("amb_home"); }
+async function load() {
+  data = await rpc("amb_home");
+  // Lets the public website recognise you ("Welcome back") and bring your bird back.
+  try { localStorage.setItem("bb_flock_me", JSON.stringify({ name: data.me.name.split(" ")[0], code: data.me.store_code })); } catch (e) {}
+  // Orders from the Nest with your code (only once the shop update has been run).
+  data.flock = null;
+  try { const f = await db.rpc("amb_flock", { p_code: code }); if (f.data && !f.data.error && !f.error) data.flock = f.data; } catch (e) {}
+}
 
 // ---------- Login ----------
 function showLogin(msg = "") {
@@ -135,7 +154,7 @@ function showLogin(msg = "") {
       <p id="lerr" role="alert" style="color:var(--bad);min-height:1.2em">${esc(msg)}</p>
       <button class="btn g" style="width:100%">Enter</button>
     </form>
-    <p class="small mute" style="margin-top:16px">Not an ambassador yet? <a href="../">Apply to join the Flock</a>.</p>
+    <p class="small mute" style="margin-top:16px">Not an ambassador yet? <a href="../flock/">Apply to join the Flock</a>.</p>
   </div></main>`;
   const ci = document.getElementById("ci");
   document.getElementById("lf").onsubmit = async (e) => {
@@ -150,7 +169,7 @@ function showLogin(msg = "") {
 // Shown when an admin has switched the account off. The code is kept, so if the
 // account is switched back on, "Check again" lets them straight back in.
 function showInactive() {
-  data = null;
+  data = null; try { localStorage.removeItem("bb_flock_me"); } catch (e) {}
   app.innerHTML = `<main class="login"><div class="box">
     <a class="brand" href="../"><span class="logo"></span>BIRDBOOST</a>
     <div class="card" style="margin-top:22px" role="alert"><h2 style="font-size:30px">Account inactive</h2>
@@ -161,7 +180,7 @@ function showInactive() {
     try { await load(); localStorage.setItem(KEY, code); render(); } catch (err) { if (!isCodeErr(err)) { toast(errText(err), 1); e.target.disabled = false; } else if (/account_inactive/.test(err.message)) toast("Still inactive", 1); } };
   document.getElementById("other").onclick = () => logout();
 }
-function logout(msg) { localStorage.removeItem(KEY); code = ""; data = null; showLogin(msg || ""); }
+function logout(msg) { localStorage.removeItem(KEY); localStorage.removeItem("bb_flock_me"); code = ""; data = null; showLogin(msg || ""); }
 
 // ---------- Main ----------
 const ICONS = {
@@ -191,7 +210,8 @@ function render() {
     </div>
     <div class="storecode"><div style="flex:1;min-width:180px"><div class="small" style="font-weight:700">YOUR STORE CODE</div><code>${esc(me.store_code)}</code>
       <div class="small">It's also your customers' discount code. When someone buys with it, they get the discount and the sale counts as yours.</div></div>
-      <div class="row"><button class="btn sm" id="copysc">Copy code</button>${shareBtn}</div></div>
+      <div class="row"><button class="btn sm" id="copysc">Copy code</button><button class="btn sm" id="copylink">Copy my Nest link</button>${shareBtn}</div></div>
+    ${flockCard()}
     ${me.code_expires_at ? `<p class="small mute">Your access code works until ${fmtDate(me.code_expires_at, false)}.</p>` : ""}
   </div></div>`
   : `<div class="hello mini"><div class="wrap"><div class="row"><h1>Hi ${first}</h1>
@@ -207,8 +227,12 @@ function render() {
   document.getElementById("refresh").onclick = async (e) => { const b = e.currentTarget; b.disabled = true; b.innerHTML = '<span class="spin"></span>';
     try { await load(); render(); toast("Up to date"); } catch (err) { if (!isCodeErr(err)) { toast(errText(err), 1); b.disabled = false; b.textContent = "↻"; } } };
   document.getElementById("copysc").onclick = () => navigator.clipboard.writeText(me.store_code).then(() => toast("Store code copied"), () => toast("Couldn't copy. Your code is " + me.store_code));
-  const sh = document.getElementById("sharesc");
-  if (sh) sh.onclick = () => navigator.share({ text: `Shopping Birdboost? Use my code ${me.store_code} for a discount when you buy.` }).catch(() => {});
+  const sh = document.getElementById("sharesc"), nestLink = new URL("../nest/?code=" + encodeURIComponent(me.store_code), location.href).href;
+  if (sh) sh.onclick = () => navigator.share({ text: `Shopping Birdboost? Use my code ${me.store_code} for a discount when you buy.`, url: nestLink }).catch(() => {});
+  const cl = document.getElementById("copylink");
+  if (cl) cl.onclick = () => navigator.clipboard.writeText(nestLink).then(() => toast("Your Nest link is copied"), () => toast("Your link: " + nestLink));
+  const fc = document.getElementById("flockcv");
+  if (fc && window.BBBird) BBBird.vScene(fc, { count: Math.min(data.sales.count, 40) });
   app.querySelectorAll("[data-tab]").forEach((b) => b.onclick = () => { tab = b.dataset.tab; history.replaceState(null, "", "#" + tab); render(); scrollTo(0, 0); });
   ({ home: viewTasks, events: viewEvents, store: viewStore, chat: viewChat }[tab] || viewTasks)(document.getElementById("view"));
 }
@@ -219,6 +243,31 @@ async function act(btn, fn, okMsg) {
   const y = scrollY;
   try { await fn(); await load(); render(); scrollTo(0, y); if (okMsg) toast(okMsg); }
   catch (e) { if (!isCodeErr(e)) { toast(errText(e), 1); if (btn.isConnected) { btn.disabled = false; btn.innerHTML = label; } } }
+}
+
+// ---------- Your place in the flock ----------
+// Every piece sold with your code is one more bird flying with you.
+const RANKS = [[0, "Fledgling"], [1, "Taking flight"], [5, "In formation"], [15, "Lead bird"], [30, "High flyer"]];
+function flockCard() {
+  const n = data.sales.count || 0;
+  let r = 0; RANKS.forEach(([min], i) => { if (n >= min) r = i; });
+  const next = RANKS[r + 1], prev = RANKS[r][0];
+  const pct = next ? Math.round(((n - prev) / (next[0] - prev)) * 100) : 100;
+  const rate = parseFloat(data.settings.commission_per_piece);
+  const cards = [
+    ...(data.flock ? [[data.flock.orders, "shop orders with your code"]] : []),
+    ...(rate > 0 ? [[new Intl.NumberFormat("en", { style: "currency", currency: "USD" }).format(n * rate), "commission earned"]] : []),
+  ];
+  return `<div class="flockcard">
+    <div class="fc-sky"><canvas id="flockcv" aria-hidden="true"></canvas></div>
+    <div class="fc-info">
+      <div class="small" style="font-weight:700;color:var(--g2)">YOUR PLACE IN THE FLOCK</div>
+      <div class="rank">${esc(RANKS[r][1])}</div>
+      <p class="small">${n ? `${n} bird${n === 1 ? " has" : "s have"} joined your flock: one for every piece sold with your code. The green-tipped bird leading them is you.` : "The green-tipped bird is you. Every piece sold with your code adds a bird to your flock."}</p>
+      <div class="fc-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}" aria-label="Progress to the next rank"><i style="width:${pct}%"></i></div>
+      <p class="small mute" style="margin:6px 0 0">${next ? `${next[0] - n} more to <b style="color:var(--ink)">${esc(next[1])}</b>` : "Top rank. You lead the flock."}</p>
+      ${cards.length ? `<div class="fc-stats">` : ""}${cards.map(([v, l]) => `<div><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join("")}${cards.length ? "</div>" : ""}
+    </div></div>`;
 }
 
 // ---------- Tasks ----------
