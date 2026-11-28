@@ -26,14 +26,15 @@
 
   /* The ambassador greeting. The portal saves a first name here when they log in. */
   let me = store.get("bb_flock_me", null);
-  const slot = $("[data-me-slot]");
   function paintMe() {
-    if (!slot) return;
-    slot.innerHTML = me && me.name
-      ? `<a class="pill-link me-pill" href="${root}portal/" data-perch-me><span class="long">Welcome back,&nbsp;</span><b>${esc(me.name)}</b></a>`
-      : `<a class="pill-link" href="${root}portal/"><span class="long">Ambassador log in</span><span class="short">Log in</span></a>`;
-    document.querySelectorAll("[data-me-name]").forEach((el) => { if (me && me.name) el.textContent = me.name; });
-    document.documentElement.classList.toggle("is-me", !!(me && me.name));
+    const on = !!(me && me.name);
+    const html = (m) => on
+      ? `<a class="pill-link me-pill" href="${root}portal/"${m ? "" : " data-perch-me"}><span class="long">Welcome back,&nbsp;</span><b>${esc(me.name)}</b></a>`
+      : `<a class="pill-link" href="${root}portal/">Ambassador log in</a>`;
+    document.querySelectorAll("[data-me-slot]").forEach((el) => { el.innerHTML = html(false); });
+    document.querySelectorAll("[data-me-slot-m]").forEach((el) => { el.innerHTML = html(true); });
+    document.querySelectorAll("[data-me-name]").forEach((el) => { if (on) el.textContent = me.name; });
+    document.documentElement.classList.toggle("is-me", on);
   }
   paintMe();
   // Logged in before this update? Ask the portal's database for their first name once.
@@ -69,8 +70,13 @@
   }
 
   /* The applications banner disappears after the deadline. */
-  const ann = $(".announce[data-until]");
-  if (ann && Date.now() > Date.parse(ann.dataset.until)) ann.remove();
+  /* Campaign promos switch themselves off after their end date, and can be dismissed. */
+  document.querySelectorAll("[data-until]").forEach((el) => { if (Date.now() > Date.parse(el.dataset.until)) el.remove(); });
+  document.querySelectorAll(".promo[data-promo]").forEach((el) => {
+    const key = "bb-promo-" + el.dataset.promo;
+    try { if (sessionStorage.getItem(key)) { el.remove(); return; } } catch (e) {}
+    const x = el.querySelector(".close"); if (x) x.onclick = () => { el.remove(); try { sessionStorage.setItem(key, "1"); } catch (e) {} };
+  });
 
   /* Reveal things as they come into view. */
   const rv = document.querySelectorAll(".rv,.reveal-img,[data-draw]");
@@ -135,5 +141,5 @@
   }
   document.querySelectorAll("svg[data-nest]").forEach((s, i) => nest(s, 7 + i * 13));
 
-  window.BB = { root, esc, store, cart, me: () => me, WA: "263713875931" };
+  window.BB = { root, esc, store, cart, me: () => me };
 })();

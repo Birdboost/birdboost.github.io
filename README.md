@@ -3,7 +3,7 @@
 The Birdboost website, live at birdboost.github.io.
 
 * `index.html`: the home page, "Enter the Flock". Old application links (with `?src=`, `?ref=` and so on) are forwarded to the application page, and links with `?code=` go to the shop with the code filled in.
-* `nest/`: the Nest, the shop. Orders are requests; payment is confirmed on WhatsApp.
+* `nest/`: the Nest, the shop. Customers place orders on the site; Birdboost contacts them to arrange delivery and payment.
 * `flock/`: Join the Flock, the ambassador application (Formspree).
 * `portal/`: the ambassador portal (log in with an access code).
 * `portal/admin/`: the admin page for the Birdboost team.

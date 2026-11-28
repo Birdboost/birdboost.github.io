@@ -3,7 +3,9 @@
    After that, pieces marked "Sell in the Nest" in the admin page replace this list automatically.
 
    To change a piece here: edit the text between the quotes.
-   price: a number like 18 or 18.50. Leave it as null to show "Price confirmed on WhatsApp". */
+   price: a number like 18 or 18.50. Leave it as null to show "Price confirmed when we contact you".
+   back: optional photo of the back, e.g. "assets/img/righteous-green-back.jpg". Adds a Back view and a turntable.
+   model: optional 3D model file (.glb), e.g. "assets/models/righteous-green.glb". Adds a 3D view you can spin and zoom. */
 window.BB_CATALOG = [
   {
     id: "righteous-green", style: "Righteous Tee", color: "Green", swatch: "#1f6b2a",

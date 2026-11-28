@@ -105,32 +105,47 @@ Ambassadors can pre-order pieces marked **Pre-order open**. You see the requests
 
 ## The Nest (the shop on the website)
 
-The website has a shop called **the Nest** at `birdboost.github.io/nest/`. Customers pick a piece and size, and send their order. **Nobody pays on the website.** You confirm stock, delivery and payment with them on WhatsApp, the same way you do today.
+The website has a shop called **the Nest** at `birdboost.github.io/nest/`. Customers pick a piece, a size and how many, then place their order on the website with their name, phone number, city, and delivery or collection. **Nobody pays on the website.** They see an order reference like `BB-F6370` and the message that Birdboost will contact them. You then contact them to confirm stock, delivery and payment.
 
-Until you do the steps below, the Nest shows the three Righteous tees from the file `assets/catalog.js`, and orders go straight to the Birdboost WhatsApp as a message. To set prices there, open that file on GitHub, press the pencil, and change `price: null` to a number such as `price: 18`.
+### Where orders arrive
 
-### Switch on the full shop (about 3 minutes)
+Every order arrives in two places, so none get lost:
+
+1. **The admin page, under Shop orders**, once you've done the one-time step below.
+2. **An email** from Formspree, to the same inbox that gets ambassador applications, with the subject "New Birdboost order BB-…". If the database can't be reached for any reason, this email is how the order still gets to you. (Formspree's free plan allows 50 submissions a month across applications and orders. If you get more than that, upgrade the Formspree plan.)
+
+If both fail (for example the customer has no signal), the customer is told it didn't go through and can tap **Try again**. Their details are kept.
+
+### One-time step: save orders in the admin page (about 2 minutes)
 
 1. In Supabase, open **SQL Editor**, then **New query**.
-2. Open `portal-setup/update-03-the-nest.sql`, copy all of it, paste it in, and press **Run**. It's safe to run again.
+2. Open `portal-setup/update-04-orders.sql`, copy all of it, paste it in, and press **Run**. It's safe to run again. It already includes update 3, so you don't need to run update 3 separately.
 3. Refresh the admin page. You now have a **Shop orders** tab, and each piece under **Preview store** has a **Sell in the Nest** tick box, a category and a colour.
-4. Tick **Sell in the Nest** on the pieces you want in the shop and add a price. As soon as one piece is ticked, the Nest shows your pieces from the admin page instead of the built-in list.
+
+Until you tick **Sell in the Nest** on any piece, the Nest shows the three Righteous tees from the file `assets/catalog.js` ($15 each). Orders for them are still saved in Shop orders. To change a price there, open that file on GitHub, press the pencil, and change `price: 15`. As soon as one piece is ticked in the admin page, the Nest shows your admin pieces instead.
+
+### Photos from more angles, and 3D models
+
+Each piece can show its front, its back, a 360° turntable and a real 3D model that customers spin and zoom. Customers can always pinch or tap **Zoom** to look closely.
+
+* **Back photo:** in the admin page, edit the piece and upload a back photo. For the built-in tees, put the photo in `assets/img/` and add `back: "assets/img/your-photo.jpg",` to the piece in `assets/catalog.js`.
+* **3D model:** you need a `.glb` file of the garment. A designer can export one from CLO 3D or Marvelous Designer, or a 3D scanning app can make one from the real tee. In the admin page, edit the piece and upload the .glb file as its 3D model. For the built-in tees, upload the file to `assets/models/` and add `model: "assets/models/your-file.glb",` to the piece in `assets/catalog.js`. A 3D button then appears on that piece.
 
 ### Shop orders
 
-Every order sent from the Nest shows up under **Shop orders**, with a reference like `BB-F6370`, the customer's WhatsApp number (tap it to message them) and the ambassador code they used. The customer is also asked to send the order to you on WhatsApp, so you get it both ways.
+Every order sent from the Nest shows up under **Shop orders**, with a reference like `BB-F6370`, the customer's phone number (tap it to message them on WhatsApp), their area or address, and the ambassador code they used.
 
 Move each order along: **New**, **Confirmed**, **Paid**, **Sent or collected**, or **Cancelled**. When an order with an ambassador's code is paid, press **Add to sales**. The ambassador then sees it on their dashboard and on the leaderboard.
 
 ### Ambassador links, discount and commission
 
 * Every ambassador can copy their **Nest link** from their dashboard. It looks like `birdboost.github.io/nest/?code=BIGBIRD7`. Anyone who opens it has that code filled in at checkout.
-* Under **Settings** you can set a **discount %** for customers who use an ambassador code. Leave it empty to agree the discount on WhatsApp.
+* Under **Settings** you can set a **discount %** for customers who use an ambassador code. Leave it empty to agree the discount with the customer yourself.
 * Under **Settings** you can set a **commission per piece**. Ambassadors then see what they've earned on their dashboard, worked out from the sales you record.
 
 ### Taking real card or mobile money payments later
 
-To take payment on the website itself you need a payment provider account in Birdboost's name. For Zimbabwe, Paynow (EcoCash, OneMoney and cards) is the usual choice; Stripe or PayPal work for cards from abroad. The provider then needs a small piece of server code to confirm payments safely, which this site can't do on its own. Until then, the WhatsApp step is the honest way to take payment.
+To take payment on the website itself you need a payment provider account in Birdboost's name. For Zimbabwe, Paynow (EcoCash, OneMoney and cards) is the usual choice; Stripe or PayPal work for cards from abroad. The provider then needs a small piece of server code to confirm payments safely, which this site can't do on its own. Until then, contacting the customer to arrange payment is the honest way to do it.
 
 ## Good to know
 

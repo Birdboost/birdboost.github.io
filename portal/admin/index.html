@@ -640,14 +640,14 @@ const ORDER_STATUS = [["new", "New"], ["confirmed", "Confirmed"], ["paid", "Paid
 function vOrders(v) {
   const recorded = (o) => D.sales.some((s) => (s.note || "").includes(o.ref));
   v.innerHTML = `<div class="bar"><h2>Shop orders</h2></div>
-    <p class="mute">Order requests from the Nest on the website. Nothing has been paid: confirm stock, delivery and payment with the customer on WhatsApp, then move the order along. When it's paid, press “Add to sales” so the ambassador whose code was used gets the credit.</p>
+    <p class="mute">Order requests from the Nest on the website. Nothing has been paid: contact the customer (tap their number) to confirm stock, delivery and payment, then move the order along. When it's paid, press “Add to sales” so the ambassador whose code was used gets the credit.</p>
     ${D.orders.length ? `<div class="tablewrap"><table><thead><tr><th>Order</th><th>Customer</th><th>Pieces</th><th>Total</th><th>Code</th><th>Status</th><th></th></tr></thead><tbody>
       ${D.orders.map((o) => {
         const amb = o.ambassador_id ? byId(D.ambassadors, o.ambassador_id) : null;
         const items = (o.items || []).map((i) => `${esc(i.name)}${i.color ? " (" + esc(i.color) + ")" : ""}${i.size ? ", " + esc(i.size) : ""} × ${i.qty}`).join("<br>");
         const wa = "https://wa.me/" + String(o.phone || "").replace(/[^0-9]/g, "").replace(/^0/, "263");
         return `<tr><td class="lead"><b>${esc(o.ref)}</b><div class="small mute">${fmt(o.created_at)}</div></td>
-        <td><b>${esc(o.name)}</b><div class="small"><a href="${esc(wa)}" target="_blank" rel="noopener">${esc(o.phone)}</a>${o.city ? " · " + esc(o.city) : ""}${o.delivery ? " · " + esc(o.delivery) : ""}</div>${o.email ? `<div class="small mute">${esc(o.email)}</div>` : ""}${o.note ? `<div class="small mute">“${esc(o.note)}”</div>` : ""}</td>
+        <td><b>${esc(o.name)}</b><div class="small"><a href="${esc(wa)}" target="_blank" rel="noopener">${esc(o.phone)}</a>${o.city ? " · " + esc(o.city) : ""}${o.delivery ? " · " + esc(o.delivery) : ""}</div>${o.address ? `<div class="small">${esc(o.address)}</div>` : ""}${o.email ? `<div class="small mute">${esc(o.email)}</div>` : ""}${o.note ? `<div class="small mute">“${esc(o.note)}”</div>` : ""}</td>
         <td class="small">${items}</td>
         <td>${o.total != null ? esc(money(o.total, o.currency)) + (o.discount_pct ? `<div class="small mute">${esc(o.discount_pct)}% off</div>` : "") : '<span class="mute">Agree on WhatsApp</span>'}</td>
         <td>${o.store_code ? `<code>${esc(o.store_code)}</code><div class="small">${amb ? esc(amb.full_name) : '<span style="color:var(--warn)">No match</span>'}</div>` : '<span class="mute">—</span>'}</td>

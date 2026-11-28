@@ -3,116 +3,150 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>The Nest · Birdboost shop</title>
-<meta name="description" content="The Nest: the Birdboost collection. Faith-driven clothing from Zimbabwe.">
+<title>Shop · The Nest · Birdboost</title>
+<meta name="description" content="The Birdboost shop. The Righteous tee in green, nude and grey, $15. Order online and we'll contact you to deliver.">
 <meta name="theme-color" content="#0a0a0a">
-<meta property="og:title" content="The Nest · Birdboost">
+<meta property="og:title" content="The Nest · Birdboost shop">
 <meta property="og:image" content="../tees.jpg">
 <link rel="icon" href="../assets/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/bb.css">
 <style>
-/* ---------- gateway: the bird comes home, the nest opens ---------- */
-.gate{position:relative;height:150svh}
+/* ---------- gateway: a short arrival, then the clothes ---------- */
+.gate{position:relative;height:130svh}
 .gate .stick{position:sticky;top:0;height:100svh;display:grid;place-items:center;overflow:hidden;isolation:isolate}
 .gate .bg{position:absolute;inset:0;z-index:-1;background:radial-gradient(55% 45% at 50% 58%,#1a3a18 0,#0c170c 45%,var(--bg) 80%)}
-.gate .inner{text-align:center;padding:90px 18px 40px;width:min(980px,100%);transform:scale(calc(1 + var(--p,0) * 1.4));opacity:calc(1 - var(--p,0) * 1.25);will-change:transform,opacity}
-.gate h1{font:400 clamp(70px,13vw,190px)/.85 var(--display);text-transform:uppercase;margin:0}
-.gate h1 .serif{display:block;font-size:.32em;line-height:1.1;color:var(--g2);margin-top:8px}
-.gate .nestart{position:relative;max-width:620px;margin:6px auto 0}
+.gate .inner{text-align:center;padding:90px 18px 40px;width:min(980px,100%);transform:scale(calc(1 + var(--p,0) * .5));opacity:calc(1 - var(--p,0) * 1.3);will-change:transform,opacity}
+.gate h1{font:400 clamp(70px,13vw,180px)/.85 var(--display);text-transform:uppercase;margin:0}
+.gate h1 .serif{display:block;font-size:.3em;line-height:1.1;color:var(--g2);margin-top:10px}
+.gate .nestart{position:relative;max-width:560px;margin:6px auto 0}
 .gate .nestart svg{width:100%;height:auto;overflow:visible}
 .gate .rim{position:absolute;left:35%;right:35%;top:31%;height:2px}
-.gate p{color:#cfcfc8;max-width:30em;margin:6px auto 0}
-.gate .cue{display:inline-flex;margin-top:22px;font:600 11px var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--mute);text-decoration:none;min-height:44px;align-items:center}
+.gate .cue{display:inline-flex;margin-top:18px;font:600 11px var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--mute);text-decoration:none;min-height:44px;align-items:center}
 
 /* ---------- shop ---------- */
 .shop{position:relative;z-index:2;background:var(--bg);padding:30px 0 110px;margin-top:-30svh;border-radius:28px 28px 0 0;box-shadow:0 -30px 60px #000}
-.shophead{display:flex;justify-content:space-between;align-items:end;gap:20px;flex-wrap:wrap;padding-top:40px}
+.shophead{display:flex;justify-content:space-between;align-items:end;gap:16px 20px;flex-wrap:wrap;padding-top:40px}
 .shophead h2{font:400 clamp(44px,6vw,80px)/.95 var(--display);text-transform:uppercase}
 .shophead h2 .serif{color:var(--g2);font-size:.6em}
-.mybar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:22px;padding:14px 18px;border-radius:16px;background:#0f2410;border:1px solid #3fae3a55}
+.how{list-style:none;display:flex;gap:8px 22px;flex-wrap:wrap;margin:18px 0 0;padding:0;color:var(--mute);font-size:14px}
+.how b{color:var(--ink);font-weight:600;margin-right:6px}
+.mybar{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;margin-top:22px;padding:14px 18px;border-radius:16px;background:#0f2410;border:1px solid #3fae3a55}
 .mybar code{font:800 18px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.06em;color:var(--g2)}
-.tools{position:sticky;top:68px;z-index:5;display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:14px 0;margin-top:26px;background:linear-gradient(var(--bg) 80%,transparent)}
+.tools{position:sticky;top:68px;z-index:5;display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:14px 0;margin-top:22px;background:linear-gradient(var(--bg) 80%,transparent)}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
-.chip{min-height:42px;padding:0 16px;border-radius:999px;border:1px solid #ffffff26;background:none;color:var(--ink);font:600 14px var(--sans);cursor:pointer}
+.chip{min-height:44px;padding:0 18px;border-radius:999px;border:1px solid #ffffff26;background:none;color:var(--ink);font:600 14px var(--sans);cursor:pointer}
 .chip[aria-pressed=true]{background:var(--ink);color:#0a0a0a;border-color:var(--ink)}
 .tools .sp{flex:1}
-.field{min-height:42px;border-radius:999px;border:1px solid #ffffff26;background:#111;color:var(--ink);font:16px var(--sans);padding:0 16px}
+.field{min-height:44px;border-radius:999px;border:1px solid #ffffff26;background:#111;color:var(--ink);font:16px var(--sans);padding:0 16px}
 input.field{width:min(240px,100%)}
 select.field{padding-right:34px;appearance:none;background:#111 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23aaa' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat right 14px center}
 .count{color:var(--mute);font-size:14px;margin:4px 0 18px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(320px,100%),1fr));gap:30px 18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(320px,100%),1fr));gap:34px 18px}
 .card{position:relative}
 .card .ph{position:relative;display:block;width:100%;aspect-ratio:333/385;border-radius:18px;overflow:hidden;background:#111;border:0;padding:0;cursor:pointer}
 .card .ph img{width:100%;height:100%;object-fit:cover;transition:transform 1.1s var(--ease)}
-.card:hover .ph img{transform:scale(1.05)}
-.card .badge{position:absolute;left:12px;top:12px;background:#0a0a0acc;color:var(--ink);font:700 11px var(--sans);letter-spacing:.08em;text-transform:uppercase;padding:6px 10px;border-radius:999px;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
-.card .quick{position:absolute;right:12px;bottom:12px;min-height:42px;padding:0 16px;border-radius:999px;border:0;background:var(--ink);color:#0a0a0a;font:700 14px var(--sans);cursor:pointer;opacity:0;transform:translateY(8px);transition:opacity .3s,transform .3s var(--ease)}
-.card:hover .quick,.card:focus-within .quick{opacity:1;transform:none}
-@media(hover:none){.card .quick{opacity:1;transform:none}}
+.card:hover .ph img{transform:scale(1.04)}
+.card .badge{position:absolute;left:12px;top:12px;background:#0a0a0acc;color:var(--ink);font:700 11px var(--sans);letter-spacing:.08em;text-transform:uppercase;padding:6px 10px;border-radius:999px;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);pointer-events:none}
 .card .meta{display:flex;justify-content:space-between;align-items:baseline;gap:4px 10px;margin-top:12px;flex-wrap:wrap}
 .card h3{font:700 17px var(--sans);margin:0}
 .card .col{color:var(--mute);font-size:14px}
 .price{font:400 22px/1 var(--display);white-space:nowrap}
 .price.soft{font:600 13px var(--sans);color:var(--mute);line-height:1.3;white-space:normal}
 .card .meta .price.soft{flex-basis:100%}
-.sw{display:flex;gap:6px;margin-top:10px}
-.sw button,.sw a{width:24px;height:24px;border-radius:50%;border:2px solid #0a0a0a;box-shadow:0 0 0 1px #ffffff40;cursor:pointer;padding:0}
+.card .choose{margin-top:12px;width:100%;min-height:48px}
+.sw{display:flex;gap:8px;margin-top:10px}
+.sw button{width:28px;height:28px;border-radius:50%;border:2px solid #0a0a0a;box-shadow:0 0 0 1px #ffffff40;cursor:pointer;padding:0;position:relative}
+.sw button::after{content:"";position:absolute;inset:-8px}
 .sw [aria-current=true]{box-shadow:0 0 0 2px var(--ink)}
 .empty{border:1px dashed #ffffff26;border-radius:18px;padding:40px 20px;text-align:center;color:var(--mute)}
 
-/* ---------- product + cart dialogs ---------- */
+/* ---------- product + cart ---------- */
 dialog{border:0;padding:0;color:var(--ink);background:#111211;max-height:100dvh}
 dialog::backdrop{background:#000b;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
-.pd{width:min(1000px,96vw);border-radius:24px;border:1px solid #ffffff14}
-.pd .in{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}
-.pd .pic{background:#0c0c0c;min-height:340px}
-.pd .pic img{width:100%;height:100%;object-fit:cover;max-height:88dvh}
-.pd .info{padding:clamp(20px,3vw,36px);display:flex;flex-direction:column;gap:14px;max-height:88dvh;overflow:auto}
+.pd{width:min(1040px,96vw);border-radius:24px;border:1px solid #ffffff14;overflow:hidden}
+.pd .in{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);max-height:min(860px,92dvh)}
+.view{position:relative;background:#0c0c0c;display:flex;flex-direction:column;min-height:0}
+.pic{position:relative;flex:1;min-height:340px;overflow:hidden;cursor:zoom-in}
+.pic>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.pic.stage3d{cursor:grab}
+.views{display:flex;gap:6px;padding:10px;justify-content:center;flex-wrap:wrap}
+.views button{min-height:40px;padding:0 14px;border-radius:999px;border:1px solid #ffffff26;background:none;color:var(--ink);font:600 13px var(--sans);cursor:pointer}
+.views button[aria-pressed=true]{background:var(--ink);color:#0a0a0a}
+.zoombtn{position:absolute;left:12px;bottom:12px;z-index:2;min-height:40px;padding:0 14px;border-radius:999px;border:0;background:#0a0a0acc;color:var(--ink);font:600 13px var(--sans);cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.pd .info{padding:clamp(20px,3vw,36px);display:flex;flex-direction:column;gap:16px;overflow:auto;min-height:0}
 .pd h2{font:400 clamp(36px,4vw,52px)/.95 var(--display);text-transform:uppercase}
-.x{position:absolute;right:12px;top:12px;z-index:3;width:44px;height:44px;border-radius:50%;border:0;background:#0a0a0acc;color:var(--ink);font-size:24px;cursor:pointer}
+.x{position:absolute;right:12px;top:12px;z-index:4;width:44px;height:44px;border-radius:50%;border:0;background:#0a0a0acc;color:var(--ink);font-size:24px;cursor:pointer}
 .sizes{display:flex;flex-wrap:wrap;gap:8px}
 .sizes label{position:relative}
 .sizes input{position:absolute;opacity:0;inset:0}
-.sizes span{display:inline-grid;place-items:center;min-width:54px;min-height:46px;padding:0 10px;border-radius:12px;border:1px solid #ffffff30;font-weight:700;cursor:pointer}
+.sizes span{display:inline-grid;place-items:center;min-width:56px;min-height:48px;padding:0 10px;border-radius:12px;border:1px solid #ffffff30;font-weight:700;cursor:pointer}
 .sizes input:checked+span{background:var(--ink);color:#0a0a0a;border-color:var(--ink)}
 .sizes input:focus-visible+span{outline:3px solid var(--g2);outline-offset:2px}
 .sizes.bad span{border-color:#ff8a80}
 .qty{display:inline-flex;align-items:center;border:1px solid #ffffff30;border-radius:999px}
 .qty button{width:44px;height:44px;border:0;background:none;color:var(--ink);font-size:20px;cursor:pointer;border-radius:50%}
 .qty output{min-width:28px;text-align:center;font-weight:700}
-.lbl{font:600 12px var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
-.note{font-size:14px;color:var(--mute);border-top:1px solid var(--line);padding-top:14px}
+.lbl{font:600 12px var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin-bottom:8px}
+.note{font-size:14px;color:var(--mute);border-top:1px solid var(--line);padding-top:14px;margin:0}
 .err{color:#ff8a80;font-weight:600;min-height:1.2em;margin:0}
-.drawer{margin:0 0 0 auto;height:100dvh;max-height:100dvh;width:min(460px,100vw);border-left:1px solid #ffffff14}
+.addbar{display:flex;gap:12px;align-items:center}
+.addbar .btn{flex:1}
+.addbar .price{font-size:26px}
+
+/* full-screen zoom: pinch, drag, double-tap */
+.zoom{position:fixed;inset:0;z-index:10;background:#050505;touch-action:none;overflow:hidden;cursor:grab;display:none}
+.zoom.on{display:block}
+.zoom img{position:absolute;left:50%;top:50%;max-width:none;width:min(100vw,calc(100dvh * 333 / 385));transform-origin:0 0;user-select:none;-webkit-user-drag:none}
+.zoom .zx{position:absolute;right:14px;top:calc(14px + env(safe-area-inset-top));width:48px;height:48px;border-radius:50%;border:0;background:#1a1a1acc;color:var(--ink);font-size:26px;cursor:pointer;z-index:2}
+.zoom .zc{position:absolute;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;gap:8px;z-index:2}
+.zoom .zc button{width:48px;height:48px;border-radius:50%;border:1px solid #ffffff30;background:#1a1a1acc;color:var(--ink);font-size:22px;cursor:pointer}
+.zoom .zh{position:absolute;left:0;right:0;top:calc(26px + env(safe-area-inset-top));text-align:center;font-size:13px;color:var(--mute);pointer-events:none}
+
+.drawer{margin:0 0 0 auto;height:100dvh;max-height:100dvh;width:min(480px,100vw);border-left:1px solid #ffffff14}
 .drawer[open]{animation:slide .45s var(--ease)}
 @keyframes slide{from{transform:translateX(40px);opacity:0}}
 .drawer .in{display:flex;flex-direction:column;height:100%}
-.drawer header{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid var(--line)}
-.drawer header h2{font:400 34px/1 var(--display);text-transform:uppercase}
+.drawer header{display:flex;justify-content:space-between;align-items:center;padding:calc(14px + env(safe-area-inset-top)) 20px 14px;border-bottom:1px solid var(--line)}
+.drawer header h2{font:400 32px/1 var(--display);text-transform:uppercase}
 .drawer .x{position:static;background:none}
-.drawer .body{flex:1;overflow:auto;padding:16px 20px}
-.drawer footer{padding:16px 20px calc(16px + env(safe-area-inset-bottom));border-top:1px solid var(--line);display:grid;gap:12px}
-.line{display:grid;grid-template-columns:72px minmax(0,1fr) auto;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);align-items:center}
-.line img{width:72px;height:84px;object-fit:cover;border-radius:10px}
-.line .rm{background:none;border:0;color:var(--mute);text-decoration:underline;cursor:pointer;font-size:13px;padding:6px 0;min-height:32px}
-.line .qty button{width:36px;height:36px}
+.drawer .body{flex:1;overflow:auto;padding:16px 20px;overscroll-behavior:contain}
+.drawer footer{padding:14px 20px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--line);display:grid;gap:10px;background:#111211}
+.steps{display:flex;gap:6px;font:600 12px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin:0 0 14px}
+.steps span[aria-current=step]{color:var(--g2)}
+.line{display:grid;grid-template-columns:68px minmax(0,1fr) auto;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);align-items:center}
+.line img{width:68px;height:80px;object-fit:cover;border-radius:10px}
+.line .rm{background:none;border:0;color:var(--mute);text-decoration:underline;cursor:pointer;font-size:13px;padding:6px 0;min-height:36px}
+.line .qty button{width:40px;height:40px}
 .tot{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
 .tot b{font:400 26px var(--display);text-align:right}
 .tot b.soft{font:600 14px var(--sans);color:var(--mute)}
 .codebox{display:flex;gap:8px}
-.codebox input{flex:1;text-transform:uppercase}
+.codebox input.field{flex:1;text-transform:uppercase;width:auto;order:0}
 .codemsg{font-size:13px;color:var(--g2);margin:0}
-.ff{display:grid;gap:12px}
+.codemsg:empty{display:none}
+.ff{display:grid;gap:14px}
 .ff label{display:grid;gap:6px;font-weight:600;font-size:14px}
-.ff input,.ff select,.ff textarea{min-height:46px;border-radius:12px;border:1px solid #ffffff30;background:#0a0a0a;color:var(--ink);font:16px var(--sans);padding:10px 12px}
+.ff label small{font-weight:400;color:var(--mute)}
+.ff input,.ff select,.ff textarea{min-height:50px;border-radius:12px;border:1px solid #ffffff30;background:#0a0a0a;color:var(--ink);font:16px var(--sans);padding:10px 12px;width:100%}
+.ff select{appearance:none;background:#0a0a0a url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23aaa' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat right 14px center}
 .ff [aria-invalid=true]{border-color:#ff8a80}
-.ok{background:#0f2410;border:1px solid #3fae3a66;border-radius:16px;padding:18px}
-.ok h3{font:400 30px/1 var(--display);text-transform:uppercase;margin-bottom:8px}
-.ok pre{white-space:pre-wrap;font:13px/1.5 var(--sans);background:#0a0a0a;border-radius:10px;padding:12px;color:#cfcfc8;max-height:220px;overflow:auto}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg label{position:relative;display:block}
+.seg input{position:absolute;opacity:0;inset:0}
+.seg span{display:grid;place-items:center;min-height:50px;border-radius:12px;border:1px solid #ffffff30;font-weight:700;cursor:pointer}
+.seg input:checked+span{background:var(--ink);color:#0a0a0a;border-color:var(--ink)}
+.seg input:focus-visible+span{outline:3px solid var(--g2);outline-offset:2px}
+.summary{border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:14px;color:#cfcfc8}
+.summary div{display:flex;justify-content:space-between;gap:10px;padding:3px 0}
+.ok{text-align:center;padding:30px 4px 10px}
+.ok .tick{width:64px;height:64px;margin:0 auto 18px;border-radius:50%;background:var(--g);display:grid;place-items:center;color:#06140a;font-size:30px;font-weight:800}
+.ok h3{font:400 40px/1 var(--display);text-transform:uppercase;margin-bottom:10px}
+.ok .ref{display:inline-block;margin:6px 0 16px;padding:8px 14px;border-radius:999px;background:#0f2410;border:1px solid #3fae3a66;font:800 16px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.06em;color:var(--g2)}
+.ok p{color:#cfcfc8;max-width:26em;margin:0 auto 12px}
 
-/* 3D turntable (shared with the ambassador preview store) */
+/* 3D turntable and model viewer (shared with the ambassador preview store) */
 .stage3d{position:relative;width:100%;height:100%;min-height:340px;overflow:hidden;background:radial-gradient(70% 60% at 50% 40%,#1f3a1e 0,#0d0e0d 70%);perspective:1100px;touch-action:pan-y;cursor:grab;user-select:none}
 .stage3d .spinner{position:absolute;inset:9% 12% 14%;transform-style:preserve-3d}
 .stage3d .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;align-items:center;justify-content:center}
@@ -124,28 +158,35 @@ dialog::backdrop{background:#000b;-webkit-backdrop-filter:blur(4px);backdrop-fil
 .stage3d model-viewer{width:100%;height:100%}
 
 @media(max-width:760px){
-  .pd{width:100vw;max-width:100vw;height:100dvh;border-radius:0;margin:0}
-  .pd .in{grid-template-columns:minmax(0,1fr);height:100%;overflow:auto}
-  .pd .pic{min-height:0;aspect-ratio:333/385;max-height:62dvh}
-  .pd .info{max-height:none;overflow:visible}
-  .tools{top:60px}
-  input.field{width:100%;order:5}
+  .gate{height:112svh}
+  .gate .inner{padding-top:70px}
+  .shop{margin-top:-18svh;border-radius:22px 22px 0 0;padding-top:10px}
+  .shophead{padding-top:28px}
+  .how{flex-direction:column;gap:4px}
+  .tools{top:60px;gap:8px;padding:10px 0}
   .tools .sp{display:none}
-  .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 10px}
-  .card .meta{flex-direction:column;gap:4px}
-  .price.soft{text-align:left}
-  .card .quick{min-height:38px;padding:0 12px;font-size:13px}
-  .gate{height:130svh}
+  input.field{width:100%;order:5}
+  .tools select.field{flex:1}
+  .grid{grid-template-columns:minmax(0,1fr);gap:34px}
+  .pd{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;border-radius:0;margin:0;border:0}
+  .pd .in{display:block;height:100%;max-height:none;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+  .view{display:block}
+  .pic{aspect-ratio:333/385;min-height:0;max-height:70dvh;flex:none}
+  .pd .info{overflow:visible;padding:20px 20px 0}
+  .addbar{position:sticky;bottom:0;z-index:3;margin:0 -20px;padding:12px 20px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(transparent,#111211 18%);}
+  .x{top:calc(10px + env(safe-area-inset-top))}
+  .drawer{width:100vw;border-left:0}
 }
-@media(prefers-reduced-motion:reduce){.gate{height:auto}.gate .stick{position:relative;height:auto;min-height:80svh}.gate .inner{transform:none;opacity:1}.shop{margin-top:0}}
+@media(prefers-reduced-motion:reduce){.gate{height:auto}.gate .stick{position:relative;height:auto;min-height:70svh}.gate .inner{transform:none;opacity:1}.shop{margin-top:0}}
 </style>
 </head>
 <body class="grain" data-bird="solo" data-bird-delay="500">
-<header class="nav"><div class="announce" data-until="2026-12-06T23:59:00+02:00">Only 10 ambassador spots. Applications close 6 December. <a href="../flock/">Join the Flock</a></div>
+<header class="nav">
   <div class="in">
     <a class="brand" href="../" aria-label="Birdboost home"><span class="logo" aria-hidden="true"></span><b>BIRDBOOST</b></a>
-    <nav aria-label="Main"><ul class="links" id="links"><li><a href="../">Home</a></li><li><a href="../nest/" aria-current="page">Shop</a></li><li><a href="../#story">The Story</a></li><li><a href="../#flock">The Flock</a></li><li><a href="../flock/">Ambassadors</a></li><li><a href="#contact">Contact</a></li></ul></nav>
-    <div class="navr"><span data-me-slot></span><a class="cartbtn" href="#cart" aria-label="Cart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 016 0"/></svg><b data-cart-count></b></a><button class="menubtn" type="button" aria-expanded="false" aria-controls="links" aria-label="Menu"><i></i></button></div>
+    <nav aria-label="Main" class="menu" id="menu"><ul class="links"><li><a href="../">Home</a></li><li><a href="../nest/" aria-current="page">Shop</a></li><li><a href="../#story">The Story</a></li><li><a href="../#flock">The Flock</a></li><li><a href="../flock/">Ambassadors</a></li><li><a href="#contact">Contact</a></li></ul>
+      <div class="menu-foot"><span data-me-slot-m></span><a href="https://www.instagram.com/birdboost_impact" target="_blank" rel="noopener">Instagram</a><a href="https://www.tiktok.com/@official_birdboost.inc" target="_blank" rel="noopener">TikTok</a></div></nav>
+    <div class="navr"><span data-me-slot></span><a class="cartbtn" href="#cart" aria-label="Cart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 016 0"/></svg><b data-cart-count></b></a><button class="menubtn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Menu"><i></i></button></div>
   </div>
 </header>
 
@@ -154,10 +195,9 @@ dialog::backdrop{background:#000b;-webkit-backdrop-filter:blur(4px);backdrop-fil
   <div class="stick">
     <div class="bg"></div>
     <div class="inner">
-      <h1 id="h1">The Nest<span class="serif">where the flock returns</span></h1>
+      <h1 id="h1">The Nest<span class="serif">the Birdboost shop</span></h1>
       <div class="nestart" data-draw><svg data-nest role="img" aria-label="A woven nest"></svg><span class="rim" data-perch="0.5" data-perch-scale="1"></span></div>
-      <p>Every Birdboost piece comes together here.</p>
-      <a class="cue" href="#shop">Enter the collection ↓</a>
+      <a class="cue" href="#shop">Shop the collection ↓</a>
     </div>
   </div>
 </section>
@@ -165,9 +205,9 @@ dialog::backdrop{background:#000b;-webkit-backdrop-filter:blur(4px);backdrop-fil
 <section class="shop" id="shop" aria-labelledby="h-shop">
   <div class="wrap">
     <div class="shophead">
-      <h2 id="h-shop">The collection <span class="serif">first drop</span></h2>
-      <p class="mute" style="max-width:30em;margin:0">Limited stock. Choose your piece, send your order, and Birdboost confirms delivery and payment with you on WhatsApp.</p>
+      <h2 id="h-shop">The collection</h2>
     </div>
+    <ol class="how" aria-label="How ordering works"><li><b>1</b>Choose your piece and size</li><li><b>2</b>Place your order here</li><li><b>3</b>We contact you to arrange delivery and payment</li></ol>
     <div class="mybar" id="mybar" hidden></div>
     <div class="tools" role="search">
       <div class="chips" id="cats" aria-label="Category"></div>
@@ -184,19 +224,22 @@ dialog::backdrop{background:#000b;-webkit-backdrop-filter:blur(4px);backdrop-fil
 
 <footer class="foot" id="contact"><div class="wrap">
   <div class="cols">
-    <div><div class="big">Talk to the flock</div><p>Orders, sizes, collaborations or just to say hi. A real person from Birdboost answers on WhatsApp.</p>
-      <a class="btn g" href="https://wa.me/263713875931" target="_blank" rel="noopener">WhatsApp +263 71 387 5931</a></div>
-    <div><h4>Explore</h4><a href="../">Home</a><a href="../nest/">The Nest</a><a href="../#story" >The Story</a><a href="../#journey">The Journey</a></div>
+    <div><div class="big">Birdboost</div><p>Faith-driven clothing and community from Zimbabwe. Questions or collaborations? Message us on Instagram.</p>
+      <a class="btn o" href="https://www.instagram.com/birdboost_impact" target="_blank" rel="noopener">@birdboost_impact</a></div>
+    <div><h4>Explore</h4><a href="../">Home</a><a href="../nest/">The Nest</a><a href="../#story" >The Story</a><a href="../#collection">The Collection</a></div>
     <div><h4>The Flock</h4><a href="../flock/">Become an ambassador</a><a href="../portal/">Ambassador log in</a><a href="../#flock">The community</a></div>
-    <div><h4>Follow</h4><a href="https://www.instagram.com/birdboost_impact" target="_blank" rel="noopener">Instagram</a><a href="https://www.tiktok.com/@official_birdboost.inc" target="_blank" rel="noopener">TikTok</a><a href="https://wa.me/263713875931" target="_blank" rel="noopener">WhatsApp</a></div>
+    <div><h4>Follow</h4><a href="https://www.instagram.com/birdboost_impact" target="_blank" rel="noopener">Instagram</a><a href="https://www.tiktok.com/@official_birdboost.inc" target="_blank" rel="noopener">TikTok</a></div>
   </div>
   <div class="fine"><span>© <span data-year>2026</span> Birdboost · Faith-driven clothing and community, Zimbabwe</span><span class="serif" style="font-size:17px">God made me.</span></div>
 </div></footer>
 
-<dialog class="pd" id="pd" aria-labelledby="pdname"><button class="x" type="button" data-close aria-label="Close">×</button><div class="in" id="pdin"></div></dialog>
+<dialog class="pd" id="pd" aria-labelledby="pdname"><button class="x" type="button" data-close aria-label="Close">×</button><div class="in" id="pdin"></div>
+  <div class="zoom" id="zoom" aria-hidden="true"><div class="zh">Pinch or scroll to zoom · drag to look around</div><img id="zimg" alt=""><button class="zx" type="button" aria-label="Close zoom">×</button>
+    <div class="zc"><button type="button" data-z="-1" aria-label="Zoom out">−</button><button type="button" data-z="1" aria-label="Zoom in">+</button></div></div>
+</dialog>
 
 <dialog class="drawer" id="cart" aria-labelledby="carth"><div class="in">
-  <header><h2 id="carth">Your cart</h2><button class="x" type="button" data-close aria-label="Close cart">×</button></header>
+  <header><h2 id="carth">Your order</h2><button class="x" type="button" data-close aria-label="Close">×</button></header>
   <div class="body" id="cbody"></div>
   <footer id="cfoot"></footer>
 </div></dialog>
@@ -208,24 +251,32 @@ dialog::backdrop{background:#000b;-webkit-backdrop-filter:blur(4px);backdrop-fil
 <script src="../assets/bird.js"></script>
 <script>
 {
-const { esc, store, cart, root, WA } = window.BB;
+const { esc, store, cart, root } = window.BB;
 const $ = (id) => document.getElementById(id);
 const CFG = window.BB_CONFIG || {};
+const FORMSPREE = "https://formspree.io/f/mdegjvad"; // a copy of every order is emailed here, and it's the backup if the database can't be reached
 const hasDB = !!(CFG.SUPABASE_URL && CFG.SUPABASE_ANON_KEY && !/PASTE/.test(CFG.SUPABASE_URL));
 const rpc = (fn, body) => fetch(CFG.SUPABASE_URL + "/rest/v1/rpc/" + fn, { method: "POST",
   headers: { apikey: CFG.SUPABASE_ANON_KEY, Authorization: "Bearer " + CFG.SUPABASE_ANON_KEY, "Content-Type": "application/json" },
   body: JSON.stringify(body || {}) }).then((r) => r.ok ? r.json() : Promise.reject(new Error("http " + r.status)));
 const money = (v, cur) => v == null ? null : new Intl.NumberFormat("en", { style: "currency", currency: cur || "USD" }).format(v);
 const img = (u) => /^(https?:|data:)/.test(u || "") ? u : u ? root + u : "";
+const isUUID = (s) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s || "");
 
-let products = [], live = false;
+let products = [];
 const state = { cat: "All", q: "", size: "", sort: "feat" };
 
-/* ---------- gateway: scroll pushes you into the nest ---------- */
+/* ---------- gateway ---------- */
 const gate = $("gate"), rm = matchMedia("(prefers-reduced-motion: reduce)").matches;
 if (!rm) {
   let queued = false;
-  const upd = () => { queued = false; const p = Math.min(1, Math.max(0, scrollY / (gate.offsetHeight * 0.6))); gate.style.setProperty("--p", p.toFixed(3)); };
+  const rim = gate.querySelector(".rim");
+  const upd = () => {
+    queued = false; const p = Math.min(1, Math.max(0, scrollY / (gate.offsetHeight * 0.55))); gate.style.setProperty("--p", p.toFixed(3));
+    // as the nest fades, the bird leaves it and moves on to the first piece
+    const on = p < 0.3;
+    if (on !== rim.hasAttribute("data-perch")) { if (on) rim.setAttribute("data-perch", "0.5"); else rim.removeAttribute("data-perch"); if (window.BBBird && BBBird.rescan) BBBird.rescan(); }
+  };
   addEventListener("scroll", () => { if (!queued) { queued = true; requestAnimationFrame(upd); } }, { passive: true }); upd();
 }
 
@@ -237,16 +288,18 @@ function fromDB(p) {
 }
 async function loadProducts() {
   if (hasDB) {
-    try { const d = await rpc("shop_catalog"); if (Array.isArray(d) && d.length) { products = d.map(fromDB); live = true; return; } } catch (e) {}
+    try { const d = await rpc("shop_catalog"); if (Array.isArray(d) && d.length) { products = d.map(fromDB); return; } } catch (e) {}
   }
-  products = (window.BB_CATALOG || []).map((p) => ({ ...p }));
+  products = (window.BB_CATALOG || []).map((p) => ({ ...p, sizes: p.sizes || [] }));
 }
 
 /* ---------- the grid ---------- */
-const priceHtml = (p) => p.price == null ? `<span class="price soft">Price confirmed on WhatsApp</span>` : `<span class="price">${esc(money(p.price, p.currency))}</span>`;
+const priceHtml = (p) => p.price == null ? `<span class="price soft">Price confirmed when we contact you</span>` : `<span class="price">${esc(money(p.price, p.currency))}</span>`;
 const siblings = (p) => products.filter((x) => x.style === p.style && x.color);
+const dot = (s) => /^#[0-9a-f]{3,8}$/i.test(s.swatch || "") ? s.swatch : "#777";
 function paintFilters() {
   const cats = ["All", ...new Set(products.map((p) => p.category))];
+  $("cats").hidden = cats.length < 3;
   $("cats").innerHTML = cats.map((c) => `<button class="chip" type="button" aria-pressed="${c === state.cat}" data-cat="${esc(c)}">${esc(c)}</button>`).join("");
   const sizes = [...new Set(products.flatMap((p) => p.sizes))];
   $("fsize").innerHTML = `<option value="">Any size</option>` + sizes.map((s) => `<option${s === state.size ? " selected" : ""}>${esc(s)}</option>`).join("");
@@ -266,15 +319,16 @@ function paintGrid() {
   const list = shown();
   $("count").textContent = list.length === 1 ? "1 piece" : list.length + " pieces";
   $("grid").innerHTML = list.length ? list.map((p, i) => `<article class="card rv${i % 3 ? " d" + (i % 3) : ""}" id="${esc(p.id)}">
-      <button class="ph" type="button" data-open="${esc(p.id)}" aria-label="${esc(p.style)} ${esc(p.color)}, see details">${p.image ? `<img src="${esc(img(p.image))}" alt="" loading="lazy">` : ""}</button>
+      <button class="ph" type="button" data-open="${esc(p.id)}"${i === 0 ? ' data-perch="0.84" data-perch-scale="0.8"' : ""} aria-label="${esc(p.style)} ${esc(p.color)}, see details">${p.image ? `<img src="${esc(img(p.image))}" alt="" loading="lazy" width="333" height="385">` : ""}</button>
       ${p.badge ? `<span class="badge">${esc(p.badge)}</span>` : ""}
-      <button class="quick" type="button" data-open="${esc(p.id)}" tabindex="-1">Choose size</button>
       <div class="meta"><div><h3>${esc(p.style)}</h3>${p.color ? `<div class="col">${esc(p.color)}</div>` : ""}</div>${priceHtml(p)}</div>
-      ${siblings(p).length > 1 ? `<div class="sw" aria-label="Colours">${siblings(p).map((s) => `<button type="button" data-open="${esc(s.id)}" style="background:${/^#[0-9a-f]{3,8}$/i.test(s.swatch) ? s.swatch : "#777"}" aria-label="${esc(s.color)}"${s.id === p.id ? ' aria-current="true"' : ""}></button>`).join("")}</div>` : ""}
+      ${siblings(p).length > 1 ? `<div class="sw" aria-label="Colours">${siblings(p).map((s) => `<button type="button" data-open="${esc(s.id)}" style="background:${dot(s)}" aria-label="${esc(s.color)}"${s.id === p.id ? ' aria-current="true"' : ""}></button>`).join("")}</div>` : ""}
+      <button class="btn o choose" type="button" data-open="${esc(p.id)}">Choose size</button>
     </article>`).join("")
     : `<div class="empty" style="grid-column:1/-1"><p>Nothing in the Nest matches that.</p><button class="btn o" type="button" id="clear">Clear filters</button></div>`;
   requestAnimationFrame(() => document.querySelectorAll("#grid .rv").forEach((el) => el.classList.add("in")));
   const c = $("clear"); if (c) c.onclick = () => { Object.assign(state, { cat: "All", q: "", size: "" }); $("q").value = ""; paintFilters(); paintGrid(); };
+  if (window.BBBird && BBBird.rescan) BBBird.rescan();
 }
 $("cats").addEventListener("click", (e) => { const b = e.target.closest("[data-cat]"); if (!b) return; state.cat = b.dataset.cat; paintFilters(); paintGrid(); });
 $("q").addEventListener("input", (e) => { state.q = e.target.value.trim(); paintGrid(); });
@@ -282,27 +336,86 @@ $("fsize").addEventListener("change", (e) => { state.size = e.target.value; pain
 $("sort").addEventListener("change", (e) => { state.sort = e.target.value; paintGrid(); });
 $("grid").addEventListener("click", (e) => { const b = e.target.closest("[data-open]"); if (b) openProduct(b.dataset.open); });
 
+/* ---------- zoom: pinch, scroll-wheel, drag and double-tap ---------- */
+const zoom = $("zoom"), zimg = $("zimg");
+let Z = { s: 1, x: 0, y: 0 };
+const pts = new Map(); let pinch = null, lastTap = 0;
+function zDraw() {
+  const w = zimg.offsetWidth, h = zimg.offsetHeight, W = innerWidth, H = innerHeight;
+  // keep the picture on screen
+  const maxX = Math.max(0, (w * Z.s - W) / 2), maxY = Math.max(0, (h * Z.s - H) / 2);
+  Z.x = Math.max(-maxX, Math.min(maxX, Z.x)); Z.y = Math.max(-maxY, Math.min(maxY, Z.y));
+  zimg.style.transform = `translate(${Z.x - w * Z.s / 2}px,${Z.y - h * Z.s / 2}px) scale(${Z.s})`;
+}
+function zSet(s, cx = innerWidth / 2, cy = innerHeight / 2) {
+  s = Math.max(1, Math.min(4, s));
+  const k = s / Z.s, ox = cx - innerWidth / 2, oy = cy - innerHeight / 2;
+  Z.x = ox - (ox - Z.x) * k; Z.y = oy - (oy - Z.y) * k; Z.s = s; zDraw();
+}
+function openZoom(src, alt) {
+  zimg.src = src; zimg.alt = alt || ""; Z = { s: 1, x: 0, y: 0 };
+  zoom.classList.add("on"); zoom.setAttribute("aria-hidden", "false");
+  (zimg.complete ? Promise.resolve() : new Promise((r) => { zimg.onload = r; })).then(() => zSet(2));
+  zoom.querySelector(".zx").focus();
+}
+function closeZoom() { zoom.classList.remove("on"); zoom.setAttribute("aria-hidden", "true"); pts.clear(); pinch = null; }
+zoom.querySelector(".zx").onclick = closeZoom;
+zoom.querySelectorAll("[data-z]").forEach((b) => b.onclick = () => zSet(Z.s * (b.dataset.z > 0 ? 1.5 : 1 / 1.5)));
+zoom.addEventListener("wheel", (e) => { e.preventDefault(); zSet(Z.s * Math.exp(-e.deltaY * 0.0022), e.clientX, e.clientY); }, { passive: false });
+zoom.addEventListener("pointerdown", (e) => {
+  if (e.target.closest("button")) return;
+  zoom.setPointerCapture(e.pointerId); pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), s: Z.s }; }
+  const now = Date.now(); if (pts.size === 1 && now - lastTap < 300) { zSet(Z.s > 1.5 ? 1 : 2.5, e.clientX, e.clientY); lastTap = 0; } else lastTap = now;
+});
+zoom.addEventListener("pointermove", (e) => {
+  const p = pts.get(e.pointerId); if (!p) return;
+  const dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY;
+  if (pts.size === 2 && pinch) { const [a, b] = [...pts.values()]; zSet(pinch.s * Math.hypot(a.x - b.x, a.y - b.y) / pinch.d, (a.x + b.x) / 2, (a.y + b.y) / 2); }
+  else if (pts.size === 1) { Z.x += dx; Z.y += dy; zDraw(); }
+});
+const zEnd = (e) => { pts.delete(e.pointerId); if (pts.size < 2) pinch = null; };
+zoom.addEventListener("pointerup", zEnd); zoom.addEventListener("pointercancel", zEnd);
+addEventListener("resize", () => { if (zoom.classList.contains("on")) zDraw(); });
+
 /* ---------- product detail ---------- */
 const pd = $("pd");
+function views(p) {
+  const v = [{ k: "front", label: "Front", src: img(p.image) }];
+  if (p.back) v.push({ k: "back", label: "Back", src: img(p.back) });
+  if (p.model) v.push({ k: "3d", label: "3D" });
+  else if (p.back) v.push({ k: "spin", label: "360°" });
+  return v;
+}
+function showView(p, k) {
+  const old = $("pic"), v = views(p).find((x) => x.k === k) || views(p)[0];
+  document.querySelectorAll("#views button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.v === v.k));
+  const pic = document.createElement("div"); pic.className = "pic"; pic.id = "pic"; old.replaceWith(pic);  // a fresh stage each time, so nothing from the last view lingers
+  if (v.k === "3d" || v.k === "spin") {
+    BB3D.mount(pic, { name: p.style, front_image: img(p.image), back_image: img(p.back), model_url: v.k === "3d" ? img(p.model) : null }, { big: true });
+    return;
+  }
+  pic.addEventListener("click", (e) => { if (v.src && (e.target.closest("[data-zoom]") || e.target.tagName === "IMG")) openZoom(v.src, p.style); });
+  pic.innerHTML = v.src ? `<img src="${esc(v.src)}" alt="${esc(p.style)}${p.color ? " in " + esc(p.color) : ""}, ${v.label.toLowerCase()}" width="333" height="385"><button class="zoombtn" type="button" data-zoom>Zoom</button>` : "";
+}
 function openProduct(id) {
   const p = products.find((x) => x.id === id); if (!p) return;
   let qty = 1;
-  const sib = siblings(p);
-  $("pdin").innerHTML = `<div class="pic" id="pic">${p.image ? `<img src="${esc(img(p.image))}" alt="${esc(p.style)} in ${esc(p.color)}">` : ""}</div>
+  const sib = siblings(p), vs = views(p);
+  const prevSize = (pd.querySelector("input[name=size]:checked") || {}).value;
+  $("pdin").innerHTML = `<div class="view"><div class="pic" id="pic"></div>${vs.length > 1 && window.BB3D ? `<div class="views" id="views" role="group" aria-label="Views">${vs.map((v) => `<button type="button" data-v="${v.k}" aria-pressed="false">${v.label}</button>`).join("")}</div>` : ""}</div>
     <form class="info" id="pf" novalidate>
-      ${p.badge ? `<span class="lbl" style="color:var(--g2)">${esc(p.badge)}</span>` : ""}
-      <h2 id="pdname">${esc(p.style)}</h2>
-      ${p.color ? `<span>${esc(p.color)}</span>` : ""}<div>${priceHtml(p)}</div>
-      ${sib.length > 1 ? `<div><div class="lbl">Colour</div><div class="sw">${sib.map((s) => `<button type="button" data-swap="${esc(s.id)}" style="background:${/^#[0-9a-f]{3,8}$/i.test(s.swatch) ? s.swatch : "#777"}" aria-label="${esc(s.color)}"${s.id === p.id ? ' aria-current="true"' : ""}></button>`).join("")}</div></div>` : ""}
-      ${p.sizes.length ? `<div><div class="lbl" id="szl">Size</div><div class="sizes" id="sz" role="radiogroup" aria-labelledby="szl">${p.sizes.map((s) => `<label><input type="radio" name="size" value="${esc(s)}"><span>${esc(s)}</span></label>`).join("")}</div></div>` : ""}
+      ${p.badge ? `<span class="lbl" style="color:var(--g2);margin:0">${esc(p.badge)}</span>` : ""}
+      <div><h2 id="pdname">${esc(p.style)}</h2>${p.color ? `<div style="margin-top:6px">${esc(p.color)}</div>` : ""}</div>
+      ${sib.length > 1 ? `<div><div class="lbl">Colour · ${esc(p.color)}</div><div class="sw">${sib.map((s) => `<button type="button" data-swap="${esc(s.id)}" style="background:${dot(s)}" aria-label="${esc(s.color)}"${s.id === p.id ? ' aria-current="true"' : ""}></button>`).join("")}</div></div>` : ""}
+      ${p.sizes.length ? `<div><div class="lbl" id="szl">Size</div><div class="sizes" id="sz" role="radiogroup" aria-labelledby="szl">${p.sizes.map((s) => `<label><input type="radio" name="size" value="${esc(s)}"${s === prevSize ? " checked" : ""}><span>${esc(s)}</span></label>`).join("")}</div><p class="err" id="perr" role="alert" style="margin-top:8px"></p></div>` : `<p class="err" id="perr" role="alert"></p>`}
       <div><div class="lbl">Quantity</div><div class="qty"><button type="button" data-q="-1" aria-label="One less">−</button><output id="qv">1</output><button type="button" data-q="1" aria-label="One more">+</button></div></div>
-      <p class="err" id="perr" role="alert"></p>
-      <button class="btn w" style="width:100%">Add to cart</button>
-      <a class="btn o" style="width:100%" target="_blank" rel="noopener" href="https://wa.me/${WA}?text=${encodeURIComponent("Hi Birdboost, I have a question about the " + p.style + (p.color ? " (" + p.color + ")" : ""))}">Ask about this piece on WhatsApp</a>
-      ${p.description ? `<p style="margin:0">${esc(p.description)}</p>` : ""}
-      <p class="note">Delivery, collection and payment are confirmed with you on WhatsApp before anything is paid.</p>
+      ${p.description ? `<p style="margin:0;color:#cfcfc8">${esc(p.description)}</p>` : ""}
+      <p class="note">Place your order here and Birdboost contacts you to arrange delivery or collection and payment. Nothing is paid on the website.</p>
+      <div class="addbar">${p.price != null ? `<span class="price">${esc(money(p.price, p.currency))}</span>` : ""}<button class="btn w">Add to order</button></div>
     </form>`;
-  if ((p.back || p.model) && window.BB3D) BB3D.mount($("pic"), { name: p.style, front_image: img(p.image), back_image: img(p.back), model_url: p.model }, { big: true });
+  showView(p, "front");
+  const vw = $("views"); if (vw) vw.onclick = (e) => { const b = e.target.closest("[data-v]"); if (b) showView(p, b.dataset.v); };
   const f = $("pf");
   f.addEventListener("click", (e) => {
     const q = e.target.closest("[data-q]"); if (q) { qty = Math.max(1, Math.min(10, qty + +q.dataset.q)); $("qv").textContent = qty; }
@@ -312,7 +425,7 @@ function openProduct(id) {
   f.onsubmit = (e) => {
     e.preventDefault();
     const size = (f.querySelector("input[name=size]:checked") || {}).value || "";
-    if (p.sizes.length && !size) { $("perr").textContent = "Choose your size first."; $("sz").classList.add("bad"); f.querySelector("input[name=size]").focus(); return; }
+    if (p.sizes.length && !size) { $("perr").textContent = "Choose your size first."; $("sz").classList.add("bad"); $("sz").scrollIntoView({ block: "center", behavior: "smooth" }); f.querySelector("input[name=size]").focus({ preventScroll: true }); return; }
     const items = cart.items(), key = p.id + "|" + size, have = items.find((i) => i.key === key);
     if (have) have.qty = Math.min(10, have.qty + qty);
     else items.push({ key, id: p.id, name: p.style, color: p.color, size, qty, price: p.price, currency: p.currency, image: img(p.image) });
@@ -320,65 +433,74 @@ function openProduct(id) {
     pd.close(); openCart();
   };
   if (!pd.open) pd.showModal();
+  $("pdin").scrollTop = 0;
   history.replaceState(null, "", "#" + p.id);
 }
-pd.addEventListener("close", () => { if (location.hash && location.hash !== "#cart") history.replaceState(null, "", location.pathname + location.search); });
+pd.addEventListener("cancel", (e) => { if (zoom.classList.contains("on")) { e.preventDefault(); closeZoom(); } });
+pd.addEventListener("close", () => { closeZoom(); if (location.hash && location.hash !== "#cart") history.replaceState(null, "", location.pathname + location.search); });
 
-/* ---------- cart and checkout ---------- */
+/* ---------- order: cart, details, placed ---------- */
 const cd = $("cart");
 const codeNow = () => (store.get("bb-code", null) || {}).code || "";
-let codeInfo = null, view = "cart", last = null;
+let codeInfo = null, view = "cart";
 function totals(items) {
   const priced = items.every((i) => i.price != null), cur = (items[0] || {}).currency || "USD";
   const sub = items.reduce((n, i) => n + (i.price || 0) * i.qty, 0);
-  const pct = codeInfo && codeInfo.percent ? +codeInfo.percent : 0;
-  return { priced, cur, sub, pct, total: sub * (1 - pct / 100) };
+  const pct = codeInfo && codeInfo.ok && codeInfo.percent ? +codeInfo.percent : 0;
+  return { priced, cur, sub, pct, total: Math.round(sub * (1 - pct / 100) * 100) / 100, n: items.reduce((n, i) => n + i.qty, 0) };
 }
+const steps = (n) => `<div class="steps" aria-label="Step ${n} of 2"><span${n === 1 ? ' aria-current="step"' : ""}>1 · Your order</span><span aria-hidden="true">—</span><span${n === 2 ? ' aria-current="step"' : ""}>2 · Your details</span></div>`;
 function paintCart() {
   const items = cart.items(), body = $("cbody"), foot = $("cfoot");
   if (view === "done") return;
   if (!items.length) {
-    body.innerHTML = `<div class="empty"><p>Your cart is empty.</p><button class="btn o" type="button" data-close>Back to the collection</button></div>`;
+    body.innerHTML = `<div class="empty"><p>Nothing in your order yet.</p><button class="btn o" type="button" data-close>Back to the collection</button></div>`;
     foot.innerHTML = ""; return;
   }
   const t = totals(items);
   if (view === "cart") {
-    body.innerHTML = items.map((i, n) => `<div class="line"><img src="${esc(i.image)}" alt="">
+    body.innerHTML = steps(1) + items.map((i, n) => `<div class="line"><img src="${esc(i.image)}" alt="">
       <div><b>${esc(i.name)}</b><div class="mute" style="font-size:14px">${[i.color, i.size && "Size " + i.size].filter(Boolean).map(esc).join(" · ")}</div>
       <div class="qty" style="margin-top:6px"><button type="button" data-step="${n}" data-d="-1" aria-label="One less">−</button><output>${i.qty}</output><button type="button" data-step="${n}" data-d="1" aria-label="One more">+</button></div></div>
-      <div style="text-align:right">${i.price == null ? '<span class="mute" style="font-size:13px">Price on WhatsApp</span>' : `<b>${esc(money(i.price * i.qty, i.currency))}</b>`}<br><button class="rm" type="button" data-rm="${n}">Remove</button></div></div>`).join("");
-    foot.innerHTML = `<form class="codebox" id="cf"><label class="sr-only" for="code">Ambassador or discount code</label><input class="field" id="code" placeholder="Ambassador code" value="${esc(codeNow())}" autocomplete="off" style="width:auto"><button class="btn o" style="min-height:42px;padding:0 16px">Apply</button></form>
-      <p class="codemsg" id="cmsg" aria-live="polite">${codeMsg()}</p>
-      <div class="tot"><span>Subtotal</span>${t.priced ? `<b>${esc(money(t.sub, t.cur))}</b>` : `<b class="soft">Confirmed on WhatsApp</b>`}</div>
-      ${t.priced && t.pct ? `<div class="tot"><span>With your code (−${t.pct}%)</span><b>${esc(money(t.total, t.cur))}</b></div>` : ""}
-      <button class="btn w" type="button" id="tocheck">Checkout <span class="arr">→</span></button>`;
+      <div style="text-align:right">${i.price == null ? '<span class="mute" style="font-size:13px">Price to confirm</span>' : `<b>${esc(money(i.price * i.qty, i.currency))}</b>`}<br><button class="rm" type="button" data-rm="${n}">Remove</button></div></div>`).join("")
+      + `<form class="codebox" id="cf" style="margin-top:18px"><label class="sr-only" for="code">Ambassador code</label><input class="field" id="code" placeholder="Ambassador code" value="${esc(codeNow())}" autocomplete="off"><button class="btn o" style="min-height:44px;padding:0 18px">Apply</button></form>
+      <p class="codemsg" id="cmsg" aria-live="polite" style="margin-top:8px">${codeMsg()}</p>`;
+    foot.innerHTML = `<div class="tot"><span>${t.pct ? "Total with your code (−" + t.pct + "%)" : "Total"}</span>${t.priced ? `<b>${esc(money(t.total, t.cur))}</b>` : `<b class="soft">Confirmed when we contact you</b>`}</div>
+      <button class="btn w" type="button" id="tocheck">Continue <span class="arr">→</span></button>`;
     $("cf").onsubmit = (e) => { e.preventDefault(); applyCode($("code").value); };
-    $("tocheck").onclick = () => { view = "check"; paintCart(); };
+    $("tocheck").onclick = () => { view = "check"; paintCart(); $("cbody").scrollTop = 0; };
   } else if (view === "check") {
-    const saved = store.get("bb-buyer", {});
-    body.innerHTML = `<form class="ff" id="co" novalidate>
-      <p class="mute" style="margin:0">Tell us where to find you. Birdboost confirms stock, delivery and how to pay on WhatsApp. Nothing is charged here.</p>
-      <label>Full name<input name="name" autocomplete="name" required value="${esc(saved.name || "")}"></label>
-      <label>WhatsApp number<input name="phone" type="tel" inputmode="tel" autocomplete="tel" required placeholder="e.g. 077 123 4567" value="${esc(saved.phone || "")}"></label>
-      <label>Email (optional)<input name="email" type="email" inputmode="email" autocomplete="email" value="${esc(saved.email || "")}"></label>
-      <label>City or town<input name="city" required autocomplete="address-level2" value="${esc(saved.city || "")}"></label>
-      <label>How do you want it?<select name="delivery"><option>Delivery</option><option>Collection</option><option>Not sure yet</option></select></label>
-      <label>Anything else? (optional)<textarea name="note" rows="2"></textarea></label>
+    const s = store.get("bb-buyer", {}), del = s.delivery || "Delivery";
+    body.innerHTML = steps(2) + `<form class="ff" id="co" novalidate>
+      <p class="mute" style="margin:0">Where can we reach you? Birdboost will contact you to confirm your order, delivery and payment. Nothing is paid on the website.</p>
+      <label>Full name<input name="name" autocomplete="name" required value="${esc(s.name || "")}"></label>
+      <label>Phone number <small>WhatsApp or calls</small><input name="phone" type="tel" inputmode="tel" autocomplete="tel" required placeholder="e.g. 077 123 4567" value="${esc(s.phone || "")}"></label>
+      <label>Email <small>optional</small><input name="email" type="email" inputmode="email" autocomplete="email" value="${esc(s.email || "")}"></label>
+      <div><div class="lbl" id="dl">Delivery or collection</div><div class="seg" role="radiogroup" aria-labelledby="dl">
+        <label><input type="radio" name="delivery" value="Delivery"${del !== "Collection" ? " checked" : ""}><span>Delivery</span></label>
+        <label><input type="radio" name="delivery" value="Collection"${del === "Collection" ? " checked" : ""}><span>Collection</span></label></div></div>
+      <label>City or town<input name="city" required autocomplete="address-level2" value="${esc(s.city || "")}"></label>
+      <label id="addrl">Area or address <small>for delivery</small><input name="address" autocomplete="street-address" value="${esc(s.address || "")}"></label>
+      <label>Anything we should know? <small>optional</small><textarea name="note" rows="2"></textarea></label>
+      <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" style="display:none" aria-hidden="true">
       <p class="err" id="coerr" role="alert"></p>
     </form>`;
-    foot.innerHTML = `<div class="tot"><span>${items.reduce((n, i) => n + i.qty, 0)} pieces${codeNow() ? " · code " + esc(codeNow()) : ""}</span>${t.priced ? `<b>${esc(money(t.pct ? t.total : t.sub, t.cur))}</b>` : `<b class="soft">Total on WhatsApp</b>`}</div>
-      <button class="btn g" type="submit" form="co" id="place">Send my order</button><button class="btn o" type="button" id="back">Back to cart</button>`;
+    foot.innerHTML = `<div class="tot"><span>${t.n} ${t.n === 1 ? "piece" : "pieces"}${codeNow() ? " · code " + esc(codeNow()) : ""}</span>${t.priced ? `<b>${esc(money(t.total, t.cur))}</b>` : `<b class="soft">Confirmed when we contact you</b>`}</div>
+      <button class="btn g" type="submit" form="co" id="place">Place order</button><button class="btn o" type="button" id="back">Back</button>`;
+    const co = $("co"), addr = () => { $("addrl").hidden = co.elements.delivery.value === "Collection"; };
+    co.addEventListener("change", addr); addr();
+    co.addEventListener("input", (e) => { e.target.removeAttribute("aria-invalid"); });
     $("back").onclick = () => { view = "cart"; paintCart(); };
-    $("co").onsubmit = placeOrder;
+    co.onsubmit = placeOrder;
   }
 }
 function codeMsg() {
   const c = codeNow(); if (!c) return "";
   if (codeInfo && codeInfo.code === c) {
     if (!codeInfo.ok) return "We couldn't find that code. Check it, or leave it empty.";
-    return `${codeInfo.name ? "Code from " + esc(codeInfo.name) + ", part of the Flock. " : "Code applied. "}${codeInfo.percent ? codeInfo.percent + "% off." : "Your discount is applied when we confirm your order."}`;
+    return `${codeInfo.name ? "Code from " + esc(codeInfo.name) + ", a Birdboost ambassador. " : "Code applied. "}${codeInfo.percent ? codeInfo.percent + "% off." : ""}`;
   }
-  return `Code ${esc(c)} saved. Your discount is applied when we confirm your order.`;
+  return `Code ${esc(c)} added to your order.`;
 }
 async function applyCode(v) {
   const c = String(v || "").replace(/[^A-Za-z0-9]/g, "").toUpperCase().slice(0, 40);
@@ -388,41 +510,72 @@ async function applyCode(v) {
   if (hasDB) { try { const d = await rpc("shop_check_code", { p_code: c }); if (d && typeof d === "object") codeInfo = { code: c, ok: !!d.ok, name: d.name, percent: d.percent }; } catch (e) {} }
   paintCart();
 }
+const newRef = () => "BB-" + Array.from(crypto.getRandomValues(new Uint8Array(3)), (b) => b.toString(16).padStart(2, "0")).join("").slice(0, 5).toUpperCase();
+const timeout = (ms) => { const c = new AbortController(); setTimeout(() => c.abort(), ms); return c.signal; };
 async function placeOrder(e) {
   e.preventDefault();
-  const f = e.target, v = (k) => f.elements[k].value.trim(), err = $("coerr");
+  const f = e.target, v = (k) => String(f.elements[k].value || "").trim(), err = $("coerr");
+  if (v("_gotcha")) return;
   f.querySelectorAll("[aria-invalid]").forEach((x) => x.removeAttribute("aria-invalid"));
+  const delivery = v("delivery") || "Delivery";
   const miss = ["name", "phone", "city"].filter((k) => !v(k));
+  if (v("phone") && v("phone").replace(/[^0-9]/g, "").length < 7) miss.push("phone");
   if (v("email") && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v("email"))) miss.push("email");
-  if (miss.length) { miss.forEach((k) => f.elements[k].setAttribute("aria-invalid", "true")); f.elements[miss[0]].focus(); err.textContent = "Please add your " + miss.map((k) => ({ name: "name", phone: "WhatsApp number", city: "city or town", email: "email in the form name@example.com" })[k]).join(", ") + "."; return; }
-  store.set("bb-buyer", { name: v("name"), phone: v("phone"), email: v("email"), city: v("city") });
+  if (miss.length) {
+    const names = { name: "your name", phone: "a phone number we can reach you on", city: "your city or town", email: "an email like name@example.com (or leave it empty)" };
+    [...new Set(miss)].forEach((k) => f.elements[k].setAttribute("aria-invalid", "true")); f.elements[miss[0]].focus();
+    err.textContent = "Please add " + [...new Set(miss)].map((k) => names[k]).join(", ") + "."; return;
+  }
+  const buyer = { name: v("name"), phone: v("phone"), email: v("email"), city: v("city"), address: delivery === "Delivery" ? v("address") : "", delivery };
+  store.set("bb-buyer", buyer);
   const items = cart.items(), t = totals(items), code = codeNow();
-  const btn = $("place"); btn.disabled = true; btn.textContent = "Sending...";
+  const btn = $("place"); btn.disabled = true; btn.textContent = "Placing your order...";
+  err.textContent = "";
+
+  // 1. Save it in Birdboost's order list (Supabase), if the shop database is set up.
   let ref = "", saved = false;
-  if (live) {
+  if (hasDB) {
     try {
-      const d = await rpc("shop_order", { p_name: v("name"), p_phone: v("phone"), p_email: v("email") || null, p_city: v("city"), p_delivery: v("delivery"), p_note: v("note") || null, p_code: code || null,
-        p_items: items.map((i) => ({ product_id: i.id, size: i.size || null, qty: i.qty })) });
+      const d = await rpc("shop_order", { p_name: buyer.name, p_phone: buyer.phone, p_email: buyer.email || null, p_city: buyer.city, p_delivery: delivery,
+        p_address: buyer.address || null, p_note: v("note") || null, p_code: code || null,
+        p_items: items.map((i) => isUUID(i.id) ? { product_id: i.id, size: i.size || null, qty: i.qty }
+          : { item: i.id, name: i.name, color: i.color || null, size: i.size || null, qty: i.qty, price: i.price, currency: i.currency }) });
       if (d && d.ref) { ref = d.ref; saved = true; }
     } catch (x) {}
   }
-  const lines = ["Hi Birdboost, I'd like to order" + (ref ? " (order " + ref + ")" : "") + ":"];
-  items.forEach((i) => lines.push(`- ${i.name}${i.color ? " (" + i.color + ")" : ""}${i.size ? ", size " + i.size : ""} x ${i.qty}`));
-  if (t.priced) lines.push("Subtotal: " + money(t.sub, t.cur) + (t.pct ? ", " + money(t.total, t.cur) + " with code" : ""));
-  if (code) lines.push("Ambassador code: " + code);
-  lines.push("", "Name: " + v("name"), "WhatsApp: " + v("phone"), "City: " + v("city"), "Delivery or collection: " + v("delivery"));
-  if (v("email")) lines.push("Email: " + v("email"));
-  if (v("note")) lines.push("Note: " + v("note"));
-  const msg = lines.join("\n");
-  last = { msg, ref, saved };
+  if (!ref) ref = newRef();
+
+  // 2. Email a copy to Birdboost (Formspree). If step 1 failed, this is how the order arrives.
+  const lines = items.map((i) => `${i.name}${i.color ? " (" + i.color + ")" : ""}${i.size ? ", size " + i.size : ""} x ${i.qty}${i.price != null ? " = " + money(i.price * i.qty, i.currency) : ""}`);
+  const fd = new FormData();
+  fd.append("_subject", `New Birdboost order ${ref}: ${buyer.name} (${buyer.city})`);
+  fd.append("form", "Shop order");
+  fd.append("order_ref", ref);
+  fd.append("name", buyer.name); fd.append("phone", buyer.phone);
+  if (buyer.email) { fd.append("email", buyer.email); fd.append("_replyto", buyer.email); }
+  fd.append("delivery", delivery); fd.append("city", buyer.city);
+  if (buyer.address) fd.append("address", buyer.address);
+  fd.append("items", lines.join("\n"));
+  fd.append("total", t.priced ? money(t.total, t.cur) + (t.pct ? ` (${t.pct}% off with code)` : "") : "To confirm");
+  if (code) fd.append("ambassador_code", code);
+  if (v("note")) fd.append("note", v("note"));
+  fd.append("saved_in_admin", saved ? "yes" : "no, only in this email");
+  let mailed = false;
+  try { const r = await fetch(FORMSPREE, { method: "POST", body: fd, headers: { Accept: "application/json" }, signal: timeout(15000) }); mailed = r.ok; } catch (x) {}
+
+  if (!saved && !mailed) {
+    btn.disabled = false; btn.textContent = "Try again";
+    err.textContent = "We couldn't send your order. Check your connection and tap Try again. Your details are kept.";
+    return;
+  }
+  cart.save([]);
   view = "done";
-  $("cbody").innerHTML = `<div class="ok" role="status"><h3>${saved ? "Order received" : "One last step"}</h3>
-    <p>${saved ? `Your order reference is <b>${esc(ref)}</b>. Send it to us on WhatsApp and we'll confirm stock, delivery and how to pay.` : "Send your order to Birdboost on WhatsApp. We'll confirm stock, delivery and how to pay there."} No payment has been taken.</p>
-    <pre>${esc(msg)}</pre></div>`;
-  $("cfoot").innerHTML = `<a class="btn g" id="wa" href="https://wa.me/${WA}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Send on WhatsApp</a><button class="btn o" type="button" id="cp">Copy order</button><button class="btn o" type="button" id="done">Done</button>`;
-  $("wa").addEventListener("click", () => cart.save([]));
-  $("cp").onclick = () => navigator.clipboard.writeText(msg).then(() => { $("cp").textContent = "Copied"; }, () => { $("cp").textContent = "Select the text above to copy"; });
-  $("done").onclick = () => { if (saved) cart.save([]); view = "cart"; cd.close(); };
+  $("cbody").innerHTML = `<div class="ok" role="status"><div class="tick" aria-hidden="true">✓</div><h3>Order placed</h3>
+    <div class="ref">${esc(ref)}</div>
+    <p>Thank you, ${esc(buyer.name.split(" ")[0])}. Birdboost will contact you on <b>${esc(buyer.phone)}</b> to confirm your order and arrange ${delivery === "Collection" ? "collection" : "delivery"} and payment.</p>
+    <p class="mute" style="font-size:14px">${esc(t.n + (t.n === 1 ? " piece" : " pieces"))}${t.priced ? " · " + esc(money(t.total, t.cur)) : ""}. Nothing has been paid on the website. Keep your reference in case you need it.</p></div>`;
+  $("cfoot").innerHTML = `<button class="btn w" type="button" id="done">Done</button>`;
+  $("done").onclick = () => { view = "cart"; cd.close(); };
 }
 $("cbody").addEventListener("click", (e) => {
   const items = cart.items();
@@ -430,8 +583,8 @@ $("cbody").addEventListener("click", (e) => {
   const r = e.target.closest("[data-rm]"); if (r) { items.splice(+r.dataset.rm, 1); cart.save(items); paintCart(); }
 });
 function openCart() { if (view === "done") view = "cart"; paintCart(); if (!cd.open) cd.showModal(); }
-cd.addEventListener("close", () => { if (location.hash === "#cart") history.replaceState(null, "", location.pathname + location.search); if (view === "check") view = "cart"; });
-document.querySelectorAll('a[href="#cart"]').forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); openCart(); }));
+cd.addEventListener("close", () => { if (location.hash === "#cart") history.replaceState(null, "", location.pathname + location.search); if (view === "check") view = "cart"; if (view === "done") view = "cart"; });
+document.querySelectorAll('a[href="#cart"]').forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); document.body.classList.remove("menu-open"); openCart(); }));
 [pd, cd].forEach((d) => d.addEventListener("click", (e) => { if (e.target === d || e.target.closest("[data-close]")) d.close(); }));
 
 /* ---------- an ambassador sees their own code and link ---------- */
@@ -439,7 +592,7 @@ const me = window.BB.me();
 if (me && me.code) {
   const link = new URL("?code=" + encodeURIComponent(me.code), location.href.split("#")[0].split("?")[0]).href;
   $("mybar").hidden = false;
-  $("mybar").innerHTML = `<span>Your bird is home, <b>${esc(me.name)}</b>. Your store code</span> <code>${esc(me.code)}</code><span class="mute" style="flex:1;min-width:200px">Share your Nest link. Anyone who opens it gets your code at checkout.</span><button class="btn o" type="button" id="cplink" style="min-height:42px">Copy my link</button>`;
+  $("mybar").innerHTML = `<span>Welcome back, <b>${esc(me.name)}</b>. Your code</span> <code>${esc(me.code)}</code><span class="mute" style="flex:1;min-width:200px">Share your link. Anyone who orders through it is linked to you.</span><button class="btn o" type="button" id="cplink" style="min-height:44px">Copy my link</button>`;
   $("cplink").onclick = () => navigator.clipboard.writeText(link).then(() => { $("cplink").textContent = "Link copied"; }, () => { $("cplink").textContent = link; });
 }
 
