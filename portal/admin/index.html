@@ -70,6 +70,13 @@ td .btn{margin:2px 0}
   table.rt td:empty{display:none}
   table.rt td.acts .row{flex-wrap:wrap!important}
 }
+/* content review */
+.subgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.sub{border:1px solid var(--line);background:#111;display:flex;flex-direction:column}
+.sub .m{width:100%;aspect-ratio:4/5;background:#0b0b0b;display:grid;place-items:center;overflow:hidden}
+.sub .m img,.sub .m video{width:100%;height:100%;object-fit:cover;display:block}
+.sub .m .lk{padding:16px;text-align:center;word-break:break-all}
+.sub .i{padding:12px 14px}
 </style>
 </head>
 <body>
@@ -87,7 +94,7 @@ const PORTAL_URL = new URL("../", location.href).href;
 let db, user, tab = location.hash.slice(1) || "ambassadors";
 let D = { ambassadors: [], tasks: [], task_done: [], events: [], event_people: [], products: [], preorders: [], sales: [], settings: {}, admins: [], orders: [] };
 // The Nest (public shop) switches on once portal-setup/update-03-the-nest.sql has been run.
-let shopReady = false;
+let shopReady = false, worldReady = false;
 
 // ---------- helpers ----------
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -178,6 +185,11 @@ async function loadAll() {
   const so = await db.from("shop_orders").select("*").order("created_at", { ascending: false });
   shopReady = !so.error;
   if (shopReady) { D.orders = so.data || []; if (!TABS.some(([k]) => k === "orders")) TABS.splice(4, 0, ["orders", "Shop orders"]); }
+  // Applications, content and campaigns (once update-05 has been run).
+  const [ap, sb, cp, cpp, rc] = await Promise.all([t("applications"), t("submissions"), t("campaigns"), db.from("campaign_people").select("*"), t("received", "received_on")]);
+  worldReady = !ap.error && !sb.error && !cp.error;
+  Object.assign(D, { applications: worldReady ? ap.data : [], submissions: worldReady ? sb.data : [], campaigns: worldReady ? cp.data : [], campaign_people: cpp.data || [], received: rc.data || [] });
+  if (worldReady && !TABS.some(([k]) => k === "content")) TABS.splice(1, 0, ["apps", "Applications"], ["content", "Content"], ["campaigns", "Campaigns"]);
 }
 async function refresh() { await loadAll(); render(); }
 
@@ -222,11 +234,13 @@ function attention() {
     unmatched: D.sales.filter((x) => !x.ambassador_id).length,
     newOrders: D.orders.filter((o) => o.status === "new").length,
     noWhatsApp: !D.settings.whatsapp_link,
+    newApps: (D.applications || []).filter((a) => a.status === "new").length,
+    toReview: (D.submissions || []).filter((x) => x.status === "pending").length,
   };
 }
 function render() {
   const at = attention();
-  const badge = { events: at.applicants, merch: at.preorders, sales: at.unmatched, orders: at.newOrders };
+  const badge = { apps: at.newApps, content: at.toReview, events: at.applicants, merch: at.preorders, sales: at.unmatched, orders: at.newOrders };
   const scrollY = window.scrollY, same = render.last === tab; render.last = tab;
   app.innerHTML = `<header class="top"><div class="wrap"><a class="brand" href="#ambassadors"><span class="logo"></span>FLOCK ADMIN</a><span class="sp"></span>
     <span class="who-am-i" title="${esc(user.email)}">${esc(user.email)}</span>
@@ -244,7 +258,7 @@ function render() {
   });
   const sel = app.querySelector(".tabs [aria-selected=true]"); if (sel) sel.scrollIntoView({ block: "nearest", inline: "nearest" });
   const v = document.getElementById("view");
-  ({ ambassadors: vAmb, tasks: vTasks, events: vEvents, merch: vMerch, orders: shopReady ? vOrders : vAmb, sales: vSales, settings: vSettings }[tab] || vAmb)(v);
+  ({ ambassadors: vAmb, apps: worldReady ? vApps : vAmb, content: worldReady ? vContent : vAmb, campaigns: worldReady ? vCampaigns : vAmb, tasks: vTasks, events: vEvents, merch: vMerch, orders: shopReady ? vOrders : vAmb, sales: vSales, settings: vSettings }[tab] || vAmb)(v);
   labelTables(v);
   if (same) window.scrollTo(0, scrollY); // stay in place after saving something
 }
@@ -272,6 +286,8 @@ let ambFilter = "all";
 function vAmb(v) {
   const n = D.ambassadors.length, active = D.ambassadors.filter((a) => a.is_active !== false).length, at = attention();
   const items = [
+    at.newApps && ["apps", at.newApps, at.newApps === 1 ? "new application" : "new applications"],
+    at.toReview && ["content", at.toReview, at.toReview === 1 ? "post waiting for review" : "posts waiting for review"],
     at.applicants && ["events", at.applicants, at.applicants === 1 ? "event applicant to review" : "event applicants to review"],
     at.preorders && ["merch", at.preorders, at.preorders === 1 ? "pre-order to confirm" : "pre-orders to confirm"],
     at.expiring && ["ambassadors:expiring", at.expiring, at.expiring === 1 ? "access code expiring within 2 weeks" : "access codes expiring within 2 weeks"],
@@ -284,19 +300,28 @@ function vAmb(v) {
     <div class="kpis"><div class="kpi"><b>${n}</b><span>ambassadors</span></div><div class="kpi"><b>${active}</b><span>active</span></div>
       <div class="kpi"><b>${D.ambassadors.filter((a) => a.code_last_used).length}</b><span>have logged in</span></div></div>
     ${n ? `<div class="filters"><input id="q" type="search" placeholder="Search name, city or code" aria-label="Search ambassadors">
-      <div class="row" role="group" aria-label="Show">${[["all", "All"], ["active", "Active"], ["inactive", "Inactive"], ["expiring", "Code expiring"]].map(([k, l]) => `<button class="chip" data-f="${k}" aria-pressed="${ambFilter === k}">${l}</button>`).join("")}</div></div>
+      <div class="row" role="group" aria-label="Show">${[["all", "All"], ["active", "Active"], ["pending", "Not logged in yet"], ["new", "New"], ["top", "Top performers"], ...(worldReady ? [["campaign", "In a campaign"], ["review", "Needs review"]] : []), ["inactive", "Inactive"], ["expiring", "Code expiring"]].map(([k, l]) => `<button class="chip" data-f="${k}" aria-pressed="${ambFilter === k}">${l}</button>`).join("")}</div></div>
     <div class="tablewrap"><table><thead><tr><th>Ambassador</th><th>Status</th><th>Access code</th><th>Actions</th><th>Last login</th><th>Tasks</th><th>Sold</th></tr></thead><tbody id="rows"></tbody></table></div>
     <p class="small mute" id="count" style="margin-top:8px"></p>`
     : `<div class="empty"><h3>No ambassadors yet</h3><p>Pick people from your applications, then press “+ Add ambassador”. Each one gets a fun access code to log in with and a store code for their sales.</p></div>`}`;
-  document.getElementById("add").onclick = addAmbassador;
+  document.getElementById("add").onclick = () => addAmbassador();
   v.querySelectorAll("[data-go]").forEach((b) => b.onclick = () => { const [t, f] = b.dataset.go.split(":"); if (f) { ambFilter = f; render(); } else go(t); });
   const rows = document.getElementById("rows"); if (!rows) return;
   const soon = Date.now() + 14 * 864e5;
   const match = { all: () => true, active: (a) => a.is_active !== false, inactive: (a) => a.is_active === false,
-    expiring: (a) => a.code_expires_at && new Date(a.code_expires_at).getTime() < soon };
+    expiring: (a) => a.code_expires_at && new Date(a.code_expires_at).getTime() < soon,
+    pending: (a) => a.is_active !== false && !a.code_last_used,
+    new: (a) => a.created_at && Date.now() - new Date(a.created_at).getTime() < 30 * 864e5,
+    top: (a) => score(a) > 0,
+    campaign: (a) => D.campaign_people.some((p) => p.ambassador_id === a.id && p.status === "assigned" && (byId(D.campaigns, p.campaign_id) || {}).is_active),
+    review: (a) => D.submissions.some((x) => x.ambassador_id === a.id && x.status === "pending") };
+  // Top performers: pieces sold, plus posts on the website, events worked and tasks done.
+  const score = (a) => salesQty(a.id) * 3 + (D.submissions || []).filter((x) => x.ambassador_id === a.id && (x.status === "approved" || x.status === "featured")).length * 2
+    + D.event_people.filter((p) => p.ambassador_id === a.id && p.status === "assigned").length + D.task_done.filter((t) => t.ambassador_id === a.id).length;
   const draw = (q = "") => {
     q = q.toLowerCase();
-    const list = D.ambassadors.filter(match[ambFilter]).filter((a) => !q || [a.full_name, a.city, a.store_code, a.access_code].join(" ").toLowerCase().includes(q));
+    const list = D.ambassadors.filter(match[ambFilter] || match.all).filter((a) => !q || [a.full_name, a.city, a.store_code, a.access_code].join(" ").toLowerCase().includes(q));
+    if (ambFilter === "top") list.sort((x, y) => score(y) - score(x));
     rows.innerHTML = list.map((a) => `<tr${a.is_active === false ? ' style="opacity:.75"' : ""}>
       <td class="lead"><button class="linkish" data-open="${a.id}">${esc(a.full_name)}</button><div class="small mute">${esc(a.city || "")}${a.city ? " · " : ""}store code <code>${esc(a.store_code)}</code></div></td>
       <td>${statusPill(a)}</td>
@@ -365,9 +390,9 @@ function mountPicker({ onConfirm, confirmLabel = "✓ Use this code" } = {}) {
   return P;
 }
 
-function addAmbassador() {
+function addAmbassador(pre, fromApp) {
   const extra = [{ k: "store_code", label: "Store code", hint: "Leave empty to make one from their name. Letters and numbers only." }, { k: "valid", label: "Access code lasts", type: "select", options: VALIDITY }];
-  openDlg("Add ambassador", `<form id="f"><div class="grid2">${fieldsHtml([...AMB_FIELDS.slice(0, 6), ...extra])}${codePickerHtml()}${fieldsHtml([AMB_FIELDS[6]])}</div><button class="btn g" id="create">Create account</button></form>`);
+  openDlg("Add ambassador", `<form id="f"><div class="grid2">${fieldsHtml([...AMB_FIELDS.slice(0, 6), ...extra], pre || {})}${codePickerHtml()}${fieldsHtml([AMB_FIELDS[6]], pre || {})}</div><button class="btn g" id="create">Create account</button></form>`);
   const picker = mountPicker();
   document.getElementById("f").onsubmit = async (e) => {
     e.preventDefault(); const f = e.target, v = readForm(f, [...AMB_FIELDS, ...extra]);
@@ -378,6 +403,7 @@ function addAmbassador() {
         p_full_name: v.full_name, p_phone: v.phone, p_email: v.email, p_city: v.city, p_instagram: v.instagram, p_tiktok: v.tiktok,
         p_notes: v.notes, p_store_code: v.store_code, p_valid_days: v.valid ? +v.valid : null, p_access_code: picker.code })), "Ambassador created");
     } catch (err) { if (/code_taken/.test(err.message || "")) picker.shuffle(); return; }
+    if (fromApp) { try { ok(await db.from("applications").update({ status: "approved", ambassador_id: a.id }).eq("id", fromApp)); } catch (e) {} }
     await loadAll(); render(); showInvite(a, true);
   };
 }
@@ -437,10 +463,12 @@ function manageAmbassador(id) {
       <p class="small">Store code <b>${esc(a.store_code)}</b> · ${salesQty(id)} pieces sold · ${D.task_done.filter((t) => t.ambassador_id === id).length} tasks done</p>
       ${evs.length ? `<p class="small">${evs.map((p) => `${esc(p.ev.title)} <span class="pill">${p.status}</span>`).join("<br>")}</p>` : `<p class="small mute">No events yet.</p>`}
       ${sales.length ? `<p class="small mute">Latest sale: ${esc(sales[0].item || "")} on ${fmt(sales[0].sold_on, false)}</p>` : ""}</div>
+    ${worldCard(id)}
     <form id="f"><h3>Details</h3><div class="grid2">${fieldsHtml([...AMB_FIELDS.slice(0, 6), { k: "store_code", label: "Store code", req: true }, AMB_FIELDS[6]], a)}</div>
       <div class="row" style="justify-content:space-between"><button class="btn g">Save details</button><button type="button" class="btn bad sm" id="del">Delete ambassador</button></div></form>`);
   const upd = async (btn, patch, msg) => { await busy(btn, async () => ok(await db.from("ambassadors").update(patch).eq("id", id)), msg); await loadAll(); render(); manageAmbassador(id); };
   document.getElementById("show").onclick = () => showInvite(a);
+  wireWorldCard(id);
   const rv = document.getElementById("revoke"); if (rv) rv.onclick = (e) => { if (confirm(`Revoke ${a.full_name}'s code? They'll be logged out straight away.`)) upd(e.currentTarget, { code_status: "revoked" }, "Code revoked"); };
   const rs = document.getElementById("restore"); if (rs) rs.onclick = (e) => upd(e.currentTarget, { code_status: "active" }, "Code switched back on");
   document.getElementById("newc").onclick = () => changeCode(id, true);
@@ -509,7 +537,14 @@ const EVENT_FIELDS = [
   { k: "brief", label: "Brief", type: "textarea", full: true, hint: "What's happening, what ambassadors will do, timings, who to report to." },
   { k: "is_open", label: "Open for applications (ambassadors can see it and apply)", type: "check", def: true },
 ];
-const evRead = (f) => { const v = readForm(f, EVENT_FIELDS); v.starts_at = fromLocalInput(v.starts_at); v.ends_at = fromLocalInput(v.ends_at); return v; };
+const EVENT_PUBLIC = [
+  { k: "is_public", label: "Show on the website's Events page", type: "check", def: false },
+  { k: "cover_file", label: "Cover photo (optional)", type: "file", accept: "image/*" },
+  { k: "featured", label: "Pieces featured", ph: "e.g. Righteous Tee" },
+  { k: "recap", label: "Recap (after the event)", type: "textarea", full: true, hint: "A few lines on how it went. Shown on the event's page with the photos you approve for it." },
+];
+const evFields = () => worldReady ? [...EVENT_FIELDS, ...EVENT_PUBLIC] : EVENT_FIELDS;
+const evRead = (f) => { const v = readForm(f, evFields()); v.starts_at = fromLocalInput(v.starts_at); v.ends_at = fromLocalInput(v.ends_at); return v; };
 const evVals = (e) => ({ ...e, starts_at: toLocalInput(e.starts_at), ends_at: toLocalInput(e.ends_at) });
 const ST_PILL = { applied: '<span class="pill blue">Applied</span>', suggested: '<span class="pill warn">Suggested</span>', assigned: '<span class="pill g">On the team</span>', declined: '<span class="pill">Declined</span>' };
 function vEvents(v) {
@@ -535,9 +570,9 @@ function vEvents(v) {
     await busy(b, async () => ok(await db.from("events").delete().eq("id", b.dataset.del)), "Deleted"); refresh(); });
 }
 function editEvent(e) {
-  openDlg(e ? "Edit event" : "Post an event", `<form id="f"><div class="grid2">${fieldsHtml(EVENT_FIELDS, e ? evVals(e) : {})}</div><button class="btn g">${e ? "Save" : "Post event"}</button></form>`);
-  document.getElementById("f").onsubmit = async (ev) => { ev.preventDefault(); const vals = evRead(ev.target);
-    await busy(ev.target.querySelector("button"), async () => ok(e ? await db.from("events").update(vals).eq("id", e.id) : await db.from("events").insert(vals)), e ? "Saved" : "Event posted");
+  openDlg(e ? "Edit event" : "Post an event", `<form id="f"><div class="grid2">${fieldsHtml(evFields(), e ? evVals(e) : {})}</div>${e && e.cover_image ? '<label class="check"><input type="checkbox" name="rm_cover"> Remove cover photo</label>' : ""}<button class="btn g">${e ? "Save" : "Post event"}</button></form>`);
+  document.getElementById("f").onsubmit = async (ev) => { ev.preventDefault(); const vals = evRead(ev.target), f = ev.target;
+    await busy(ev.target.querySelector("button"), async () => (f.cover_file && f.cover_file.files[0] && (vals.cover_image = await upload(f.cover_file.files[0])), f.rm_cover && f.rm_cover.checked && (vals.cover_image = null), ok(e ? await db.from("events").update(vals).eq("id", e.id) : await db.from("events").insert(vals))), e ? "Saved" : "Event posted");
     dlg.close(); refresh(); };
 }
 function eventTeam(id) {
@@ -582,7 +617,16 @@ const SHOP_FIELDS = [
   { k: "color", label: "Colour name", ph: "e.g. Green", hint: "Pieces with the same name and different colours are shown as colour options." },
   { k: "swatch", label: "Colour dot", type: "color", def: "#3fae3a", hint: "The little colour circle in the shop." },
 ];
-const prodFields = () => shopReady ? [...PROD_FIELDS, ...SHOP_FIELDS] : PROD_FIELDS;
+// Fit and care, used on the piece page and by Find my size (update 05).
+const FIT_FIELDS = [
+  { k: "slug", label: "Link name", ph: "e.g. righteous-green", hint: "Short name for the piece's web address. Letters, numbers and dashes." },
+  { k: "fit", label: "Fit", type: "select", options: [["", "Not set"], ["fitted", "Fitted"], ["regular", "Regular"], ["relaxed", "Relaxed"], ["oversized", "Oversized"]] },
+  { k: "size_chart_text", label: "Measurements in cm, laid flat", type: "textarea", full: true, ph: "S 51 70\nM 54 72\nL 57 74", hint: "One size per line: size, chest (armpit to armpit), length. Find my size uses these." },
+  { k: "material", label: "Material", ph: "e.g. 100% cotton, 220gsm" },
+  { k: "care", label: "Care", ph: "e.g. Wash cold, inside out" },
+  { k: "styling", label: "How to wear it", type: "textarea", full: true, hint: "Optional styling notes shown on the piece page." },
+];
+const prodFields = () => [...PROD_FIELDS, ...(shopReady ? SHOP_FIELDS : []), ...(worldReady ? FIT_FIELDS : [])];
 async function upload(file) {
   const ext = (file.name.split(".").pop() || "bin").toLowerCase().replace(/[^a-z0-9]/g, "");
   const path = `${crypto.randomUUID()}.${ext}`;
@@ -617,12 +661,14 @@ function vMerch(v) {
     try { ok(await db.from("preorders").update({ status: s.value }).eq("id", s.dataset.po)); toast("Pre-order " + s.value); await refresh(); } catch (e) { toast(errText(e), 1); } });
 }
 function editProduct(p) {
-  openDlg(p ? "Edit " + p.name : "Add a piece", `<form id="f"><div class="grid2">${fieldsHtml(prodFields(), p || {})}</div>
+  openDlg(p ? "Edit " + p.name : "Add a piece", `<form id="f"><div class="grid2">${fieldsHtml(prodFields(), p ? { ...p, size_chart_text: chartToText(p.size_chart) } : {})}</div>
     ${p ? `<p class="small mute">Leave a photo empty to keep the current one.${p.back_image ? ' <label class="check"><input type="checkbox" name="rm_back"> Remove back photo</label>' : ""}${p.model_url ? ' <label class="check"><input type="checkbox" name="rm_model"> Remove 3D model</label>' : ""}</p>` : ""}
     <button class="btn g">${p ? "Save" : "Add to preview store"}</button></form>`);
   document.getElementById("f").onsubmit = async (e) => {
     e.preventDefault(); const f = e.target, vals = readForm(f, prodFields());
     vals.currency = (vals.currency || "USD").toUpperCase();
+    if ("size_chart_text" in vals) { vals.size_chart = textToChart(vals.size_chart_text); delete vals.size_chart_text; }
+    if (vals.slug) vals.slug = vals.slug.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     await busy(f.querySelector("button"), async () => {
       if (f.front_file.files[0]) vals.front_image = await upload(f.front_file.files[0]);
       if (f.back_file.files[0]) vals.back_image = await upload(f.back_file.files[0]);
@@ -633,6 +679,142 @@ function editProduct(p) {
     }, "Saved");
     dlg.close(); refresh();
   };
+}
+
+
+// ================= APPLICATIONS, CONTENT, CAMPAIGNS (update 05) =================
+const APP_PILL = { new: '<span class="pill warn">New</span>', shortlisted: '<span class="pill blue">Shortlisted</span>', approved: '<span class="pill g">Approved</span>', declined: '<span class="pill">Declined</span>' };
+let appFilter = "new";
+const ANSWER_LABELS = { why: "Why Birdboost", commitment: "Time they can give", size: "Size", parent_name: "Parent or guardian", parent_phone: "Parent's number", parent_ok: "Parent agrees", description: "About them", source: "Heard about us", ref: "Referred by", spot_picked: "Picked spot" };
+function vApps(v) {
+  const c = (s) => D.applications.filter((a) => a.status === s).length;
+  const list = D.applications.filter((a) => appFilter === "all" || a.status === appFilter);
+  v.innerHTML = `<div class="bar"><h2>Applications</h2></div>
+    <p class="mute">Everyone who applies on the website lands here (you still get the email too). Approving opens “Add ambassador” with their details filled in.</p>
+    <div class="row" role="group" aria-label="Show" style="margin:12px 0">${[["new", "New"], ["shortlisted", "Shortlisted"], ["approved", "Approved"], ["declined", "Declined"], ["all", "All"]].map(([k, l]) => `<button class="chip" data-af="${k}" aria-pressed="${appFilter === k}">${l}${k !== "all" && c(k) ? ` (${c(k)})` : ""}</button>`).join("")}</div>
+    ${list.length ? `<div class="cards two">${list.map((a) => { const ans = a.answers || {};
+      return `<article class="card"><div class="row" style="justify-content:space-between"><h3>${esc(a.full_name)}</h3>${APP_PILL[a.status] || ""}</div>
+      <p class="small">${[a.age && `Age ${esc(a.age)}`, a.city && esc(a.city), fmt(a.created_at, false)].filter(Boolean).join(" · ")}</p>
+      ${a.phone || a.email ? `<p class="small">${a.phone ? `<a href="https://wa.me/${esc(String(a.phone).replace(/\D/g, "").replace(/^0/, "263"))}" target="_blank" rel="noopener">${esc(a.phone)}</a>` : ""}${a.phone && a.email ? " · " : ""}${a.email ? `<a href="mailto:${esc(a.email)}">${esc(a.email)}</a>` : ""}</p>` : ""}
+      ${a.handles ? `<p class="small"><b>Socials:</b> ${esc(a.handles)}</p>` : ""}
+      ${Object.keys(ANSWER_LABELS).filter((k) => ans[k]).map((k) => `<p class="small"><b>${ANSWER_LABELS[k]}:</b> ${esc(ans[k])}</p>`).join("")}
+      <div class="row">${a.status !== "approved" ? `<button class="btn g sm" data-approve="${a.id}">Approve</button>` : a.ambassador_id ? `<button class="btn sm" data-openamb="${a.ambassador_id}">Open ambassador</button>` : ""}
+      ${a.status === "new" ? `<button class="btn sm" data-ast="shortlisted" data-id="${a.id}">Shortlist</button>` : ""}
+      ${a.status !== "declined" && a.status !== "approved" ? `<button class="btn sm" data-ast="declined" data-id="${a.id}">Decline</button>` : ""}
+      ${a.status === "declined" ? `<button class="btn sm" data-ast="new" data-id="${a.id}">Move back to new</button>` : ""}</div></article>`; }).join("")}</div>`
+    : `<div class="empty"><h3>${appFilter === "new" ? "No new applications" : "Nothing here"}</h3><p>When someone applies on the Become an ambassador page, they show up here.</p></div>`}`;
+  v.querySelectorAll("[data-af]").forEach((b) => b.onclick = () => { appFilter = b.dataset.af; render(); });
+  v.querySelectorAll("[data-ast]").forEach((b) => b.onclick = async () => { await busy(b, async () => ok(await db.from("applications").update({ status: b.dataset.ast }).eq("id", b.dataset.id)), "Updated"); refresh(); });
+  v.querySelectorAll("[data-openamb]").forEach((b) => b.onclick = () => manageAmbassador(b.dataset.openamb));
+  v.querySelectorAll("[data-approve]").forEach((b) => b.onclick = () => { const a = byId(D.applications, b.dataset.approve);
+    const handles = String(a.handles || ""), ig = (handles.match(/@?([A-Za-z0-9._]{2,30})/) || [])[1] || "";
+    addAmbassador({ full_name: a.full_name, phone: a.phone, email: a.email, city: a.city, instagram: ig ? "@" + ig : "", notes: (a.answers && a.answers.why) ? "From their application: " + a.answers.why : "" }, a.id); });
+}
+
+const SUB_TABS = [["pending", "Waiting for review"], ["approved", "On the website"], ["featured", "Featured"], ["private", "Kept private"], ["rejected", "Not used"]];
+let subFilter = "pending";
+const pieceName = (ref) => { if (!ref) return ""; const p = D.products.find((x) => x.slug === ref || x.id === ref); if (p) return p.name + (p.color ? " · " + p.color : ""); return ref.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()); };
+function vContent(v) {
+  const c = (s) => D.submissions.filter((x) => x.status === s).length;
+  const list = D.submissions.filter((x) => x.status === subFilter);
+  v.innerHTML = `<div class="bar"><h2>Content</h2></div>
+    <p class="mute">Photos, videos and links from ambassadors and customers. Nothing shows on the website until you approve it. “Featured” shows first.</p>
+    <div class="row" role="group" aria-label="Show" style="margin:12px 0">${SUB_TABS.map(([k, l]) => `<button class="chip" data-sf="${k}" aria-pressed="${subFilter === k}">${l}${c(k) ? ` (${c(k)})` : ""}</button>`).join("")}</div>
+    ${list.length ? `<div class="subgrid">${list.map((s) => { const amb = s.ambassador_id && byId(D.ambassadors, s.ambassador_id), camp = s.campaign_id && byId(D.campaigns, s.campaign_id), ev = s.event_id && byId(D.events, s.event_id);
+      return `<article class="sub">
+        <div class="m">${s.media_url ? (s.kind === "video" ? `<video src="${esc(s.media_url)}" controls muted playsinline preload="metadata"></video>` : `<a href="${esc(s.media_url)}" target="_blank" rel="noopener"><img src="${esc(s.media_url)}" alt="" loading="lazy"></a>`) : `<a class="lk" href="${esc(s.link || "")}" target="_blank" rel="noopener">Open the post ↗<br><span class="small">${esc((s.link || "").replace(/^https?:\/\/(www\.)?/, "").slice(0, 60))}</span></a>`}</div>
+        <div class="i"><b>${amb ? esc(amb.full_name) + ' <span class="pill g">Ambassador</span>' : esc(s.name || "Someone")}</b>
+        ${!amb && s.contact ? `<div class="small mute">Contact: ${esc(s.contact)}</div>` : ""}
+        <div class="small">${[pieceName(s.product_ref) && "Wearing " + esc(pieceName(s.product_ref)), s.place && esc(s.place), camp && "Campaign: " + esc(camp.title), ev && "Event: " + esc(ev.title)].filter(Boolean).join(" · ")}</div>
+        ${s.caption ? `<p class="small" style="margin:6px 0">“${esc(s.caption)}”</p>` : ""}${s.hashtags ? `<div class="small mute">${esc(s.hashtags)}</div>` : ""}
+        ${s.media_url && s.link ? `<div class="small"><a href="${esc(s.link)}" target="_blank" rel="noopener">Their post ↗</a></div>` : ""}
+        <div class="small mute">${fmt(s.created_at)}${s.consent ? " · agreed to be shown" : ""}</div>
+        <div class="row" style="margin-top:8px">${[["approved", "Approve", "g"], ["featured", "Feature", ""], ["private", "Keep private", ""], ["rejected", "Don't use", "bad"]].filter(([k]) => k !== s.status)
+          .map(([k, l, cl]) => `<button class="btn sm ${cl}" data-sst="${k}" data-id="${s.id}">${l}</button>`).join("")}</div></div></article>`; }).join("")}</div>`
+    : `<div class="empty"><h3>${subFilter === "pending" ? "Nothing waiting" : "Nothing here yet"}</h3><p>${subFilter === "pending" ? "New posts from ambassadors (Post tab in their portal) and from customers (Share your fit on the website) arrive here." : "Posts you move here will show in this list."}</p></div>`}`;
+  v.querySelectorAll("[data-sf]").forEach((b) => b.onclick = () => { subFilter = b.dataset.sf; render(); });
+  v.querySelectorAll("[data-sst]").forEach((b) => b.onclick = async () => {
+    await busy(b, async () => ok(await db.from("submissions").update({ status: b.dataset.sst, reviewed_at: new Date().toISOString() }).eq("id", b.dataset.id)),
+      { approved: "Approved. It's on the website now.", featured: "Featured", private: "Kept private", rejected: "Marked as not used" }[b.dataset.sst]); refresh(); });
+}
+
+const CAMP_FIELDS = [
+  { k: "title", label: "Campaign name", req: true, full: true, ph: "e.g. Made on purpose" },
+  { k: "brief", label: "Brief", type: "textarea", full: true, hint: "What ambassadors should make, wear and say." },
+  { k: "hashtag", label: "Hashtag", ph: "#MadeOnPurpose" },
+  { k: "cover_file", label: "Cover photo (optional)", type: "file", accept: "image/*" },
+  { k: "starts_on", label: "Starts", type: "date" },
+  { k: "ends_on", label: "Ends", type: "date" },
+  { k: "is_active", label: "Running now (ambassadors see it)", type: "check", def: true },
+];
+function vCampaigns(v) {
+  const card = (c) => { const ppl = D.campaign_people.filter((p) => p.campaign_id === c.id), posts = D.submissions.filter((s) => s.campaign_id === c.id);
+    return `<article class="card">${c.cover_image ? `<img src="${esc(c.cover_image)}" alt="" style="width:100%;aspect-ratio:16/7;object-fit:cover;margin-bottom:10px">` : ""}
+      <div class="row" style="justify-content:space-between"><h3>${esc(c.title)}</h3>${c.is_active ? '<span class="pill g">Running</span>' : '<span class="pill">Ended</span>'}</div>
+      <p class="small">${[c.hashtag && esc(c.hashtag), c.starts_on && fmt(c.starts_on, false), c.ends_on && "to " + fmt(c.ends_on, false)].filter(Boolean).join(" · ")}</p>
+      <p class="small">${ppl.length} ambassador${ppl.length === 1 ? "" : "s"} in it · ${ppl.filter((p) => p.status === "done").length} finished · ${posts.length} post${posts.length === 1 ? "" : "s"} (${posts.filter((s) => s.status === "pending").length} waiting)</p>
+      <div class="row"><button class="btn g sm" data-cppl="${c.id}">Who's in it</button><button class="btn sm" data-cedit="${c.id}">Edit</button><button class="btn bad sm" data-cdel="${c.id}">Delete</button></div></article>`; };
+  v.innerHTML = `<div class="bar"><h2>Campaigns</h2><button class="btn g" id="addc">+ New campaign</button></div>
+    <p class="mute">A campaign is a brief for the Flock: what to wear, what to post, which hashtag. Ambassadors see running campaigns on their home page and can post for them.</p>
+    ${D.campaigns.length ? `<div class="cards two">${D.campaigns.map(card).join("")}</div>` : `<div class="empty"><h3>No campaigns yet</h3><p>Start one with a short brief and a hashtag. Then choose who's in it.</p></div>`}`;
+  document.getElementById("addc").onclick = () => editCampaign();
+  v.querySelectorAll("[data-cedit]").forEach((b) => b.onclick = () => editCampaign(byId(D.campaigns, b.dataset.cedit)));
+  v.querySelectorAll("[data-cppl]").forEach((b) => b.onclick = () => campaignPeople(b.dataset.cppl));
+  v.querySelectorAll("[data-cdel]").forEach((b) => b.onclick = async () => { if (!confirm("Delete this campaign? Posts made for it are kept.")) return;
+    await busy(b, async () => ok(await db.from("campaigns").delete().eq("id", b.dataset.cdel)), "Deleted"); refresh(); });
+}
+function editCampaign(c) {
+  openDlg(c ? "Edit campaign" : "New campaign", `<form id="f"><div class="grid2">${fieldsHtml(CAMP_FIELDS, c || {})}</div>${c && c.cover_image ? '<label class="check"><input type="checkbox" name="rm_cover"> Remove cover photo</label>' : ""}<button class="btn g">${c ? "Save" : "Start campaign"}</button></form>`);
+  document.getElementById("f").onsubmit = async (e) => { e.preventDefault(); const f = e.target, vals = readForm(f, CAMP_FIELDS);
+    if (vals.hashtag && !vals.hashtag.startsWith("#")) vals.hashtag = "#" + vals.hashtag.replace(/\s+/g, "");
+    await busy(f.querySelector("button"), async () => {
+      if (f.cover_file.files[0]) vals.cover_image = await upload(f.cover_file.files[0]);
+      if (f.rm_cover && f.rm_cover.checked) vals.cover_image = null;
+      ok(c ? await db.from("campaigns").update(vals).eq("id", c.id) : await db.from("campaigns").insert(vals));
+    }, c ? "Saved" : "Campaign started"); dlg.close(); refresh(); };
+}
+function campaignPeople(id) {
+  const c = byId(D.campaigns, id), st = (aid) => D.campaign_people.find((p) => p.campaign_id === id && p.ambassador_id === aid);
+  const list = D.ambassadors.filter((a) => a.is_active !== false || st(a.id));
+  openDlg(c.title, `<p class="small mute">Tick who's in this campaign. They'll see it on their home page. They mark it finished themselves, or you can.</p>
+    <div class="row" style="margin-bottom:10px"><button class="btn sm" id="all">Add everyone active</button></div>
+    <div class="tablewrap"><table><thead><tr><th>Ambassador</th><th>In it</th><th>Posts</th></tr></thead><tbody>${list.map((a) => { const p = st(a.id);
+      return `<tr><td><b>${esc(a.full_name)}</b><div class="small mute">${esc(a.city || "")}</div></td>
+      <td><select data-amb="${a.id}" aria-label="${esc(a.full_name)} in this campaign"><option value="">Not in it</option><option value="assigned"${p && p.status === "assigned" ? " selected" : ""}>In it</option><option value="done"${p && p.status === "done" ? " selected" : ""}>Finished</option></select></td>
+      <td>${D.submissions.filter((s) => s.campaign_id === id && s.ambassador_id === a.id).length}</td></tr>`; }).join("") || `<tr><td colspan="3" class="mute">Add ambassadors first.</td></tr>`}</tbody></table></div>`);
+  const save = async (aid, val) => {
+    if (!val) ok(await db.from("campaign_people").delete().eq("campaign_id", id).eq("ambassador_id", aid));
+    else ok(await db.from("campaign_people").upsert({ campaign_id: id, ambassador_id: aid, status: val, updated_at: new Date().toISOString() }, { onConflict: "campaign_id,ambassador_id" }));
+  };
+  dlg.querySelectorAll("select[data-amb]").forEach((s) => s.onchange = async () => { try { await save(s.dataset.amb, s.value); toast("Updated"); await loadAll(); render(); } catch (err) { toast(errText(err), 1); } });
+  document.getElementById("all").onclick = (e) => busy(e.currentTarget, async () => {
+    for (const a of D.ambassadors.filter((a) => a.is_active !== false && !st(a.id))) await save(a.id, "assigned");
+    await loadAll(); render(); campaignPeople(id); }, "Everyone active is in");
+}
+// Pieces an ambassador has been given, plus their public profile, inside "Manage".
+function worldCard(id) {
+  if (!worldReady) return "";
+  const a = byId(D.ambassadors, id), rec = D.received.filter((r) => r.ambassador_id === id), posts = D.submissions.filter((s) => s.ambassador_id === id);
+  return `<div class="card" style="margin-bottom:14px"><div class="row" style="justify-content:space-between"><h3>Profile and content</h3>${a.show_publicly ? '<span class="pill g">Shown on the website</span>' : '<span class="pill">Not public</span>'}</div>
+      <div class="row" style="align-items:flex-start;flex-wrap:nowrap">${a.photo_url ? `<img src="${esc(a.photo_url)}" alt="" style="width:64px;height:64px;object-fit:cover">` : ""}<div>
+      ${a.bio ? `<p class="small" style="margin:0">${esc(a.bio)}</p>` : `<p class="small mute" style="margin:0">They haven't written a bio yet.</p>`}${a.style ? `<p class="small mute" style="margin:4px 0 0">${esc(a.style)}</p>` : ""}</div></div>
+      <p class="small">${posts.length} post${posts.length === 1 ? "" : "s"} · ${posts.filter((s) => s.status === "approved" || s.status === "featured").length} on the website · ${posts.filter((s) => s.status === "pending").length} waiting${a.show_publicly ? ` · <button class="linkish" id="hidepub">Hide from the website</button>` : ""}</p>
+      <h3 style="margin-top:12px">Pieces given</h3>
+      ${rec.length ? `<ul class="small" style="margin:4px 0 8px;padding-left:18px">${rec.map((r) => `<li>${esc(r.item)}${r.size ? ", " + esc(r.size) : ""} · ${fmt(r.received_on, false)} <button class="linkish" data-rdel="${r.id}" aria-label="Remove ${esc(r.item)}">remove</button></li>`).join("")}</ul>` : `<p class="small mute">Nothing recorded yet.</p>`}
+      <form id="rf2" class="row"><input name="item" placeholder="Piece, e.g. Righteous Tee Green" aria-label="Piece" required style="flex:2;min-width:160px"><input name="size" placeholder="Size" aria-label="Size" style="width:80px"><button class="btn sm">Add</button></form></div>`;
+}
+function wireWorldCard(id) {
+  const f = document.getElementById("rf2"); if (!f) return;
+  const again = async () => { await loadAll(); render(); manageAmbassador(id); };
+  f.onsubmit = async (e) => { e.preventDefault(); await busy(f.querySelector("button"), async () => ok(await db.from("received").insert({ ambassador_id: id, item: f.item.value.trim(), size: f.size.value.trim() || null })), "Added"); again(); };
+  dlg.querySelectorAll("[data-rdel]").forEach((b) => b.onclick = async () => { await busy(b, async () => ok(await db.from("received").delete().eq("id", b.dataset.rdel)), "Removed"); again(); });
+  const hp = document.getElementById("hidepub"); if (hp) hp.onclick = async (e) => { await busy(e.currentTarget, async () => ok(await db.from("ambassadors").update({ show_publicly: false }).eq("id", id)), "Hidden from the website"); again(); };
+}
+// Measurements: "M 54 72" per line  <->  {"M": {"chest": 54, "length": 72}}
+const chartToText = (c) => c && typeof c === "object" ? Object.entries(c).map(([s, m]) => `${s} ${m.chest ?? ""} ${m.length ?? ""}`.trim()).join("\n") : "";
+function textToChart(t) {
+  const out = {}; String(t || "").split(/\n+/).forEach((line) => { const [s, ch, ln] = line.trim().split(/[\s,]+/); if (s && +ch) out[s.toUpperCase()] = { chest: +ch, ...(+ln ? { length: +ln } : {}) }; });
+  return Object.keys(out).length ? out : null;
 }
 
 // ================= SHOP ORDERS (the Nest) =================

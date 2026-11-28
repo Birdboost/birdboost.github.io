@@ -147,6 +147,63 @@ Move each order along: **New**, **Confirmed**, **Paid**, **Sent or collected**, 
 
 To take payment on the website itself you need a payment provider account in Birdboost's name. For Zimbabwe, Paynow (EcoCash, OneMoney and cards) is the usual choice; Stripe or PayPal work for cards from abroad. The provider then needs a small piece of server code to confirm payments safely, which this site can't do on its own. Until then, contacting the customer to arrange payment is the honest way to do it.
 
+## The Flock and the community (update 5)
+
+This switches on everything from the redesign: ambassador profiles, campaigns, photo posts, applications in the admin page, Seen in the Flock on the website, public event pages, and measurements for Find my size. Until it's run, the website and portal keep working as before and simply show "coming soon" empty spaces.
+
+### One-time step (about 2 minutes)
+
+1. In Supabase, open **SQL Editor** and press **New query**.
+2. Open `portal-setup/update-05-community.sql`, copy all of it, paste it in, and press **Run**. It's safe to run again. Run update 4 first if you haven't.
+3. Refresh the admin page. You'll see three new tabs: **Applications**, **Content** and **Campaigns**.
+
+### Applications
+
+Everyone who applies on the website now appears under **Applications** (you still get the email too). Press **Approve** and the "Add ambassador" form opens with their details filled in. **Shortlist** and **Decline** keep the list tidy. Applications sent before update 5 only exist in your email.
+
+### Content: what shows on the website
+
+Ambassadors post from the **Post** button in their portal. Customers post from **Share your fit** on the website. Everything lands under **Content → Waiting for review**, and nothing appears anywhere until you choose:
+
+* **Approve**: shown in Seen in the Flock and on the page of the piece they're wearing.
+* **Feature**: shown first.
+* **Keep private**: kept, never shown.
+* **Don't use**: hidden.
+
+Customers' contact details are only ever visible to you.
+
+### Ambassador profiles on the website
+
+Ambassadors fill in their photo, bio and style under **Me** in the portal. They only appear on the website (in "The people" on the home page, and "Worn by our ambassadors" on piece pages) if they tick **Show me on the Birdboost website**. You can hide anyone from their **Manage** window.
+
+### Campaigns
+
+Under **Campaigns**, write a short brief, a hashtag and dates, then press **Who's in it** to add ambassadors. They see it on their home page, can post for it, and mark it finished.
+
+### Pieces given
+
+In an ambassador's **Manage** window, record the pieces you've given them. They see the list in their portal.
+
+### Events on the website
+
+Edit an event and tick **Show on the website's Events page**. Add a cover photo, and after the day, a few lines of recap. Photos approved under Content that were posted for that event appear on its page.
+
+### Measurements for Find my size
+
+Edit a piece in **Preview store** and fill in **Measurements in cm, laid flat**, one size per line: size, chest (armpit to armpit), length. For example:
+
+```
+S 51 70
+M 54 72
+L 57 74
+```
+
+Find my size then uses that piece's real measurements. Without them it uses a general unisex guide and says so. The **Link name** (for example `righteous-green`) should match the piece's web address.
+
+### Campaign photos on the home page
+
+Real photos of people wearing Birdboost go in `assets/img/campaign/` and are listed in `assets/campaign.js` (there's an example inside the file). Until then the home page uses the product photos.
+
 ## Good to know
 
 - **Free plan limits.** Supabase's free plan is plenty for this. If nobody uses the portal for 7 days, Supabase pauses the project. If that happens, log in to supabase.com and press **Restore project**. Nothing is lost.

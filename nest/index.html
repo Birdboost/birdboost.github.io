@@ -3,222 +3,135 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Shop · The Nest · Birdboost</title>
-<meta name="description" content="The Birdboost shop. The Righteous tee in green, nude and grey, $15. Order online and we'll contact you to deliver.">
+<title>The Nest · Birdboost</title>
+<meta name="description" content="The Nest is where Birdboost lives. Every piece up close: the details, the fit, and the people wearing it.">
 <meta name="theme-color" content="#0a0a0a">
-<meta property="og:title" content="The Nest · Birdboost shop">
+<meta property="og:title" content="The Nest · Birdboost">
 <meta property="og:image" content="../tees.jpg">
 <link rel="icon" href="../assets/logo.png">
+<script>
+/* Old links to a piece (nest/#righteous-green) now open its own page. */
+(function(){var h=location.hash.slice(1);if(h&&h!=='cart'&&h!=='shop'&&/^[a-z0-9-]+$/i.test(h))location.replace('piece/?id='+encodeURIComponent(h)+(location.search?'&'+location.search.slice(1):''));})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/bb.css">
+<link rel="stylesheet" href="../assets/shop.css">
 <style>
-/* ---------- gateway: a short arrival, then the clothes ---------- */
-.gate{position:relative;height:130svh}
-.gate .stick{position:sticky;top:0;height:100svh;display:grid;place-items:center;overflow:hidden;isolation:isolate}
-.gate .bg{position:absolute;inset:0;z-index:-1;background:radial-gradient(55% 45% at 50% 58%,#1a3a18 0,#0c170c 45%,var(--bg) 80%)}
-.gate .inner{text-align:center;padding:90px 18px 40px;width:min(980px,100%);transform:scale(calc(1 + var(--p,0) * .5));opacity:calc(1 - var(--p,0) * 1.3);will-change:transform,opacity}
-.gate h1{font:400 clamp(70px,13vw,180px)/.85 var(--display);text-transform:uppercase;margin:0}
-.gate h1 .serif{display:block;font-size:.3em;line-height:1.1;color:var(--g2);margin-top:10px}
-.gate .nestart{position:relative;max-width:560px;margin:6px auto 0}
-.gate .nestart svg{width:100%;height:auto;overflow:visible}
-.gate .rim{position:absolute;left:35%;right:35%;top:31%;height:2px}
-.gate .cue{display:inline-flex;margin-top:18px;font:600 11px var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--mute);text-decoration:none;min-height:44px;align-items:center}
+/* ---------- arrival ---------- */
+.arrive{position:relative;padding:clamp(110px,14vw,170px) 0 clamp(30px,4vw,50px);overflow:hidden;isolation:isolate}
+.arrive::before{content:"";position:absolute;inset:0;z-index:-2;background:radial-gradient(55% 60% at 30% 70%,#14301a 0,#0a110a 50%,var(--bg) 80%)}
+.arrive .grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:18px;align-items:end}
+.arrive h1{grid-column:1/9;font:400 clamp(100px,19vw,300px)/.78 var(--display);text-transform:uppercase;letter-spacing:-.01em;position:relative}
+.arrive h1 .serif{display:block;font-size:.2em;line-height:1.2;color:var(--g2);letter-spacing:0;margin-top:14px}
+.arrive .nestbg{position:absolute;z-index:-1;left:-6%;bottom:-14%;width:min(760px,90vw);opacity:.55;pointer-events:none}
+.arrive .nestbg svg{width:100%;height:auto;overflow:visible}
+.arrive .rim{position:absolute;left:34%;right:34%;top:31%;height:2px}
+.inside{grid-column:9/13;border-top:1px solid #ffffff2e}
+.inside button{display:flex;justify-content:space-between;align-items:baseline;width:100%;padding:14px 0;border:0;border-bottom:1px solid #ffffff1f;background:none;color:var(--mute);font:400 28px/1 var(--display);text-transform:uppercase;cursor:pointer;text-align:left;transition:color .25s,padding .35s var(--ease)}
+.inside button:hover{color:var(--ink);padding-left:6px}
+.inside button[aria-pressed=true]{color:var(--ink)}
+.inside button[aria-pressed=true]::before{content:"→ ";color:var(--g)}
+.inside .idx{font-size:12px}
+.how{display:flex;gap:6px 26px;flex-wrap:wrap;margin:clamp(30px,4vw,50px) 0 0;padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);list-style:none;font-size:14px;color:var(--mute)}
+.how li b{color:var(--ink);font-weight:600;margin-right:6px}
+.mybar{display:flex;align-items:center;gap:10px 16px;flex-wrap:wrap;margin-top:18px;padding:14px 0;border-bottom:1px solid #3fae3a55;font-size:14px}
+.mybar code{font:800 16px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.06em;color:var(--g2)}
 
-/* ---------- shop ---------- */
-.shop{position:relative;z-index:2;background:var(--bg);padding:30px 0 110px;margin-top:-30svh;border-radius:28px 28px 0 0;box-shadow:0 -30px 60px #000}
-.shophead{display:flex;justify-content:space-between;align-items:end;gap:16px 20px;flex-wrap:wrap;padding-top:40px}
-.shophead h2{font:400 clamp(44px,6vw,80px)/.95 var(--display);text-transform:uppercase}
-.shophead h2 .serif{color:var(--g2);font-size:.6em}
-.how{list-style:none;display:flex;gap:8px 22px;flex-wrap:wrap;margin:18px 0 0;padding:0;color:var(--mute);font-size:14px}
-.how b{color:var(--ink);font-weight:600;margin-right:6px}
-.mybar{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;margin-top:22px;padding:14px 18px;border-radius:16px;background:#0f2410;border:1px solid #3fae3a55}
-.mybar code{font:800 18px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.06em;color:var(--g2)}
-.tools{position:sticky;top:68px;z-index:5;display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:14px 0;margin-top:22px;background:linear-gradient(var(--bg) 80%,transparent)}
-.chips{display:flex;gap:6px;flex-wrap:wrap}
-.chip{min-height:44px;padding:0 18px;border-radius:999px;border:1px solid #ffffff26;background:none;color:var(--ink);font:600 14px var(--sans);cursor:pointer}
-.chip[aria-pressed=true]{background:var(--ink);color:#0a0a0a;border-color:var(--ink)}
-.tools .sp{flex:1}
-.field{min-height:44px;border-radius:999px;border:1px solid #ffffff26;background:#111;color:var(--ink);font:16px var(--sans);padding:0 16px}
-input.field{width:min(240px,100%)}
-select.field{padding-right:34px;appearance:none;background:#111 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23aaa' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat right 14px center}
-.count{color:var(--mute);font-size:14px;margin:4px 0 18px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(320px,100%),1fr));gap:34px 18px}
-.card{position:relative}
-.card .ph{position:relative;display:block;width:100%;aspect-ratio:333/385;border-radius:18px;overflow:hidden;background:#111;border:0;padding:0;cursor:pointer}
-.card .ph img{width:100%;height:100%;object-fit:cover;transition:transform 1.1s var(--ease)}
-.card:hover .ph img{transform:scale(1.04)}
-.card .badge{position:absolute;left:12px;top:12px;background:#0a0a0acc;color:var(--ink);font:700 11px var(--sans);letter-spacing:.08em;text-transform:uppercase;padding:6px 10px;border-radius:999px;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);pointer-events:none}
-.card .meta{display:flex;justify-content:space-between;align-items:baseline;gap:4px 10px;margin-top:12px;flex-wrap:wrap}
-.card h3{font:700 17px var(--sans);margin:0}
-.card .col{color:var(--mute);font-size:14px}
-.price{font:400 22px/1 var(--display);white-space:nowrap}
-.price.soft{font:600 13px var(--sans);color:var(--mute);line-height:1.3;white-space:normal}
-.card .meta .price.soft{flex-basis:100%}
-.card .choose{margin-top:12px;width:100%;min-height:48px}
-.sw{display:flex;gap:8px;margin-top:10px}
-.sw button{width:28px;height:28px;border-radius:50%;border:2px solid #0a0a0a;box-shadow:0 0 0 1px #ffffff40;cursor:pointer;padding:0;position:relative}
-.sw button::after{content:"";position:absolute;inset:-8px}
-.sw [aria-current=true]{box-shadow:0 0 0 2px var(--ink)}
-.empty{border:1px dashed #ffffff26;border-radius:18px;padding:40px 20px;text-align:center;color:var(--mute)}
+/* ---------- the floor: an editorial grid, not a wall of identical cards ---------- */
+.floor{padding:clamp(30px,4vw,60px) 0 clamp(80px,10vw,140px)}
+.floorbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:24px;font-size:14px;color:var(--mute)}
+.floorbar select{background:none;border:0;border-bottom:1px solid #ffffff40;color:var(--ink);font:14px var(--sans);padding:6px 22px 6px 2px;appearance:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23aaa' stroke-width='1.4'/%3E%3C/svg%3E") no-repeat right 4px center;cursor:pointer}
+.floorbar option{background:#111}
+.lay{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:clamp(40px,5vw,70px) 18px}
+.pc{text-decoration:none;color:inherit;display:block;position:relative}
+.pc .ph{position:relative;overflow:hidden;background:#111}
+.pc img{width:100%;aspect-ratio:333/385;object-fit:cover;transition:transform 1.3s var(--ease),opacity .6s var(--ease)}
+.pc .alt{position:absolute;inset:0;height:100%;opacity:0}
+@media(hover:hover){.pc:hover img{transform:scale(1.035)}.pc:hover .alt{opacity:1}}
+.pc .badge{position:absolute;left:0;top:0;background:var(--bg);color:var(--ink);font:600 10px var(--sans);letter-spacing:.14em;text-transform:uppercase;padding:7px 10px}
+.pc .meta{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 14px;align-items:baseline;margin-top:14px}
+.pc h3{font:600 16px var(--sans)}
+.pc .col{grid-column:2;color:var(--mute);font-size:14px;display:flex;gap:10px;align-items:center}
+.pc .dots{display:inline-flex;gap:5px}
+.pc .dots i{width:10px;height:10px;border-radius:50%;box-shadow:0 0 0 1px #ffffff40}
+.pc .pr{font:400 22px var(--display);grid-row:1}
+.pc .pr.soft{font:600 12px var(--sans);color:var(--mute)}
+.pc .go{grid-column:2/4;font-size:13px;color:var(--mute);opacity:0;transform:translateY(-4px);transition:.4s var(--ease)}
+.pc:hover .go,.pc:focus-visible .go{opacity:1;transform:none}
+/* the rhythm: big, then two, then wide, then three */
+.pc.s-hero{grid-column:1/8;grid-row:span 2}
+.pc.s-hero img{aspect-ratio:4/5}
+.pc.s-side{grid-column:8/13}
+.pc.s-side img{aspect-ratio:5/4}
+.pc.s-half{grid-column:span 6}
+.pc.s-third{grid-column:span 4}
+.pc.s-off{grid-column:2/7}
+.pc.s-off2{grid-column:8/12;margin-top:18%}
+.pc .story{grid-column:2/4;font:400 18px/1.35 var(--serif);font-style:italic;color:#d8d8d0;margin-top:6px;max-width:28em}
+.interlude{grid-column:1/-1;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:18px;align-items:center;padding:clamp(40px,6vw,80px) 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.interlude q{grid-column:2/10;font:400 clamp(34px,4.6vw,68px)/1.08 var(--serif);font-style:italic;quotes:none}
+.interlude cite{grid-column:10/13;font:600 11px var(--sans);letter-spacing:.16em;text-transform:uppercase;font-style:normal;color:var(--mute)}
+.empty{grid-column:1/-1;border-top:1px solid var(--line);padding:40px 0;color:var(--mute)}
+.seenhere{padding:clamp(60px,8vw,110px) 0;border-top:1px solid var(--line)}
+.seenhere .secthead h2{font-size:clamp(40px,5.5vw,80px)}
 
-/* ---------- product + cart ---------- */
-dialog{border:0;padding:0;color:var(--ink);background:#111211;max-height:100dvh}
-dialog::backdrop{background:#000b;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
-.pd{width:min(1040px,96vw);border-radius:24px;border:1px solid #ffffff14;overflow:hidden}
-.pd .in{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);max-height:min(860px,92dvh)}
-.view{position:relative;background:#0c0c0c;display:flex;flex-direction:column;min-height:0}
-.pic{position:relative;flex:1;min-height:340px;overflow:hidden;cursor:zoom-in}
-.pic>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.pic.stage3d{cursor:grab}
-.views{display:flex;gap:6px;padding:10px;justify-content:center;flex-wrap:wrap}
-.views button{min-height:40px;padding:0 14px;border-radius:999px;border:1px solid #ffffff26;background:none;color:var(--ink);font:600 13px var(--sans);cursor:pointer}
-.views button[aria-pressed=true]{background:var(--ink);color:#0a0a0a}
-.zoombtn{position:absolute;left:12px;bottom:12px;z-index:2;min-height:40px;padding:0 14px;border-radius:999px;border:0;background:#0a0a0acc;color:var(--ink);font:600 13px var(--sans);cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
-.pd .info{padding:clamp(20px,3vw,36px);display:flex;flex-direction:column;gap:16px;overflow:auto;min-height:0}
-.pd h2{font:400 clamp(36px,4vw,52px)/.95 var(--display);text-transform:uppercase}
-.x{position:absolute;right:12px;top:12px;z-index:4;width:44px;height:44px;border-radius:50%;border:0;background:#0a0a0acc;color:var(--ink);font-size:24px;cursor:pointer}
-.sizes{display:flex;flex-wrap:wrap;gap:8px}
-.sizes label{position:relative}
-.sizes input{position:absolute;opacity:0;inset:0}
-.sizes span{display:inline-grid;place-items:center;min-width:56px;min-height:48px;padding:0 10px;border-radius:12px;border:1px solid #ffffff30;font-weight:700;cursor:pointer}
-.sizes input:checked+span{background:var(--ink);color:#0a0a0a;border-color:var(--ink)}
-.sizes input:focus-visible+span{outline:3px solid var(--g2);outline-offset:2px}
-.sizes.bad span{border-color:#ff8a80}
-.qty{display:inline-flex;align-items:center;border:1px solid #ffffff30;border-radius:999px}
-.qty button{width:44px;height:44px;border:0;background:none;color:var(--ink);font-size:20px;cursor:pointer;border-radius:50%}
-.qty output{min-width:28px;text-align:center;font-weight:700}
-.lbl{font:600 12px var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin-bottom:8px}
-.note{font-size:14px;color:var(--mute);border-top:1px solid var(--line);padding-top:14px;margin:0}
-.err{color:#ff8a80;font-weight:600;min-height:1.2em;margin:0}
-.addbar{display:flex;gap:12px;align-items:center}
-.addbar .btn{flex:1}
-.addbar .price{font-size:26px}
-
-/* full-screen zoom: pinch, drag, double-tap */
-.zoom{position:fixed;inset:0;z-index:10;background:#050505;touch-action:none;overflow:hidden;cursor:grab;display:none}
-.zoom.on{display:block}
-.zoom img{position:absolute;left:50%;top:50%;max-width:none;width:min(100vw,calc(100dvh * 333 / 385));transform-origin:0 0;user-select:none;-webkit-user-drag:none}
-.zoom .zx{position:absolute;right:14px;top:calc(14px + env(safe-area-inset-top));width:48px;height:48px;border-radius:50%;border:0;background:#1a1a1acc;color:var(--ink);font-size:26px;cursor:pointer;z-index:2}
-.zoom .zc{position:absolute;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;gap:8px;z-index:2}
-.zoom .zc button{width:48px;height:48px;border-radius:50%;border:1px solid #ffffff30;background:#1a1a1acc;color:var(--ink);font-size:22px;cursor:pointer}
-.zoom .zh{position:absolute;left:0;right:0;top:calc(26px + env(safe-area-inset-top));text-align:center;font-size:13px;color:var(--mute);pointer-events:none}
-
-.drawer{margin:0 0 0 auto;height:100dvh;max-height:100dvh;width:min(480px,100vw);border-left:1px solid #ffffff14}
-.drawer[open]{animation:slide .45s var(--ease)}
-@keyframes slide{from{transform:translateX(40px);opacity:0}}
-.drawer .in{display:flex;flex-direction:column;height:100%}
-.drawer header{display:flex;justify-content:space-between;align-items:center;padding:calc(14px + env(safe-area-inset-top)) 20px 14px;border-bottom:1px solid var(--line)}
-.drawer header h2{font:400 32px/1 var(--display);text-transform:uppercase}
-.drawer .x{position:static;background:none}
-.drawer .body{flex:1;overflow:auto;padding:16px 20px;overscroll-behavior:contain}
-.drawer footer{padding:14px 20px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--line);display:grid;gap:10px;background:#111211}
-.steps{display:flex;gap:6px;font:600 12px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin:0 0 14px}
-.steps span[aria-current=step]{color:var(--g2)}
-.line{display:grid;grid-template-columns:68px minmax(0,1fr) auto;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);align-items:center}
-.line img{width:68px;height:80px;object-fit:cover;border-radius:10px}
-.line .rm{background:none;border:0;color:var(--mute);text-decoration:underline;cursor:pointer;font-size:13px;padding:6px 0;min-height:36px}
-.line .qty button{width:40px;height:40px}
-.tot{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
-.tot b{font:400 26px var(--display);text-align:right}
-.tot b.soft{font:600 14px var(--sans);color:var(--mute)}
-.codebox{display:flex;gap:8px}
-.codebox input.field{flex:1;text-transform:uppercase;width:auto;order:0}
-.codemsg{font-size:13px;color:var(--g2);margin:0}
-.codemsg:empty{display:none}
-.ff{display:grid;gap:14px}
-.ff label{display:grid;gap:6px;font-weight:600;font-size:14px}
-.ff label small{font-weight:400;color:var(--mute)}
-.ff input,.ff select,.ff textarea{min-height:50px;border-radius:12px;border:1px solid #ffffff30;background:#0a0a0a;color:var(--ink);font:16px var(--sans);padding:10px 12px;width:100%}
-.ff select{appearance:none;background:#0a0a0a url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23aaa' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat right 14px center}
-.ff [aria-invalid=true]{border-color:#ff8a80}
-.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.seg label{position:relative;display:block}
-.seg input{position:absolute;opacity:0;inset:0}
-.seg span{display:grid;place-items:center;min-height:50px;border-radius:12px;border:1px solid #ffffff30;font-weight:700;cursor:pointer}
-.seg input:checked+span{background:var(--ink);color:#0a0a0a;border-color:var(--ink)}
-.seg input:focus-visible+span{outline:3px solid var(--g2);outline-offset:2px}
-.summary{border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:14px;color:#cfcfc8}
-.summary div{display:flex;justify-content:space-between;gap:10px;padding:3px 0}
-.ok{text-align:center;padding:30px 4px 10px}
-.ok .tick{width:64px;height:64px;margin:0 auto 18px;border-radius:50%;background:var(--g);display:grid;place-items:center;color:#06140a;font-size:30px;font-weight:800}
-.ok h3{font:400 40px/1 var(--display);text-transform:uppercase;margin-bottom:10px}
-.ok .ref{display:inline-block;margin:6px 0 16px;padding:8px 14px;border-radius:999px;background:#0f2410;border:1px solid #3fae3a66;font:800 16px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.06em;color:var(--g2)}
-.ok p{color:#cfcfc8;max-width:26em;margin:0 auto 12px}
-
-/* 3D turntable and model viewer (shared with the ambassador preview store) */
-.stage3d{position:relative;width:100%;height:100%;min-height:340px;overflow:hidden;background:radial-gradient(70% 60% at 50% 40%,#1f3a1e 0,#0d0e0d 70%);perspective:1100px;touch-action:pan-y;cursor:grab;user-select:none}
-.stage3d .spinner{position:absolute;inset:9% 12% 14%;transform-style:preserve-3d}
-.stage3d .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;align-items:center;justify-content:center}
-.stage3d .face img{max-width:100%;max-height:100%;object-fit:contain;filter:drop-shadow(0 18px 18px #000a)}
-.stage3d .face.back{transform:rotateY(180deg)}
-.stage3d .face.blank{flex-direction:column;gap:10px;color:var(--mute);font-weight:700;font-size:13px;text-transform:uppercase}
-.stage3d .floor{position:absolute;left:20%;right:20%;bottom:7%;height:7%;border-radius:50%;background:radial-gradient(closest-side,#000c,transparent)}
-.stage3d .hint3d{position:absolute;left:0;right:0;bottom:8px;text-align:center;font-size:12px;color:var(--mute)}
-.stage3d model-viewer{width:100%;height:100%}
-
-@media(max-width:760px){
-  .gate{height:112svh}
-  .gate .inner{padding-top:70px}
-  .shop{margin-top:-18svh;border-radius:22px 22px 0 0;padding-top:10px}
-  .shophead{padding-top:28px}
-  .how{flex-direction:column;gap:4px}
-  .tools{top:60px;gap:8px;padding:10px 0}
-  .tools .sp{display:none}
-  input.field{width:100%;order:5}
-  .tools select.field{flex:1}
-  .grid{grid-template-columns:minmax(0,1fr);gap:34px}
-  .pd{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;border-radius:0;margin:0;border:0}
-  .pd .in{display:block;height:100%;max-height:none;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
-  .view{display:block}
-  .pic{aspect-ratio:333/385;min-height:0;max-height:70dvh;flex:none}
-  .pd .info{overflow:visible;padding:20px 20px 0}
-  .addbar{position:sticky;bottom:0;z-index:3;margin:0 -20px;padding:12px 20px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(transparent,#111211 18%);}
-  .x{top:calc(10px + env(safe-area-inset-top))}
-  .drawer{width:100vw;border-left:0}
+@media(max-width:900px){
+  .arrive{padding-top:96px}
+  .arrive h1{grid-column:1/-1;font-size:clamp(88px,27vw,160px)}
+  .inside{grid-column:1/-1;margin-top:26px;display:flex;overflow-x:auto;gap:0;border-top:0;scrollbar-width:none}
+  .inside::-webkit-scrollbar{display:none}
+  .inside button{width:auto;flex:none;padding:10px 16px 10px 0;margin-right:16px;font-size:24px;border-bottom:0;gap:8px}
+  .inside button[aria-pressed=true]{border-bottom:2px solid var(--g)}
+  .inside button[aria-pressed=true]::before{content:""}
+  .how{flex-direction:column}
+  .lay{grid-template-columns:repeat(2,minmax(0,1fr));gap:36px 10px}
+  .pc.s-hero,.pc.s-side,.pc.s-off,.pc.s-off2{grid-column:1/-1;grid-row:auto;margin-top:0}
+  .pc.s-side img{aspect-ratio:333/385}
+  .pc.s-half,.pc.s-third{grid-column:span 1}
+  .pc.s-half h3,.pc.s-third h3{font-size:14px}
+  .pc.s-half .meta,.pc.s-third .meta{grid-template-columns:minmax(0,1fr) auto}
+  .pc.s-half .idx,.pc.s-third .idx{display:none}
+  .pc.s-half .col,.pc.s-third .col{grid-column:1/-1}
+  .pc .go{display:none}
+  .pc .story{grid-column:1/-1}
+  .interlude q,.interlude cite{grid-column:1/-1}
 }
-@media(prefers-reduced-motion:reduce){.gate{height:auto}.gate .stick{position:relative;height:auto;min-height:70svh}.gate .inner{transform:none;opacity:1}.shop{margin-top:0}}
 </style>
 </head>
-<body class="grain" data-bird="solo" data-bird-delay="500">
+<body class="grain" data-bird="solo" data-bird-delay="700">
 <header class="nav">
   <div class="in">
     <a class="brand" href="../" aria-label="Birdboost home"><span class="logo" aria-hidden="true"></span><b>BIRDBOOST</b></a>
-    <nav aria-label="Main" class="menu" id="menu"><ul class="links"><li><a href="../">Home</a></li><li><a href="../nest/" aria-current="page">Shop</a></li><li><a href="../#story">The Story</a></li><li><a href="../#flock">The Flock</a></li><li><a href="../flock/">Ambassadors</a></li><li><a href="#contact">Contact</a></li></ul>
+    <nav aria-label="Main" class="menu" id="menu"><ul class="links"><li><a href="../nest/" aria-current="page">The Nest</a></li><li><a href="../#seen">Seen in the Flock</a></li><li><a href="../events/">Events</a></li><li><a href="../flock/">Ambassadors</a></li><li><a href="../#story">Our story</a></li></ul>
       <div class="menu-foot"><span data-me-slot-m></span><a href="https://www.instagram.com/birdboost_impact" target="_blank" rel="noopener">Instagram</a><a href="https://www.tiktok.com/@official_birdboost.inc" target="_blank" rel="noopener">TikTok</a></div></nav>
     <div class="navr"><span data-me-slot></span><a class="cartbtn" href="#cart" aria-label="Cart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 016 0"/></svg><b data-cart-count></b></a><button class="menubtn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Menu"><i></i></button></div>
   </div>
 </header>
 
 <main>
-<section class="gate" id="gate" aria-labelledby="h1">
-  <div class="stick">
-    <div class="bg"></div>
-    <div class="inner">
-      <h1 id="h1">The Nest<span class="serif">the Birdboost shop</span></h1>
-      <div class="nestart" data-draw><svg data-nest role="img" aria-label="A woven nest"></svg><span class="rim" data-perch="0.5" data-perch-scale="1"></span></div>
-      <a class="cue" href="#shop">Shop the collection ↓</a>
+<section class="arrive" aria-labelledby="h1">
+  <div class="wrap">
+    <div class="grid">
+      <h1 id="h1">The Nest<span class="serif">where Birdboost lives</span></h1>
+      <nav class="inside" id="inside" aria-label="What's inside"></nav>
     </div>
+    <ol class="how" aria-label="How ordering works"><li><b>1</b>Pick a piece and your size</li><li><b>2</b>Place your order here</li><li><b>3</b>We contact you to arrange delivery and payment</li></ol>
+    <div class="mybar" id="mybar" hidden></div>
+  </div>
+  <div class="nestbg" aria-hidden="true" data-draw><svg data-nest></svg><span class="rim" data-perch="0.5" data-perch-scale="0.9"></span></div>
+</section>
+
+<section class="floor" id="shop" aria-label="The pieces">
+  <div class="wrap">
+    <div class="floorbar"><span id="count" aria-live="polite"></span><label>Sort <select id="sort"><option value="feat">Featured</option><option value="lo">Price, low to high</option><option value="hi">Price, high to low</option></select></label></div>
+    <div class="lay" id="lay"></div>
   </div>
 </section>
 
-<section class="shop" id="shop" aria-labelledby="h-shop">
-  <div class="wrap">
-    <div class="shophead">
-      <h2 id="h-shop">The collection</h2>
-    </div>
-    <ol class="how" aria-label="How ordering works"><li><b>1</b>Choose your piece and size</li><li><b>2</b>Place your order here</li><li><b>3</b>We contact you to arrange delivery and payment</li></ol>
-    <div class="mybar" id="mybar" hidden></div>
-    <div class="tools" role="search">
-      <div class="chips" id="cats" aria-label="Category"></div>
-      <span class="sp"></span>
-      <label class="sr-only" for="q">Search the collection</label><input class="field" id="q" type="search" placeholder="Search" autocomplete="off">
-      <label class="sr-only" for="fsize">Size</label><select class="field" id="fsize"><option value="">Any size</option></select>
-      <label class="sr-only" for="sort">Sort</label><select class="field" id="sort"><option value="feat">Featured</option><option value="lo">Price: low to high</option><option value="hi">Price: high to low</option><option value="az">Name</option></select>
-    </div>
-    <p class="count" id="count" aria-live="polite"></p>
-    <div class="grid" id="grid"></div>
-  </div>
+<section class="seenhere" id="seenwrap" aria-labelledby="h-seen">
+  <div class="wrap secthead"><h2 id="h-seen">Seen in <span class="serif">the Flock</span></h2><p>The pieces, worn by real people. <a class="link-u" href="../flock/share/">Share yours</a>.</p></div>
+  <div class="sf" id="strip"><div class="sf-row"></div></div>
 </section>
 </main>
 
@@ -226,384 +139,66 @@ dialog::backdrop{background:#000b;-webkit-backdrop-filter:blur(4px);backdrop-fil
   <div class="cols">
     <div><div class="big">Birdboost</div><p>Faith-driven clothing and community from Zimbabwe. Questions or collaborations? Message us on Instagram.</p>
       <a class="btn o" href="https://www.instagram.com/birdboost_impact" target="_blank" rel="noopener">@birdboost_impact</a></div>
-    <div><h4>Explore</h4><a href="../">Home</a><a href="../nest/">The Nest</a><a href="../#story" >The Story</a><a href="../#collection">The Collection</a></div>
-    <div><h4>The Flock</h4><a href="../flock/">Become an ambassador</a><a href="../portal/">Ambassador log in</a><a href="../#flock">The community</a></div>
+    <div><h4>Explore</h4><a href="../">Home</a><a href="../nest/">The Nest</a><a href="../events/">Events</a><a href="../#story">Our story</a></div>
+    <div><h4>The Flock</h4><a href="../#seen">Seen in the Flock</a><a href="../flock/share/">Share your fit</a><a href="../flock/">Become an ambassador</a><a href="../portal/">Ambassador log in</a></div>
     <div><h4>Follow</h4><a href="https://www.instagram.com/birdboost_impact" target="_blank" rel="noopener">Instagram</a><a href="https://www.tiktok.com/@official_birdboost.inc" target="_blank" rel="noopener">TikTok</a></div>
   </div>
   <div class="fine"><span>© <span data-year>2026</span> Birdboost · Faith-driven clothing and community, Zimbabwe</span><span class="serif" style="font-size:17px">God made me.</span></div>
 </div></footer>
 
-<dialog class="pd" id="pd" aria-labelledby="pdname"><button class="x" type="button" data-close aria-label="Close">×</button><div class="in" id="pdin"></div>
-  <div class="zoom" id="zoom" aria-hidden="true"><div class="zh">Pinch or scroll to zoom · drag to look around</div><img id="zimg" alt=""><button class="zx" type="button" aria-label="Close zoom">×</button>
-    <div class="zc"><button type="button" data-z="-1" aria-label="Zoom out">−</button><button type="button" data-z="1" aria-label="Zoom in">+</button></div></div>
-</dialog>
-
-<dialog class="drawer" id="cart" aria-labelledby="carth"><div class="in">
-  <header><h2 id="carth">Your order</h2><button class="x" type="button" data-close aria-label="Close">×</button></header>
-  <div class="body" id="cbody"></div>
-  <footer id="cfoot"></footer>
-</div></dialog>
-
 <script src="../portal/config.js"></script>
 <script src="../assets/catalog.js"></script>
-<script src="../portal/viewer3d.js"></script>
 <script src="../assets/site.js"></script>
+<script src="../assets/shop.js"></script>
+<script src="../assets/community.js"></script>
 <script src="../assets/bird.js"></script>
 <script>
 {
-const { esc, store, cart, root } = window.BB;
+const { esc } = window.BB, S = window.BBShop, C = window.BBCommunity;
 const $ = (id) => document.getElementById(id);
-const CFG = window.BB_CONFIG || {};
-const FORMSPREE = "https://formspree.io/f/mdegjvad"; // a copy of every order is emailed here, and it's the backup if the database can't be reached
-const hasDB = !!(CFG.SUPABASE_URL && CFG.SUPABASE_ANON_KEY && !/PASTE/.test(CFG.SUPABASE_URL));
-const rpc = (fn, body) => fetch(CFG.SUPABASE_URL + "/rest/v1/rpc/" + fn, { method: "POST",
-  headers: { apikey: CFG.SUPABASE_ANON_KEY, Authorization: "Bearer " + CFG.SUPABASE_ANON_KEY, "Content-Type": "application/json" },
-  body: JSON.stringify(body || {}) }).then((r) => r.ok ? r.json() : Promise.reject(new Error("http " + r.status)));
-const money = (v, cur) => v == null ? null : new Intl.NumberFormat("en", { style: "currency", currency: cur || "USD" }).format(v);
-const img = (u) => /^(https?:|data:)/.test(u || "") ? u : u ? root + u : "";
-const isUUID = (s) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s || "");
+let products = [], cat = "All", sort = "feat";
 
-let products = [];
-const state = { cat: "All", q: "", size: "", sort: "feat" };
-
-/* ---------- gateway ---------- */
-const gate = $("gate"), rm = matchMedia("(prefers-reduced-motion: reduce)").matches;
-if (!rm) {
-  let queued = false;
-  const rim = gate.querySelector(".rim");
-  const upd = () => {
-    queued = false; const p = Math.min(1, Math.max(0, scrollY / (gate.offsetHeight * 0.55))); gate.style.setProperty("--p", p.toFixed(3));
-    // as the nest fades, the bird leaves it and moves on to the first piece
-    const on = p < 0.3;
-    if (on !== rim.hasAttribute("data-perch")) { if (on) rim.setAttribute("data-perch", "0.5"); else rim.removeAttribute("data-perch"); if (window.BBBird && BBBird.rescan) BBBird.rescan(); }
-  };
-  addEventListener("scroll", () => { if (!queued) { queued = true; requestAnimationFrame(upd); } }, { passive: true }); upd();
+const rhythm = ["s-hero", "s-side", "s-side", "s-off", "s-off2", "s-third", "s-third", "s-third", "s-half", "s-half"];
+function card(p, i, list) {
+  const sib = S.siblings(list, p), cls = rhythm[i % rhythm.length];
+  const story = (cls === "s-hero" || cls === "s-off") && p.description ? `<p class="story">${esc(p.description.split(". ")[0].replace(/\.$/, ""))}.</p>` : "";
+  return `<a class="pc ${cls}" href="${esc(S.pieceUrl(p))}">
+    <div class="ph"><img src="${esc(S.img(p.image))}" alt="${esc(p.style)}${p.color ? " in " + esc(p.color) : ""}" loading="${i < 3 ? "eager" : "lazy"}" width="333" height="385">${p.back ? `<img class="alt" src="${esc(S.img(p.back))}" alt="" loading="lazy">` : ""}${p.badge ? `<span class="badge">${esc(p.badge)}</span>` : ""}</div>
+    <div class="meta"><span class="idx">${String(i + 1).padStart(2, "0")}</span><h3>${esc(p.style)}</h3>${p.price != null ? `<span class="pr">${esc(S.money(p.price, p.currency))}</span>` : `<span class="pr soft">Price on request</span>`}
+      <span class="col">${esc(p.color)}${sib.length > 1 ? `<span class="dots" aria-label="${sib.length} colours">${sib.map((s) => `<i style="background:${S.dot(s)}"></i>`).join("")}</span>` : ""}</span>
+      <span class="go">View the piece →</span>${story}</div></a>`;
 }
-
-/* ---------- products: from the shop database when it's switched on, otherwise the built-in list ---------- */
-function fromDB(p) {
-  return { id: p.id, style: p.name, color: p.color || "", swatch: p.swatch || "", category: p.category || "Pieces", price: p.price, currency: p.currency || "USD",
-    sizes: (p.sizes || "").split(",").map((s) => s.trim()).filter(Boolean), image: p.front_image, back: p.back_image, model: p.model_url,
-    description: p.description || "", badge: p.stage === "preorder" ? "Pre-order" : (p.release_note || "") };
-}
-async function loadProducts() {
-  if (hasDB) {
-    try { const d = await rpc("shop_catalog"); if (Array.isArray(d) && d.length) { products = d.map(fromDB); return; } } catch (e) {}
-  }
-  products = (window.BB_CATALOG || []).map((p) => ({ ...p, sizes: p.sizes || [] }));
-}
-
-/* ---------- the grid ---------- */
-const priceHtml = (p) => p.price == null ? `<span class="price soft">Price confirmed when we contact you</span>` : `<span class="price">${esc(money(p.price, p.currency))}</span>`;
-const siblings = (p) => products.filter((x) => x.style === p.style && x.color);
-const dot = (s) => /^#[0-9a-f]{3,8}$/i.test(s.swatch || "") ? s.swatch : "#777";
-function paintFilters() {
-  const cats = ["All", ...new Set(products.map((p) => p.category))];
-  $("cats").hidden = cats.length < 3;
-  $("cats").innerHTML = cats.map((c) => `<button class="chip" type="button" aria-pressed="${c === state.cat}" data-cat="${esc(c)}">${esc(c)}</button>`).join("");
-  const sizes = [...new Set(products.flatMap((p) => p.sizes))];
-  $("fsize").innerHTML = `<option value="">Any size</option>` + sizes.map((s) => `<option${s === state.size ? " selected" : ""}>${esc(s)}</option>`).join("");
-}
-function shown() {
-  const q = state.q.toLowerCase();
-  let list = products.filter((p) => (state.cat === "All" || p.category === state.cat)
-    && (!state.size || p.sizes.includes(state.size))
-    && (!q || [p.style, p.color, p.category, p.description].join(" ").toLowerCase().includes(q)));
+function paint() {
+  let list = products.filter((p) => cat === "All" || p.category === cat);
   const pv = (p) => p.price == null ? Infinity : p.price;
-  if (state.sort === "lo") list.sort((a, b) => pv(a) - pv(b));
-  if (state.sort === "hi") list.sort((a, b) => (b.price ?? -1) - (a.price ?? -1));
-  if (state.sort === "az") list.sort((a, b) => (a.style + a.color).localeCompare(b.style + b.color));
-  return list;
-}
-function paintGrid() {
-  const list = shown();
+  if (sort === "lo") list = [...list].sort((a, b) => pv(a) - pv(b));
+  if (sort === "hi") list = [...list].sort((a, b) => (b.price ?? -1) - (a.price ?? -1));
   $("count").textContent = list.length === 1 ? "1 piece" : list.length + " pieces";
-  $("grid").innerHTML = list.length ? list.map((p, i) => `<article class="card rv${i % 3 ? " d" + (i % 3) : ""}" id="${esc(p.id)}">
-      <button class="ph" type="button" data-open="${esc(p.id)}"${i === 0 ? ' data-perch="0.84" data-perch-scale="0.8"' : ""} aria-label="${esc(p.style)} ${esc(p.color)}, see details">${p.image ? `<img src="${esc(img(p.image))}" alt="" loading="lazy" width="333" height="385">` : ""}</button>
-      ${p.badge ? `<span class="badge">${esc(p.badge)}</span>` : ""}
-      <div class="meta"><div><h3>${esc(p.style)}</h3>${p.color ? `<div class="col">${esc(p.color)}</div>` : ""}</div>${priceHtml(p)}</div>
-      ${siblings(p).length > 1 ? `<div class="sw" aria-label="Colours">${siblings(p).map((s) => `<button type="button" data-open="${esc(s.id)}" style="background:${dot(s)}" aria-label="${esc(s.color)}"${s.id === p.id ? ' aria-current="true"' : ""}></button>`).join("")}</div>` : ""}
-      <button class="btn o choose" type="button" data-open="${esc(p.id)}">Choose size</button>
-    </article>`).join("")
-    : `<div class="empty" style="grid-column:1/-1"><p>Nothing in the Nest matches that.</p><button class="btn o" type="button" id="clear">Clear filters</button></div>`;
-  requestAnimationFrame(() => document.querySelectorAll("#grid .rv").forEach((el) => el.classList.add("in")));
-  const c = $("clear"); if (c) c.onclick = () => { Object.assign(state, { cat: "All", q: "", size: "" }); $("q").value = ""; paintFilters(); paintGrid(); };
+  let html = list.map((p, i) => card(p, i, products)).join("");
+  // a pause between pieces: the line the brand is built on
+  if (list.length > 3) { const cut = html.split("</a>"); cut.splice(3, 0, `<div class="interlude"><q>“For we are God's handiwork, created to do good works.”</q><cite>Ephesians 2:10 · on every Righteous tee</cite></div>`); html = cut.join("</a>"); }
+  $("lay").innerHTML = list.length ? html : `<p class="empty">Nothing here yet.</p>`;
   if (window.BBBird && BBBird.rescan) BBBird.rescan();
 }
-$("cats").addEventListener("click", (e) => { const b = e.target.closest("[data-cat]"); if (!b) return; state.cat = b.dataset.cat; paintFilters(); paintGrid(); });
-$("q").addEventListener("input", (e) => { state.q = e.target.value.trim(); paintGrid(); });
-$("fsize").addEventListener("change", (e) => { state.size = e.target.value; paintGrid(); });
-$("sort").addEventListener("change", (e) => { state.sort = e.target.value; paintGrid(); });
-$("grid").addEventListener("click", (e) => { const b = e.target.closest("[data-open]"); if (b) openProduct(b.dataset.open); });
+function paintInside() {
+  const counts = products.reduce((m, p) => (m[p.category] = (m[p.category] || 0) + 1, m), {});
+  const cats = ["All", ...Object.keys(counts)];
+  $("inside").innerHTML = cats.map((c) => `<button type="button" aria-pressed="${c === cat}" data-cat="${esc(c)}"><span>${esc(c === "All" ? "Everything" : c)}</span><span class="idx">${c === "All" ? products.length : counts[c]}</span></button>`).join("");
+}
+$("inside").addEventListener("click", (e) => { const b = e.target.closest("[data-cat]"); if (!b) return; cat = b.dataset.cat; paintInside(); paint(); });
+$("sort").addEventListener("change", (e) => { sort = e.target.value; paint(); });
 
-/* ---------- zoom: pinch, scroll-wheel, drag and double-tap ---------- */
-const zoom = $("zoom"), zimg = $("zimg");
-let Z = { s: 1, x: 0, y: 0 };
-const pts = new Map(); let pinch = null, lastTap = 0;
-function zDraw() {
-  const w = zimg.offsetWidth, h = zimg.offsetHeight, W = innerWidth, H = innerHeight;
-  // keep the picture on screen
-  const maxX = Math.max(0, (w * Z.s - W) / 2), maxY = Math.max(0, (h * Z.s - H) / 2);
-  Z.x = Math.max(-maxX, Math.min(maxX, Z.x)); Z.y = Math.max(-maxY, Math.min(maxY, Z.y));
-  zimg.style.transform = `translate(${Z.x - w * Z.s / 2}px,${Z.y - h * Z.s / 2}px) scale(${Z.s})`;
-}
-function zSet(s, cx = innerWidth / 2, cy = innerHeight / 2) {
-  s = Math.max(1, Math.min(4, s));
-  const k = s / Z.s, ox = cx - innerWidth / 2, oy = cy - innerHeight / 2;
-  Z.x = ox - (ox - Z.x) * k; Z.y = oy - (oy - Z.y) * k; Z.s = s; zDraw();
-}
-function openZoom(src, alt) {
-  zimg.src = src; zimg.alt = alt || ""; Z = { s: 1, x: 0, y: 0 };
-  zoom.classList.add("on"); zoom.setAttribute("aria-hidden", "false");
-  (zimg.complete ? Promise.resolve() : new Promise((r) => { zimg.onload = r; })).then(() => zSet(2));
-  zoom.querySelector(".zx").focus();
-}
-function closeZoom() { zoom.classList.remove("on"); zoom.setAttribute("aria-hidden", "true"); pts.clear(); pinch = null; }
-zoom.querySelector(".zx").onclick = closeZoom;
-zoom.querySelectorAll("[data-z]").forEach((b) => b.onclick = () => zSet(Z.s * (b.dataset.z > 0 ? 1.5 : 1 / 1.5)));
-zoom.addEventListener("wheel", (e) => { e.preventDefault(); zSet(Z.s * Math.exp(-e.deltaY * 0.0022), e.clientX, e.clientY); }, { passive: false });
-zoom.addEventListener("pointerdown", (e) => {
-  if (e.target.closest("button")) return;
-  zoom.setPointerCapture(e.pointerId); pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
-  if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), s: Z.s }; }
-  const now = Date.now(); if (pts.size === 1 && now - lastTap < 300) { zSet(Z.s > 1.5 ? 1 : 2.5, e.clientX, e.clientY); lastTap = 0; } else lastTap = now;
-});
-zoom.addEventListener("pointermove", (e) => {
-  const p = pts.get(e.pointerId); if (!p) return;
-  const dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY;
-  if (pts.size === 2 && pinch) { const [a, b] = [...pts.values()]; zSet(pinch.s * Math.hypot(a.x - b.x, a.y - b.y) / pinch.d, (a.x + b.x) / 2, (a.y + b.y) / 2); }
-  else if (pts.size === 1) { Z.x += dx; Z.y += dy; zDraw(); }
-});
-const zEnd = (e) => { pts.delete(e.pointerId); if (pts.size < 2) pinch = null; };
-zoom.addEventListener("pointerup", zEnd); zoom.addEventListener("pointercancel", zEnd);
-addEventListener("resize", () => { if (zoom.classList.contains("on")) zDraw(); });
-
-/* ---------- product detail ---------- */
-const pd = $("pd");
-function views(p) {
-  const v = [{ k: "front", label: "Front", src: img(p.image) }];
-  if (p.back) v.push({ k: "back", label: "Back", src: img(p.back) });
-  if (p.model) v.push({ k: "3d", label: "3D" });
-  else if (p.back) v.push({ k: "spin", label: "360°" });
-  return v;
-}
-function showView(p, k) {
-  const old = $("pic"), v = views(p).find((x) => x.k === k) || views(p)[0];
-  document.querySelectorAll("#views button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.v === v.k));
-  const pic = document.createElement("div"); pic.className = "pic"; pic.id = "pic"; old.replaceWith(pic);  // a fresh stage each time, so nothing from the last view lingers
-  if (v.k === "3d" || v.k === "spin") {
-    BB3D.mount(pic, { name: p.style, front_image: img(p.image), back_image: img(p.back), model_url: v.k === "3d" ? img(p.model) : null }, { big: true });
-    return;
-  }
-  pic.addEventListener("click", (e) => { if (v.src && (e.target.closest("[data-zoom]") || e.target.tagName === "IMG")) openZoom(v.src, p.style); });
-  pic.innerHTML = v.src ? `<img src="${esc(v.src)}" alt="${esc(p.style)}${p.color ? " in " + esc(p.color) : ""}, ${v.label.toLowerCase()}" width="333" height="385"><button class="zoombtn" type="button" data-zoom>Zoom</button>` : "";
-}
-function openProduct(id) {
-  const p = products.find((x) => x.id === id); if (!p) return;
-  let qty = 1;
-  const sib = siblings(p), vs = views(p);
-  const prevSize = (pd.querySelector("input[name=size]:checked") || {}).value;
-  $("pdin").innerHTML = `<div class="view"><div class="pic" id="pic"></div>${vs.length > 1 && window.BB3D ? `<div class="views" id="views" role="group" aria-label="Views">${vs.map((v) => `<button type="button" data-v="${v.k}" aria-pressed="false">${v.label}</button>`).join("")}</div>` : ""}</div>
-    <form class="info" id="pf" novalidate>
-      ${p.badge ? `<span class="lbl" style="color:var(--g2);margin:0">${esc(p.badge)}</span>` : ""}
-      <div><h2 id="pdname">${esc(p.style)}</h2>${p.color ? `<div style="margin-top:6px">${esc(p.color)}</div>` : ""}</div>
-      ${sib.length > 1 ? `<div><div class="lbl">Colour · ${esc(p.color)}</div><div class="sw">${sib.map((s) => `<button type="button" data-swap="${esc(s.id)}" style="background:${dot(s)}" aria-label="${esc(s.color)}"${s.id === p.id ? ' aria-current="true"' : ""}></button>`).join("")}</div></div>` : ""}
-      ${p.sizes.length ? `<div><div class="lbl" id="szl">Size</div><div class="sizes" id="sz" role="radiogroup" aria-labelledby="szl">${p.sizes.map((s) => `<label><input type="radio" name="size" value="${esc(s)}"${s === prevSize ? " checked" : ""}><span>${esc(s)}</span></label>`).join("")}</div><p class="err" id="perr" role="alert" style="margin-top:8px"></p></div>` : `<p class="err" id="perr" role="alert"></p>`}
-      <div><div class="lbl">Quantity</div><div class="qty"><button type="button" data-q="-1" aria-label="One less">−</button><output id="qv">1</output><button type="button" data-q="1" aria-label="One more">+</button></div></div>
-      ${p.description ? `<p style="margin:0;color:#cfcfc8">${esc(p.description)}</p>` : ""}
-      <p class="note">Place your order here and Birdboost contacts you to arrange delivery or collection and payment. Nothing is paid on the website.</p>
-      <div class="addbar">${p.price != null ? `<span class="price">${esc(money(p.price, p.currency))}</span>` : ""}<button class="btn w">Add to order</button></div>
-    </form>`;
-  showView(p, "front");
-  const vw = $("views"); if (vw) vw.onclick = (e) => { const b = e.target.closest("[data-v]"); if (b) showView(p, b.dataset.v); };
-  const f = $("pf");
-  f.addEventListener("click", (e) => {
-    const q = e.target.closest("[data-q]"); if (q) { qty = Math.max(1, Math.min(10, qty + +q.dataset.q)); $("qv").textContent = qty; }
-    const s = e.target.closest("[data-swap]"); if (s) openProduct(s.dataset.swap);
-  });
-  f.addEventListener("change", () => { $("perr").textContent = ""; const z = $("sz"); if (z) z.classList.remove("bad"); });
-  f.onsubmit = (e) => {
-    e.preventDefault();
-    const size = (f.querySelector("input[name=size]:checked") || {}).value || "";
-    if (p.sizes.length && !size) { $("perr").textContent = "Choose your size first."; $("sz").classList.add("bad"); $("sz").scrollIntoView({ block: "center", behavior: "smooth" }); f.querySelector("input[name=size]").focus({ preventScroll: true }); return; }
-    const items = cart.items(), key = p.id + "|" + size, have = items.find((i) => i.key === key);
-    if (have) have.qty = Math.min(10, have.qty + qty);
-    else items.push({ key, id: p.id, name: p.style, color: p.color, size, qty, price: p.price, currency: p.currency, image: img(p.image) });
-    cart.save(items);
-    pd.close(); openCart();
-  };
-  if (!pd.open) pd.showModal();
-  $("pdin").scrollTop = 0;
-  history.replaceState(null, "", "#" + p.id);
-}
-pd.addEventListener("cancel", (e) => { if (zoom.classList.contains("on")) { e.preventDefault(); closeZoom(); } });
-pd.addEventListener("close", () => { closeZoom(); if (location.hash && location.hash !== "#cart") history.replaceState(null, "", location.pathname + location.search); });
-
-/* ---------- order: cart, details, placed ---------- */
-const cd = $("cart");
-const codeNow = () => (store.get("bb-code", null) || {}).code || "";
-let codeInfo = null, view = "cart";
-function totals(items) {
-  const priced = items.every((i) => i.price != null), cur = (items[0] || {}).currency || "USD";
-  const sub = items.reduce((n, i) => n + (i.price || 0) * i.qty, 0);
-  const pct = codeInfo && codeInfo.ok && codeInfo.percent ? +codeInfo.percent : 0;
-  return { priced, cur, sub, pct, total: Math.round(sub * (1 - pct / 100) * 100) / 100, n: items.reduce((n, i) => n + i.qty, 0) };
-}
-const steps = (n) => `<div class="steps" aria-label="Step ${n} of 2"><span${n === 1 ? ' aria-current="step"' : ""}>1 · Your order</span><span aria-hidden="true">—</span><span${n === 2 ? ' aria-current="step"' : ""}>2 · Your details</span></div>`;
-function paintCart() {
-  const items = cart.items(), body = $("cbody"), foot = $("cfoot");
-  if (view === "done") return;
-  if (!items.length) {
-    body.innerHTML = `<div class="empty"><p>Nothing in your order yet.</p><button class="btn o" type="button" data-close>Back to the collection</button></div>`;
-    foot.innerHTML = ""; return;
-  }
-  const t = totals(items);
-  if (view === "cart") {
-    body.innerHTML = steps(1) + items.map((i, n) => `<div class="line"><img src="${esc(i.image)}" alt="">
-      <div><b>${esc(i.name)}</b><div class="mute" style="font-size:14px">${[i.color, i.size && "Size " + i.size].filter(Boolean).map(esc).join(" · ")}</div>
-      <div class="qty" style="margin-top:6px"><button type="button" data-step="${n}" data-d="-1" aria-label="One less">−</button><output>${i.qty}</output><button type="button" data-step="${n}" data-d="1" aria-label="One more">+</button></div></div>
-      <div style="text-align:right">${i.price == null ? '<span class="mute" style="font-size:13px">Price to confirm</span>' : `<b>${esc(money(i.price * i.qty, i.currency))}</b>`}<br><button class="rm" type="button" data-rm="${n}">Remove</button></div></div>`).join("")
-      + `<form class="codebox" id="cf" style="margin-top:18px"><label class="sr-only" for="code">Ambassador code</label><input class="field" id="code" placeholder="Ambassador code" value="${esc(codeNow())}" autocomplete="off"><button class="btn o" style="min-height:44px;padding:0 18px">Apply</button></form>
-      <p class="codemsg" id="cmsg" aria-live="polite" style="margin-top:8px">${codeMsg()}</p>`;
-    foot.innerHTML = `<div class="tot"><span>${t.pct ? "Total with your code (−" + t.pct + "%)" : "Total"}</span>${t.priced ? `<b>${esc(money(t.total, t.cur))}</b>` : `<b class="soft">Confirmed when we contact you</b>`}</div>
-      <button class="btn w" type="button" id="tocheck">Continue <span class="arr">→</span></button>`;
-    $("cf").onsubmit = (e) => { e.preventDefault(); applyCode($("code").value); };
-    $("tocheck").onclick = () => { view = "check"; paintCart(); $("cbody").scrollTop = 0; };
-  } else if (view === "check") {
-    const s = store.get("bb-buyer", {}), del = s.delivery || "Delivery";
-    body.innerHTML = steps(2) + `<form class="ff" id="co" novalidate>
-      <p class="mute" style="margin:0">Where can we reach you? Birdboost will contact you to confirm your order, delivery and payment. Nothing is paid on the website.</p>
-      <label>Full name<input name="name" autocomplete="name" required value="${esc(s.name || "")}"></label>
-      <label>Phone number <small>WhatsApp or calls</small><input name="phone" type="tel" inputmode="tel" autocomplete="tel" required placeholder="e.g. 077 123 4567" value="${esc(s.phone || "")}"></label>
-      <label>Email <small>optional</small><input name="email" type="email" inputmode="email" autocomplete="email" value="${esc(s.email || "")}"></label>
-      <div><div class="lbl" id="dl">Delivery or collection</div><div class="seg" role="radiogroup" aria-labelledby="dl">
-        <label><input type="radio" name="delivery" value="Delivery"${del !== "Collection" ? " checked" : ""}><span>Delivery</span></label>
-        <label><input type="radio" name="delivery" value="Collection"${del === "Collection" ? " checked" : ""}><span>Collection</span></label></div></div>
-      <label>City or town<input name="city" required autocomplete="address-level2" value="${esc(s.city || "")}"></label>
-      <label id="addrl">Area or address <small>for delivery</small><input name="address" autocomplete="street-address" value="${esc(s.address || "")}"></label>
-      <label>Anything we should know? <small>optional</small><textarea name="note" rows="2"></textarea></label>
-      <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" style="display:none" aria-hidden="true">
-      <p class="err" id="coerr" role="alert"></p>
-    </form>`;
-    foot.innerHTML = `<div class="tot"><span>${t.n} ${t.n === 1 ? "piece" : "pieces"}${codeNow() ? " · code " + esc(codeNow()) : ""}</span>${t.priced ? `<b>${esc(money(t.total, t.cur))}</b>` : `<b class="soft">Confirmed when we contact you</b>`}</div>
-      <button class="btn g" type="submit" form="co" id="place">Place order</button><button class="btn o" type="button" id="back">Back</button>`;
-    const co = $("co"), addr = () => { $("addrl").hidden = co.elements.delivery.value === "Collection"; };
-    co.addEventListener("change", addr); addr();
-    co.addEventListener("input", (e) => { e.target.removeAttribute("aria-invalid"); });
-    $("back").onclick = () => { view = "cart"; paintCart(); };
-    co.onsubmit = placeOrder;
-  }
-}
-function codeMsg() {
-  const c = codeNow(); if (!c) return "";
-  if (codeInfo && codeInfo.code === c) {
-    if (!codeInfo.ok) return "We couldn't find that code. Check it, or leave it empty.";
-    return `${codeInfo.name ? "Code from " + esc(codeInfo.name) + ", a Birdboost ambassador. " : "Code applied. "}${codeInfo.percent ? codeInfo.percent + "% off." : ""}`;
-  }
-  return `Code ${esc(c)} added to your order.`;
-}
-async function applyCode(v) {
-  const c = String(v || "").replace(/[^A-Za-z0-9]/g, "").toUpperCase().slice(0, 40);
-  if (!c) { store.set("bb-code", null); codeInfo = null; return paintCart(); }
-  store.set("bb-code", { code: c, t: Date.now() });
-  codeInfo = null;
-  if (hasDB) { try { const d = await rpc("shop_check_code", { p_code: c }); if (d && typeof d === "object") codeInfo = { code: c, ok: !!d.ok, name: d.name, percent: d.percent }; } catch (e) {} }
-  paintCart();
-}
-const newRef = () => "BB-" + Array.from(crypto.getRandomValues(new Uint8Array(3)), (b) => b.toString(16).padStart(2, "0")).join("").slice(0, 5).toUpperCase();
-const timeout = (ms) => { const c = new AbortController(); setTimeout(() => c.abort(), ms); return c.signal; };
-async function placeOrder(e) {
-  e.preventDefault();
-  const f = e.target, v = (k) => String(f.elements[k].value || "").trim(), err = $("coerr");
-  if (v("_gotcha")) return;
-  f.querySelectorAll("[aria-invalid]").forEach((x) => x.removeAttribute("aria-invalid"));
-  const delivery = v("delivery") || "Delivery";
-  const miss = ["name", "phone", "city"].filter((k) => !v(k));
-  if (v("phone") && v("phone").replace(/[^0-9]/g, "").length < 7) miss.push("phone");
-  if (v("email") && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v("email"))) miss.push("email");
-  if (miss.length) {
-    const names = { name: "your name", phone: "a phone number we can reach you on", city: "your city or town", email: "an email like name@example.com (or leave it empty)" };
-    [...new Set(miss)].forEach((k) => f.elements[k].setAttribute("aria-invalid", "true")); f.elements[miss[0]].focus();
-    err.textContent = "Please add " + [...new Set(miss)].map((k) => names[k]).join(", ") + "."; return;
-  }
-  const buyer = { name: v("name"), phone: v("phone"), email: v("email"), city: v("city"), address: delivery === "Delivery" ? v("address") : "", delivery };
-  store.set("bb-buyer", buyer);
-  const items = cart.items(), t = totals(items), code = codeNow();
-  const btn = $("place"); btn.disabled = true; btn.textContent = "Placing your order...";
-  err.textContent = "";
-
-  // 1. Save it in Birdboost's order list (Supabase), if the shop database is set up.
-  let ref = "", saved = false;
-  if (hasDB) {
-    try {
-      const d = await rpc("shop_order", { p_name: buyer.name, p_phone: buyer.phone, p_email: buyer.email || null, p_city: buyer.city, p_delivery: delivery,
-        p_address: buyer.address || null, p_note: v("note") || null, p_code: code || null,
-        p_items: items.map((i) => isUUID(i.id) ? { product_id: i.id, size: i.size || null, qty: i.qty }
-          : { item: i.id, name: i.name, color: i.color || null, size: i.size || null, qty: i.qty, price: i.price, currency: i.currency }) });
-      if (d && d.ref) { ref = d.ref; saved = true; }
-    } catch (x) {}
-  }
-  if (!ref) ref = newRef();
-
-  // 2. Email a copy to Birdboost (Formspree). If step 1 failed, this is how the order arrives.
-  const lines = items.map((i) => `${i.name}${i.color ? " (" + i.color + ")" : ""}${i.size ? ", size " + i.size : ""} x ${i.qty}${i.price != null ? " = " + money(i.price * i.qty, i.currency) : ""}`);
-  const fd = new FormData();
-  fd.append("_subject", `New Birdboost order ${ref}: ${buyer.name} (${buyer.city})`);
-  fd.append("form", "Shop order");
-  fd.append("order_ref", ref);
-  fd.append("name", buyer.name); fd.append("phone", buyer.phone);
-  if (buyer.email) { fd.append("email", buyer.email); fd.append("_replyto", buyer.email); }
-  fd.append("delivery", delivery); fd.append("city", buyer.city);
-  if (buyer.address) fd.append("address", buyer.address);
-  fd.append("items", lines.join("\n"));
-  fd.append("total", t.priced ? money(t.total, t.cur) + (t.pct ? ` (${t.pct}% off with code)` : "") : "To confirm");
-  if (code) fd.append("ambassador_code", code);
-  if (v("note")) fd.append("note", v("note"));
-  fd.append("saved_in_admin", saved ? "yes" : "no, only in this email");
-  let mailed = false;
-  try { const r = await fetch(FORMSPREE, { method: "POST", body: fd, headers: { Accept: "application/json" }, signal: timeout(15000) }); mailed = r.ok; } catch (x) {}
-
-  if (!saved && !mailed) {
-    btn.disabled = false; btn.textContent = "Try again";
-    err.textContent = "We couldn't send your order. Check your connection and tap Try again. Your details are kept.";
-    return;
-  }
-  cart.save([]);
-  view = "done";
-  $("cbody").innerHTML = `<div class="ok" role="status"><div class="tick" aria-hidden="true">✓</div><h3>Order placed</h3>
-    <div class="ref">${esc(ref)}</div>
-    <p>Thank you, ${esc(buyer.name.split(" ")[0])}. Birdboost will contact you on <b>${esc(buyer.phone)}</b> to confirm your order and arrange ${delivery === "Collection" ? "collection" : "delivery"} and payment.</p>
-    <p class="mute" style="font-size:14px">${esc(t.n + (t.n === 1 ? " piece" : " pieces"))}${t.priced ? " · " + esc(money(t.total, t.cur)) : ""}. Nothing has been paid on the website. Keep your reference in case you need it.</p></div>`;
-  $("cfoot").innerHTML = `<button class="btn w" type="button" id="done">Done</button>`;
-  $("done").onclick = () => { view = "cart"; cd.close(); };
-}
-$("cbody").addEventListener("click", (e) => {
-  const items = cart.items();
-  const s = e.target.closest("[data-step]"); if (s) { const i = items[+s.dataset.step]; i.qty = Math.max(1, Math.min(10, i.qty + +s.dataset.d)); cart.save(items); paintCart(); }
-  const r = e.target.closest("[data-rm]"); if (r) { items.splice(+r.dataset.rm, 1); cart.save(items); paintCart(); }
-});
-function openCart() { if (view === "done") view = "cart"; paintCart(); if (!cd.open) cd.showModal(); }
-cd.addEventListener("close", () => { if (location.hash === "#cart") history.replaceState(null, "", location.pathname + location.search); if (view === "check") view = "cart"; if (view === "done") view = "cart"; });
-document.querySelectorAll('a[href="#cart"]').forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); document.body.classList.remove("menu-open"); openCart(); }));
-[pd, cd].forEach((d) => d.addEventListener("click", (e) => { if (e.target === d || e.target.closest("[data-close]")) d.close(); }));
-
-/* ---------- an ambassador sees their own code and link ---------- */
+/* an ambassador sees their own code and link */
 const me = window.BB.me();
 if (me && me.code) {
   const link = new URL("?code=" + encodeURIComponent(me.code), location.href.split("#")[0].split("?")[0]).href;
   $("mybar").hidden = false;
-  $("mybar").innerHTML = `<span>Welcome back, <b>${esc(me.name)}</b>. Your code</span> <code>${esc(me.code)}</code><span class="mute" style="flex:1;min-width:200px">Share your link. Anyone who orders through it is linked to you.</span><button class="btn o" type="button" id="cplink" style="min-height:44px">Copy my link</button>`;
+  $("mybar").innerHTML = `<span>Welcome back, <b>${esc(me.name)}</b>. Your code</span><code>${esc(me.code)}</code><span class="mute" style="flex:1;min-width:200px">Anyone who orders through your link is linked to you.</span><button class="btn o" type="button" id="cplink" style="min-height:42px">Copy my link</button>`;
   $("cplink").onclick = () => navigator.clipboard.writeText(link).then(() => { $("cplink").textContent = "Link copied"; }, () => { $("cplink").textContent = link; });
 }
 
-/* ---------- start ---------- */
-loadProducts().then(() => {
-  paintFilters(); paintGrid();
-  if (codeNow() && hasDB) applyCode(codeNow());
-  const h = location.hash.slice(1);
-  if (h === "cart") openCart();
-  else if (h && products.some((p) => p.id === h)) { document.getElementById(h)?.scrollIntoView({ block: "center" }); openProduct(h); }
-});
+S.load().then((p) => { products = p; paintInside(); paint(); });
+C.strip($("strip"), { limit: 24, hideEmpty: true }).then((posts) => { if (!posts.length) $("seenwrap").hidden = true; });
 }
 </script>
 </body>
