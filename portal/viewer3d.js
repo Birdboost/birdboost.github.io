@@ -28,6 +28,8 @@
       if (p.front_image) mv.setAttribute("poster", p.front_image);
       mv.setAttribute("alt", "3D model of " + (p.name || "Birdboost piece"));
       mv.setAttribute("camera-controls", "");
+      mv.setAttribute("touch-action", "pan-y"); // a vertical swipe still scrolls the page on phones
+      mv.setAttribute("interaction-prompt", "auto");
       if (!reduce) mv.setAttribute("auto-rotate", "");
       mv.setAttribute("shadow-intensity", "1");
       mv.setAttribute("ar", "");
