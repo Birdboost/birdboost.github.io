@@ -141,5 +141,30 @@
   }
   document.querySelectorAll("svg[data-nest]").forEach((s, i) => nest(s, 7 + i * 13));
 
-  window.BB = { root, esc, store, cart, me: () => me };
+  /* Scroll progress: any element with data-progress gets --p from 0 (its top enters the bottom of the screen)
+     to 1 (its bottom leaves the top). CSS and small scripts use it for horizontal strips and parallax.
+     Only elements on screen are measured, once per frame. */
+  const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const live = new Set();
+  let pq = false;
+  const progress = () => {
+    pq = false;
+    const H = innerHeight;
+    live.forEach((el) => {
+      const r = el.getBoundingClientRect();
+      const p = Math.min(1, Math.max(0, (H - r.top) / (H + r.height)));
+      el.style.setProperty("--p", p.toFixed(4));
+      if (el._onProgress) el._onProgress(p, r);
+    });
+  };
+  const tickP = () => { if (!pq) { pq = true; requestAnimationFrame(progress); } };
+  function watchProgress(el) {
+    if (RM || !("IntersectionObserver" in window)) { el.style.setProperty("--p", ".5"); return; }
+    if (!watchProgress.io) watchProgress.io = new IntersectionObserver((es) => { es.forEach((e) => e.isIntersecting ? live.add(e.target) : live.delete(e.target)); tickP(); }, { rootMargin: "20% 0px" });
+    watchProgress.io.observe(el);
+  }
+  document.querySelectorAll("[data-progress]").forEach(watchProgress);
+  addEventListener("scroll", tickP, { passive: true }); addEventListener("resize", tickP);
+
+  window.BB = { root, esc, store, cart, me: () => me, watchProgress, RM };
 })();

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en" data-root="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Nest · Birdboost</title>
+<meta name="description" content="The Nest is where Birdboost lives. Every piece up close: the details, the fit, and the people wearing it.">
+<meta name="theme-color" content="#0a0a0a">
+<meta property="og:title" content="The Nest · Birdboost">
+<meta property="og:image" content="../tees.jpg">
+<link rel="icon" href="../assets/logo.png">
+<script>
+/* Old links to a piece (nest/#righteous-green) now open its own page. */
+(function(){var h=location.hash.slice(1);if(h&&h!=='cart'&&h!=='shop'&&/^[a-z0-9-]+$/i.test(h))location.replace('piece/?id='+encodeURIComponent(h)+(location.search?'&'+location.search.slice(1):''));})();
+</script>
+<!--HEAD-->
+<link rel="stylesheet" href="../assets/bb.css">
+<link rel="stylesheet" href="../assets/shop.css">
+<style>
+/* ---------- arrival ---------- */
+.arrive{position:relative;padding:clamp(110px,14vw,170px) 0 clamp(30px,4vw,50px);overflow:hidden;isolation:isolate}
+.arrive::before{content:"";position:absolute;inset:0;z-index:-2;background:radial-gradient(55% 60% at 30% 70%,#14301a 0,#0a110a 50%,var(--bg) 80%)}
+.arrive .grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:18px;align-items:end}
+.arrive h1{grid-column:1/9;font:400 clamp(100px,19vw,300px)/.78 var(--display);text-transform:uppercase;letter-spacing:-.01em;position:relative}
+.arrive h1 .serif{display:block;font-size:.2em;line-height:1.2;color:var(--g2);letter-spacing:0;margin-top:14px}
+.arrive .nestbg{position:absolute;z-index:-1;left:-6%;bottom:-14%;width:min(760px,90vw);opacity:.55;pointer-events:none}
+.arrive .nestbg svg{width:100%;height:auto;overflow:visible}
+.arrive .rim{position:absolute;left:34%;right:34%;top:31%;height:2px}
+.inside{grid-column:9/13;border-top:1px solid #ffffff2e}
+.inside button{display:flex;justify-content:space-between;align-items:baseline;width:100%;padding:14px 0;border:0;border-bottom:1px solid #ffffff1f;background:none;color:var(--mute);font:400 28px/1 var(--display);text-transform:uppercase;cursor:pointer;text-align:left;transition:color .25s,padding .35s var(--ease)}
+.inside button:hover{color:var(--ink);padding-left:6px}
+.inside button[aria-pressed=true]{color:var(--ink)}
+.inside button[aria-pressed=true]::before{content:"→ ";color:var(--g)}
+.inside .idx{font-size:12px}
+.how{display:flex;gap:6px 26px;flex-wrap:wrap;margin:clamp(30px,4vw,50px) 0 0;padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);list-style:none;font-size:14px;color:var(--mute)}
+.how li b{color:var(--ink);font-weight:600;margin-right:6px}
+.mybar{display:flex;align-items:center;gap:10px 16px;flex-wrap:wrap;margin-top:18px;padding:14px 0;border-bottom:1px solid #3fae3a55;font-size:14px}
+.mybar code{font:800 16px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.06em;color:var(--g2)}
+
+/* ---------- the floor: an editorial grid, not a wall of identical cards ---------- */
+.floor{padding:clamp(30px,4vw,60px) 0 clamp(80px,10vw,140px)}
+.floorbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:24px;font-size:14px;color:var(--mute)}
+.floorbar select{background:none;border:0;border-bottom:1px solid #ffffff40;color:var(--ink);font:14px var(--sans);padding:6px 22px 6px 2px;appearance:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23aaa' stroke-width='1.4'/%3E%3C/svg%3E") no-repeat right 4px center;cursor:pointer}
+.floorbar option{background:#111}
+.lay{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:clamp(40px,5vw,70px) 18px}
+.pc{text-decoration:none;color:inherit;display:block;position:relative}
+.pc .ph{position:relative;overflow:hidden;background:#111}
+.pc img{width:100%;aspect-ratio:333/385;object-fit:cover;transition:transform 1.3s var(--ease),opacity .6s var(--ease)}
+.pc .alt{position:absolute;inset:0;height:100%;opacity:0}
+@media(hover:hover){.pc:hover img{transform:scale(1.035)}.pc:hover .alt{opacity:1}}
+.pc .badge{position:absolute;left:0;top:0;background:var(--bg);color:var(--ink);font:600 10px var(--sans);letter-spacing:.14em;text-transform:uppercase;padding:7px 10px}
+.pc .meta{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 14px;align-items:baseline;margin-top:14px}
+.pc h3{font:600 16px var(--sans)}
+.pc .col{grid-column:2;color:var(--mute);font-size:14px;display:flex;gap:10px;align-items:center}
+.pc .dots{display:inline-flex;gap:5px}
+.pc .dots i{width:10px;height:10px;border-radius:50%;box-shadow:0 0 0 1px #ffffff40}
+.pc .pr{font:400 22px var(--display);grid-row:1}
+.pc .pr.soft{font:600 12px var(--sans);color:var(--mute)}
+.pc .go{grid-column:2/4;font-size:13px;color:var(--mute);opacity:0;transform:translateY(-4px);transition:.4s var(--ease)}
+.pc:hover .go,.pc:focus-visible .go{opacity:1;transform:none}
+/* the rhythm: big, then two, then wide, then three */
+.pc.s-hero{grid-column:1/8;grid-row:span 2}
+.pc.s-hero img{aspect-ratio:4/5}
+.pc.s-side{grid-column:8/13}
+.pc.s-side img{aspect-ratio:5/4}
+.pc.s-half{grid-column:span 6}
+.pc.s-third{grid-column:span 4}
+.pc.s-off{grid-column:2/7}
+.pc.s-off2{grid-column:8/12;margin-top:18%}
+.pc .story{grid-column:2/4;font:400 18px/1.35 var(--serif);font-style:italic;color:#d8d8d0;margin-top:6px;max-width:28em}
+.interlude{grid-column:1/-1;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:18px;align-items:center;padding:clamp(40px,6vw,80px) 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.interlude q{grid-column:2/10;font:400 clamp(34px,4.6vw,68px)/1.08 var(--serif);font-style:italic;quotes:none}
+.interlude cite{grid-column:10/13;font:600 11px var(--sans);letter-spacing:.16em;text-transform:uppercase;font-style:normal;color:var(--mute)}
+.empty{grid-column:1/-1;border-top:1px solid var(--line);padding:40px 0;color:var(--mute)}
+.seenhere{padding:clamp(60px,8vw,110px) 0;border-top:1px solid var(--line)}
+.seenhere .secthead h2{font-size:clamp(40px,5.5vw,80px)}
+
+@media(max-width:900px){
+  .arrive{padding-top:96px}
+  .arrive h1{grid-column:1/-1;font-size:clamp(88px,27vw,160px)}
+  .inside{grid-column:1/-1;margin-top:26px;display:flex;overflow-x:auto;gap:0;border-top:0;scrollbar-width:none}
+  .inside::-webkit-scrollbar{display:none}
+  .inside button{width:auto;flex:none;padding:10px 16px 10px 0;margin-right:16px;font-size:24px;border-bottom:0;gap:8px}
+  .inside button[aria-pressed=true]{border-bottom:2px solid var(--g)}
+  .inside button[aria-pressed=true]::before{content:""}
+  .how{flex-direction:column}
+  .lay{grid-template-columns:repeat(2,minmax(0,1fr));gap:36px 10px}
+  .pc.s-hero,.pc.s-side,.pc.s-off,.pc.s-off2{grid-column:1/-1;grid-row:auto;margin-top:0}
+  .pc.s-side img{aspect-ratio:333/385}
+  .pc.s-half,.pc.s-third{grid-column:span 1}
+  .pc.s-half h3,.pc.s-third h3{font-size:14px}
+  .pc.s-half .meta,.pc.s-third .meta{grid-template-columns:minmax(0,1fr) auto}
+  .pc.s-half .idx,.pc.s-third .idx{display:none}
+  .pc.s-half .col,.pc.s-third .col{grid-column:1/-1}
+  .pc .go{display:none}
+  .pc .story{grid-column:1/-1}
+  .interlude q,.interlude cite{grid-column:1/-1}
+}
+</style>
+</head>
+<body class="grain" data-bird="solo" data-bird-delay="700">
+<!--NAV-->
+
+<main>
+<section class="arrive" aria-labelledby="h1">
+  <div class="wrap">
+    <div class="grid">
+      <h1 id="h1">The Nest<span class="serif">where Birdboost lives</span></h1>
+      <nav class="inside" id="inside" aria-label="What's inside"></nav>
+    </div>
+    <ol class="how" aria-label="How ordering works"><li><b>1</b>Pick a piece and your size</li><li><b>2</b>Place your order here</li><li><b>3</b>We contact you to arrange delivery and payment</li></ol>
+    <div class="mybar" id="mybar" hidden></div>
+  </div>
+  <div class="nestbg" aria-hidden="true" data-draw><svg data-nest></svg><span class="rim" data-perch="0.5" data-perch-scale="0.9"></span></div>
+</section>
+
+<section class="floor" id="shop" aria-label="The pieces">
+  <div class="wrap">
+    <div class="floorbar"><span id="count" aria-live="polite"></span><label>Sort <select id="sort"><option value="feat">Featured</option><option value="lo">Price, low to high</option><option value="hi">Price, high to low</option></select></label></div>
+    <div class="lay" id="lay"></div>
+  </div>
+</section>
+
+<section class="seenhere" id="seenwrap" aria-labelledby="h-seen">
+  <div class="wrap secthead"><h2 id="h-seen">Seen in <span class="serif">the Flock</span></h2><p>The pieces, worn by real people. <a class="link-u" href="../flock/share/">Share yours</a>.</p></div>
+  <div class="sf" id="strip"><div class="sf-row"></div></div>
+</section>
+</main>
+
+<!--FOOT-->
+
+<script src="../portal/config.js"></script>
+<script src="../assets/catalog.js"></script>
+<script src="../assets/site.js"></script>
+<script src="../assets/shop.js"></script>
+<script src="../assets/community.js"></script>
+<script src="../assets/bird.js"></script>
+<script>
+{
+const { esc } = window.BB, S = window.BBShop, C = window.BBCommunity;
+const $ = (id) => document.getElementById(id);
+let products = [], cat = "All", sort = "feat";
+
+const rhythm = ["s-hero", "s-side", "s-side", "s-off", "s-off2", "s-third", "s-third", "s-third", "s-half", "s-half"];
+function card(p, i, list) {
+  const sib = S.siblings(list, p), cls = rhythm[i % rhythm.length];
+  const story = (cls === "s-hero" || cls === "s-off") && p.description ? `<p class="story">${esc(p.description.split(". ")[0].replace(/\.$/, ""))}.</p>` : "";
+  return `<a class="pc ${cls}" href="${esc(S.pieceUrl(p))}">
+    <div class="ph"><img src="${esc(S.img(p.image))}" alt="${esc(p.style)}${p.color ? " in " + esc(p.color) : ""}" loading="${i < 3 ? "eager" : "lazy"}" width="333" height="385">${p.back ? `<img class="alt" src="${esc(S.img(p.back))}" alt="" loading="lazy">` : ""}${p.badge ? `<span class="badge">${esc(p.badge)}</span>` : ""}</div>
+    <div class="meta"><span class="idx">${String(i + 1).padStart(2, "0")}</span><h3>${esc(p.style)}</h3>${p.price != null ? `<span class="pr">${esc(S.money(p.price, p.currency))}</span>` : `<span class="pr soft">Price on request</span>`}
+      <span class="col">${esc(p.color)}${sib.length > 1 ? `<span class="dots" aria-label="${sib.length} colours">${sib.map((s) => `<i style="background:${S.dot(s)}"></i>`).join("")}</span>` : ""}</span>
+      <span class="go">View the piece →</span>${story}</div></a>`;
+}
+function paint() {
+  let list = products.filter((p) => cat === "All" || p.category === cat);
+  const pv = (p) => p.price == null ? Infinity : p.price;
+  if (sort === "lo") list = [...list].sort((a, b) => pv(a) - pv(b));
+  if (sort === "hi") list = [...list].sort((a, b) => (b.price ?? -1) - (a.price ?? -1));
+  $("count").textContent = list.length === 1 ? "1 piece" : list.length + " pieces";
+  let html = list.map((p, i) => card(p, i, products)).join("");
+  // a pause between pieces: the line the brand is built on
+  if (list.length > 3) { const cut = html.split("</a>"); cut.splice(3, 0, `<div class="interlude"><q>“For we are God's handiwork, created to do good works.”</q><cite>Ephesians 2:10 · on every Righteous tee</cite></div>`); html = cut.join("</a>"); }
+  $("lay").innerHTML = list.length ? html : `<p class="empty">Nothing here yet.</p>`;
+  if (window.BBBird && BBBird.rescan) BBBird.rescan();
+}
+function paintInside() {
+  const counts = products.reduce((m, p) => (m[p.category] = (m[p.category] || 0) + 1, m), {});
+  const cats = ["All", ...Object.keys(counts)];
+  $("inside").innerHTML = cats.map((c) => `<button type="button" aria-pressed="${c === cat}" data-cat="${esc(c)}"><span>${esc(c === "All" ? "Everything" : c)}</span><span class="idx">${c === "All" ? products.length : counts[c]}</span></button>`).join("");
+}
+$("inside").addEventListener("click", (e) => { const b = e.target.closest("[data-cat]"); if (!b) return; cat = b.dataset.cat; paintInside(); paint(); });
+$("sort").addEventListener("change", (e) => { sort = e.target.value; paint(); });
+
+/* an ambassador sees their own code and link */
+const me = window.BB.me();
+if (me && me.code) {
+  const link = new URL("?code=" + encodeURIComponent(me.code), location.href.split("#")[0].split("?")[0]).href;
+  $("mybar").hidden = false;
+  $("mybar").innerHTML = `<span>Welcome back, <b>${esc(me.name)}</b>. Your code</span><code>${esc(me.code)}</code><span class="mute" style="flex:1;min-width:200px">Anyone who orders through your link is linked to you.</span><button class="btn o" type="button" id="cplink" style="min-height:42px">Copy my link</button>`;
+  $("cplink").onclick = () => navigator.clipboard.writeText(link).then(() => { $("cplink").textContent = "Link copied"; }, () => { $("cplink").textContent = link; });
+}
+
+S.load().then((p) => { products = p; paintInside(); paint(); });
+C.strip($("strip"), { limit: 24, hideEmpty: true }).then((posts) => { if (!posts.length) $("seenwrap").hidden = true; });
+}
+</script>
+</body>
+</html>

@@ -167,7 +167,7 @@ html:not(.is-me) [data-me-show]{display:none!important}
 <header class="nav">
   <div class="in">
     <a class="brand" href="../" aria-label="Birdboost home"><span class="logo" aria-hidden="true"></span><b>BIRDBOOST</b></a>
-    <nav aria-label="Main" class="menu" id="menu"><ul class="links"><li><a href="../">Home</a></li><li><a href="../nest/">Shop</a></li><li><a href="../#story">The Story</a></li><li><a href="../#flock">The Flock</a></li><li><a href="../flock/" aria-current="page">Ambassadors</a></li><li><a href="#contact">Contact</a></li></ul>
+    <nav aria-label="Main" class="menu" id="menu"><ul class="links"><li><a href="../nest/">The Nest</a></li><li><a href="../#seen">Seen in the Flock</a></li><li><a href="../events/">Events</a></li><li><a href="../flock/" aria-current="page">Ambassadors</a></li><li><a href="../#story">Our story</a></li></ul>
       <div class="menu-foot"><span data-me-slot-m></span><a href="https://www.instagram.com/birdboost_impact" target="_blank" rel="noopener">Instagram</a><a href="https://www.tiktok.com/@official_birdboost.inc" target="_blank" rel="noopener">TikTok</a></div></nav>
     <div class="navr"><span data-me-slot></span><a class="cartbtn" href="../nest/#cart" aria-label="Cart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 016 0"/></svg><b data-cart-count></b></a><button class="menubtn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Menu"><i></i></button></div>
   </div>
@@ -317,13 +317,14 @@ html:not(.is-me) [data-me-show]{display:none!important}
   <div class="cols">
     <div><div class="big">Birdboost</div><p>Faith-driven clothing and community from Zimbabwe. Questions or collaborations? Message us on Instagram.</p>
       <a class="btn o" href="https://www.instagram.com/birdboost_impact" target="_blank" rel="noopener">@birdboost_impact</a></div>
-    <div><h4>Explore</h4><a href="../">Home</a><a href="../nest/">The Nest</a><a href="../#story" >The Story</a><a href="../#collection">The Collection</a></div>
-    <div><h4>The Flock</h4><a href="../flock/">Become an ambassador</a><a href="../portal/">Ambassador log in</a><a href="../#flock">The community</a></div>
+    <div><h4>Explore</h4><a href="../">Home</a><a href="../nest/">The Nest</a><a href="../events/">Events</a><a href="../#story">Our story</a></div>
+    <div><h4>The Flock</h4><a href="../#seen">Seen in the Flock</a><a href="../flock/share/">Share your fit</a><a href="../flock/">Become an ambassador</a><a href="../portal/">Ambassador log in</a></div>
     <div><h4>Follow</h4><a href="https://www.instagram.com/birdboost_impact" target="_blank" rel="noopener">Instagram</a><a href="https://www.tiktok.com/@official_birdboost.inc" target="_blank" rel="noopener">TikTok</a></div>
   </div>
   <div class="fine"><span>© <span data-year>2026</span> Birdboost · Faith-driven clothing and community, Zimbabwe</span><span class="serif" style="font-size:17px">God made me.</span></div>
 </div></footer>
 
+<script src="../portal/config.js"></script>
 <script src="../assets/site.js"></script>
 <script>
 {
@@ -469,6 +470,9 @@ $('f').addEventListener('submit', e => {
   const btn = $('sub'); btn.disabled = true; btn.textContent = 'Sending...';
   const data = {}; new FormData($('f')).forEach((val,k) => { data[k] = val; });
   data._subject = 'New Flock application: ' + v('name') + ' (' + a + ', ' + v('city') + ')';
+  // also save it in the admin page's Applications list (when the database update is done); the email above stays the main copy
+  try { const C = window.BB_CONFIG || {}; if (C.SUPABASE_URL && !/PASTE/.test(C.SUPABASE_URL)) { const d = Object.assign({}, data); delete d._gotcha; delete d._subject;
+    fetch(C.SUPABASE_URL + '/rest/v1/rpc/public_apply', { method: 'POST', headers: { apikey: C.SUPABASE_ANON_KEY, Authorization: 'Bearer ' + C.SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ p: d }) }).catch(() => {}); } } catch (e) {}
   fetch('https://formspree.io/f/' + FORM_ID, { method:'POST', headers:{'Content-Type':'application/json','Accept':'application/json'}, body:JSON.stringify(data) })
     .then(r => { if (!r.ok) throw new Error(r.status);
       $('okmsg').style.display = ''; $('fallback').style.display = 'none';

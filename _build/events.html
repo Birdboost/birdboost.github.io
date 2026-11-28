@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" data-root="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Events · Birdboost</title>
+<meta name="description" content="Where Birdboost shows up: events, shoots and gatherings, and the recaps after.">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="icon" href="../assets/logo.png">
+<!--HEAD-->
+<link rel="stylesheet" href="../assets/bb.css">
+<link rel="stylesheet" href="../assets/shop.css">
+<style>
+.evp{padding:clamp(110px,13vw,170px) 0 clamp(80px,10vw,130px)}
+.evp h1{font:400 clamp(90px,15vw,240px)/.8 var(--display);text-transform:uppercase;margin-bottom:30px}
+.evp h1 .serif{color:var(--g2);font-size:.5em}
+.sect{margin-top:clamp(50px,7vw,90px)}
+.rows{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.rows a{display:grid;grid-template-columns:170px minmax(0,1fr) minmax(0,.8fr) 160px;gap:20px;align-items:center;padding:20px 0;border-bottom:1px solid var(--line);text-decoration:none;color:inherit;transition:padding .4s var(--ease)}
+.rows a:hover{padding-left:10px}
+.rows .d{font:500 13px ui-monospace,Menlo,Consolas,monospace;color:var(--mute)}
+.rows b{font:400 clamp(30px,3.4vw,50px)/1 var(--display);text-transform:uppercase}
+.rows .pl{color:var(--mute)}
+.rows .th{aspect-ratio:4/3;overflow:hidden;background:#111}
+.rows .th img{width:100%;height:100%;object-fit:cover}
+.none{border-top:1px solid var(--line);padding:30px 0;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:18px}
+.none p{grid-column:1/8;font:400 clamp(24px,2.6vw,36px)/1.25 var(--serif);font-style:italic;margin:0}
+/* a single event: the recap */
+.ev-hero{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:18px;align-items:end;margin-bottom:40px}
+.ev-hero .t{grid-column:1/8}
+.ev-hero h1{font-size:clamp(64px,9vw,150px);margin:12px 0 0}
+.ev-hero .facts{grid-column:9/13;border-top:1px solid var(--line)}
+.ev-hero .facts div{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px}
+.ev-hero .facts span{color:var(--mute)}
+.ev-cover{aspect-ratio:21/9;overflow:hidden;background:#111;margin-bottom:40px}
+.ev-cover img{width:100%;height:100%;object-fit:cover}
+.recap{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:18px}
+.recap p{grid-column:3/11;font:400 clamp(22px,2.2vw,30px)/1.4 var(--serif);margin:0 0 40px;white-space:pre-line}
+.grid-ph{columns:3 260px;column-gap:10px}
+.grid-ph button{display:block;width:100%;margin:0 0 10px;padding:0;border:0;background:#111;cursor:zoom-in;break-inside:avoid}
+.grid-ph img{width:100%}
+@media(max-width:900px){
+  .rows a{grid-template-columns:minmax(0,1fr) 110px;gap:6px 14px}
+  .rows .d{grid-column:1}.rows b{grid-column:1}.rows .pl{grid-column:1}.rows .th{grid-column:2;grid-row:1/4}
+  .none p,.ev-hero .t,.ev-hero .facts,.recap p{grid-column:1/-1}
+  .ev-cover{aspect-ratio:4/3}
+}
+</style>
+</head>
+<body class="grain" data-bird="solo" data-bird-delay="1200">
+<!--NAV-->
+
+<main class="evp"><div class="wrap" id="root"><p class="mute">Loading…</p></div></main>
+
+<!--FOOT-->
+
+<script src="../portal/config.js"></script>
+<script src="../assets/catalog.js"></script>
+<script src="../assets/site.js"></script>
+<script src="../assets/shop.js"></script>
+<script src="../assets/community.js"></script>
+<script src="../assets/bird.js"></script>
+<script>
+{
+const { esc } = window.BB, S = window.BBShop, C = window.BBCommunity;
+const $ = (id) => document.getElementById(id);
+const one = new URLSearchParams(location.search).get("e");
+const when = (e) => C.date(e.starts_at, { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+const upcoming = (e) => e.starts_at && new Date(e.ends_at || e.starts_at) > new Date();
+const row = (e) => `<li><a href="?e=${esc(e.id)}"><span class="d">${esc(when(e) || "Date to come")}</span><b>${esc(e.title)}</b><span class="pl">${esc(e.location || "")}${!upcoming(e) && e.photos ? " · " + e.photos + " photos" : ""}</span><span class="th">${C.safe(e.cover_image) ? `<img src="${esc(C.safe(e.cover_image))}" alt="" loading="lazy">` : ""}</span></a></li>`;
+
+C.events().then((list) => {
+  if (one) {
+    const e = list.find((x) => x.id === one);
+    if (!e) { $("root").innerHTML = `<h1>Event <span class="serif">not found</span></h1><a class="btn o" href="./">All events</a>`; return; }
+    document.title = e.title + " · Birdboost";
+    $("root").innerHTML = `<a class="link-u" href="./" style="font-size:14px">← All events</a>
+      <div class="ev-hero"><div class="t"><span class="eyebrow-s">${upcoming(e) ? "Coming up" : "Recap"}</span><h1>${esc(e.title)}</h1></div>
+        <div class="facts"><div><span>When</span>${esc(when(e) || "To be announced")}</div>${e.location ? `<div><span>Where</span>${esc(e.location)}</div>` : ""}${e.featured ? `<div><span>Wearing</span>${esc(e.featured)}</div>` : ""}${e.team.length ? `<div><span>Ambassadors</span>${e.team.map((t) => esc(t.name)).join(", ")}</div>` : ""}</div></div>
+      ${C.safe(e.cover_image) ? `<div class="ev-cover"><img src="${esc(C.safe(e.cover_image))}" alt=""></div>` : ""}
+      ${e.recap || e.brief ? `<div class="recap"><p>${esc(upcoming(e) ? e.brief || "" : e.recap || e.brief || "")}</p></div>` : ""}
+      <div class="sect"><div class="secthead"><h2>Seen <span class="serif">there</span></h2><p>${upcoming(e) ? "After the day, the photos land here." : "Photos from the day, from the people who were there."}</p></div><div class="grid-ph" id="ph"></div>
+        <div class="none" id="phnone" hidden><p>${upcoming(e) ? "Coming? Post your photos with #SeenInTheFlock and send them to us after." : "No photos from this one yet. Were you there?"}</p><div style="grid-column:9/13;align-self:end"><a class="btn o" href="../flock/share/">Share a photo</a></div></div></div>`;
+    S.rpc("community_feed", { p_limit: 120, p_product: null, p_event: e.id }).then((posts) => {
+      posts = Array.isArray(posts) ? posts : [];
+      if (!posts.length) { $("phnone").hidden = false; return; }
+      $("ph").innerHTML = posts.map((p, i) => `<button type="button" data-i="${i}">${p.kind === "video" ? `<video src="${esc(C.safe(p.media_url))}" muted playsinline preload="metadata"></video>` : `<img src="${esc(C.safe(p.media_url))}" alt="" loading="lazy">`}</button>`).join("");
+      $("ph").onclick = (ev) => { const b = ev.target.closest("[data-i]"); if (b) C.open(posts[+b.dataset.i]); };
+    }).catch(() => { $("phnone").hidden = false; });
+    return;
+  }
+  const up = list.filter(upcoming).reverse(), past = list.filter((e) => !upcoming(e));
+  $("root").innerHTML = `<div class="label"><b>Where Birdboost shows up</b></div><h1>Events</h1>
+    <div class="sect"><div class="secthead"><h2>Coming <span class="serif">up</span></h2></div>${up.length ? `<ul class="rows">${up.map(row).join("")}</ul>` : `<div class="none"><p>Nothing announced yet. Follow @birdboost_impact to hear first.</p></div>`}</div>
+    <div class="sect"><div class="secthead"><h2>Recaps</h2></div>${past.length ? `<ul class="rows">${past.map(row).join("")}</ul>` : `<div class="none"><p>After each event, the photos, the people and the pieces stay here.</p></div>`}</div>`;
+});
+}
+</script>
+</body>
+</html>

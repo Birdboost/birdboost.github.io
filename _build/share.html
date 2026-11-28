@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" data-root="../../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Share your fit · Seen in the Flock · Birdboost</title>
+<meta name="description" content="Wearing Birdboost? Send us your photo. Approved photos appear in Seen in the Flock on the Birdboost website.">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="icon" href="../../assets/logo.png">
+<!--HEAD-->
+<link rel="stylesheet" href="../../assets/bb.css">
+<link rel="stylesheet" href="../../assets/shop.css">
+<style>
+.sh{padding:clamp(100px,12vw,150px) 0 clamp(80px,10vw,130px)}
+.sh .grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:18px;align-items:start}
+.sh-intro{grid-column:1/6;position:sticky;top:100px}
+.sh-intro h1{font:400 clamp(70px,9vw,140px)/.84 var(--display);text-transform:uppercase}
+.sh-intro h1 .serif{color:var(--g2);font-size:.82em}
+.sh-intro p{color:#d0d0ca;max-width:26em}
+.sh-intro ol{margin:24px 0 0;padding:0;list-style:none;border-top:1px solid var(--line)}
+.sh-intro li{display:grid;grid-template-columns:34px 1fr;padding:12px 0;border-bottom:1px solid var(--line);color:var(--mute);font-size:15px}
+.sh-form{grid-column:7/13}
+.drop{position:relative;display:grid;place-items:center;aspect-ratio:4/5;border:1px dashed #ffffff40;cursor:pointer;overflow:hidden;text-align:center;transition:border-color .2s}
+.drop:hover,.drop.over{border-color:var(--g)}
+.drop input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.drop .hint b{display:block;font:400 34px var(--display);text-transform:uppercase;margin-bottom:6px}
+.drop .hint span{color:var(--mute);font-size:14px}
+.drop img,.drop video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.drop .chg{position:absolute;right:10px;bottom:10px;background:#000c;color:#fff;font:600 12px var(--sans);padding:8px 12px;pointer-events:none}
+.bar{height:3px;background:#ffffff1a;margin-top:8px;overflow:hidden}.bar i{display:block;height:100%;width:0;background:var(--g);transition:width .2s}
+.or{display:flex;align-items:center;gap:12px;color:var(--mute);font-size:13px;margin:18px 0}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+.ff select{min-height:48px;border:0;border-bottom:1px solid #ffffff40;background:none;color:var(--ink);font:16px var(--sans);padding:8px 2px;width:100%;border-radius:0;appearance:none}
+.ff select option{background:#111}
+.consent{display:grid!important;grid-template-columns:22px 1fr;gap:10px!important;font-weight:400!important;font-size:14px!important;color:#cfcfc8;align-items:start}
+.consent input{width:20px;height:20px;min-height:0!important;margin-top:2px;accent-color:var(--g)}
+.done{border-top:1px solid var(--line);padding-top:30px}
+.done h2{font:400 56px/.9 var(--display);text-transform:uppercase;margin-bottom:12px}
+@media(max-width:900px){.sh-intro,.sh-form{grid-column:1/-1;position:static}.sh{padding-top:90px}.drop{aspect-ratio:1}}
+</style>
+</head>
+<body class="grain" data-bird="solo" data-bird-delay="1200">
+<!--NAV-->
+
+<main class="sh">
+  <div class="wrap grid">
+    <div class="sh-intro">
+      <div class="label"><b>Seen in the Flock</b></div>
+      <h1>Share <span class="serif">your fit.</span></h1>
+      <p>Wearing Birdboost? Send us the photo. We look at every one, and the ones we share appear in Seen in the Flock on this website.</p>
+      <ol><li><span class="idx">01</span>Add your photo, or a link to your post</li><li><span class="idx">02</span>Tell us who to credit and where it was</li><li><span class="idx">03</span>We check it, then it goes up</li></ol>
+      <p class="mute" style="font-size:14px;margin-top:18px">On Instagram? Tag <b>@birdboost_impact</b> and use <b>#SeenInTheFlock</b> too.</p>
+    </div>
+    <form class="sh-form ff" id="f" novalidate>
+      <label class="drop" id="drop"><input type="file" id="file" accept="image/*,video/mp4,video/quicktime,video/webm"><span class="hint"><b>Add your photo</b><span>A photo or a short video, up to 25 MB</span></span></label>
+      <div class="bar" id="bar" hidden><i></i></div>
+      <div class="or">or</div>
+      <label>Link to your post <small>Instagram or TikTok</small><input name="link" type="url" inputmode="url" placeholder="https://www.instagram.com/p/…"></label>
+      <label>Name or @handle to credit<input name="name" autocomplete="nickname" required placeholder="e.g. @rudo.m"></label>
+      <label>Where was it? <small>optional</small><input name="place" placeholder="e.g. Sunday service, Avondale"></label>
+      <label>Which piece are you wearing? <small>optional</small><select name="product" id="product"><option value="">Choose a piece</option></select></label>
+      <label>Say something <small>optional</small><textarea name="caption" rows="2" maxlength="400"></textarea></label>
+      <label>How can we reach you? <small>optional, never shown</small><input name="contact" placeholder="Phone, email or @handle"></label>
+      <label class="consent"><input type="checkbox" name="consent"><span>This is me (or I have permission from the people in it), and Birdboost may show it on its website and social media with the credit above.</span></label>
+      <p class="err" id="err" role="alert"></p>
+      <button class="btn w" id="send">Send it to Birdboost</button>
+    </form>
+  </div>
+</main>
+
+<!--FOOT-->
+
+<script src="../../portal/config.js"></script>
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/site.js"></script>
+<script src="../../assets/shop.js"></script>
+<script src="../../assets/upload.js"></script>
+<script src="../../assets/bird.js"></script>
+<script>
+{
+const { esc } = window.BB, S = window.BBShop, U = window.BBUpload;
+const $ = (id) => document.getElementById(id);
+const f = $("f"), drop = $("drop"), file = $("file");
+S.load().then((list) => { $("product").innerHTML += list.map((p) => `<option value="${esc(p.id)}">${esc(p.style)}${p.color ? " · " + esc(p.color) : ""}</option>`).join(""); const pre = new URLSearchParams(location.search).get("piece"); if (pre) $("product").value = pre; });
+const show = () => {
+  const x = file.files[0]; drop.querySelectorAll("img,video,.chg").forEach((n) => n.remove());
+  if (!x) return;
+  const url = URL.createObjectURL(x);
+  drop.insertAdjacentHTML("beforeend", (/^video\//.test(x.type) ? `<video src="${url}" muted autoplay loop playsinline></video>` : `<img src="${url}" alt="Your photo">`) + `<span class="chg">Change</span>`);
+};
+file.addEventListener("change", show);
+["dragenter", "dragover"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave", "drop"].forEach((t) => drop.addEventListener(t, () => drop.classList.remove("over")));
+f.addEventListener("input", (e) => e.target.removeAttribute("aria-invalid"));
+f.onsubmit = async (e) => {
+  e.preventDefault();
+  const v = (k) => String(f.elements[k].value || "").trim(), err = $("err"), btn = $("send");
+  err.textContent = "";
+  const link = v("link");
+  if (!file.files[0] && !link) { err.textContent = "Add a photo, or paste a link to your post."; return; }
+  if (link && !/^https:\/\/[^\s]+$/i.test(link)) { f.elements.link.setAttribute("aria-invalid", "true"); err.textContent = "That link should start with https://"; return; }
+  if (!v("name")) { f.elements.name.setAttribute("aria-invalid", "true"); f.elements.name.focus(); err.textContent = "Tell us who to credit."; return; }
+  if (!f.elements.consent.checked) { err.textContent = "Please tick the box so we're allowed to share it."; return; }
+  if (!S.hasDB) { err.textContent = "Sharing isn't switched on yet. For now, tag @birdboost_impact on Instagram."; return; }
+  btn.disabled = true; btn.textContent = file.files[0] ? "Sending your photo…" : "Sending…";
+  let media = null;
+  try {
+    if (file.files[0]) { $("bar").hidden = false; media = await U.send(file.files[0], (k) => { $("bar").firstElementChild.style.width = Math.round(k * 100) + "%"; }); }
+    const d = await S.rpc("community_submit", { p_name: v("name"), p_contact: v("contact") || null, p_media_url: media, p_link: link || null, p_caption: v("caption") || null, p_place: v("place") || null, p_product: v("product") || null, p_consent: true });
+    if (!d || !d.ok) throw new Error((d && d.error) || "failed");
+    f.innerHTML = `<div class="done" role="status"><span class="eyebrow-s">Received</span><h2>Thank you.</h2><p>We'll take a look. If we share it, it'll appear in Seen in the Flock with your name.</p><p class="mute" style="font-size:14px">Keep tagging #SeenInTheFlock. The flock is how Birdboost travels.</p><div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:20px"><a class="btn w" href="../../#seen">See the Flock</a><a class="btn o" href="./">Share another</a></div></div>`;
+  } catch (x) {
+    btn.disabled = false; btn.textContent = "Try again";
+    const m = String(x.message || "");
+    err.textContent = m === "too_big" ? "That file is over 25 MB. Try a shorter video or a photo." : m === "not_media" ? "That file isn't a photo or a video." : m === "too_many" ? "You've sent a lot in the last hour. Try again a bit later." : "We couldn't send it just now. Check your connection and try again.";
+  }
+};
+}
+</script>
+</body>
+</html>
