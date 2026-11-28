@@ -414,7 +414,7 @@ function openProduct(id) {
       <p class="note">Place your order here and Birdboost contacts you to arrange delivery or collection and payment. Nothing is paid on the website.</p>
       <div class="addbar">${p.price != null ? `<span class="price">${esc(money(p.price, p.currency))}</span>` : ""}<button class="btn w">Add to order</button></div>
     </form>`;
-  showView(p, "front");
+  showView(p, p.model && window.BB3D ? "3d" : "front"); // a piece with a 3D model opens in 3D
   const vw = $("views"); if (vw) vw.onclick = (e) => { const b = e.target.closest("[data-v]"); if (b) showView(p, b.dataset.v); };
   const f = $("pf");
   f.addEventListener("click", (e) => {
@@ -603,6 +603,8 @@ loadProducts().then(() => {
   const h = location.hash.slice(1);
   if (h === "cart") openCart();
   else if (h && products.some((p) => p.id === h)) { document.getElementById(h)?.scrollIntoView({ block: "center" }); openProduct(h); }
+  // a link to a piece from elsewhere on the page (or the footer) opens it
+  addEventListener("hashchange", () => { const k = location.hash.slice(1); if (k === "cart") openCart(); else if (products.some((p) => p.id === k)) openProduct(k); });
 });
 }
 </script>

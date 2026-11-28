@@ -25,4 +25,16 @@ window.BB_CATALOG = [
     image: "assets/img/righteous-grey.jpg", badge: "Limited drop",
     description: "The Righteous tee in grey. A topographic RIGHTEOUS print across the chest with Ephesians 2:8-10 underneath, and the Birdboost mark on the sleeve.",
   },
+  {
+    id: "god-made-me-hoodie", style: "God Made Me Hoodie", color: "Black", swatch: "#111111",
+    category: "Hoodies", price: null, currency: "USD", sizes: ["XS", "S", "M", "L", "XL", "XXL"],
+    image: "assets/img/gmm-hoodie.jpg", back: "assets/img/gmm-hoodie-back.jpg", model: "assets/models/god-made-me-hoodie.glb", badge: "New · 3D",
+    description: "The God Made Me hoodie in black, with the GOD MADE ME print across the back. Turn it around in 3D to see every side.",
+  },
+  {
+    id: "god-made-me-bomber", style: "God Made Me Bomber Jacket", color: "Black", swatch: "#111111",
+    category: "Jackets", price: null, currency: "USD", sizes: ["XS", "S", "M", "L", "XL", "XXL"],
+    image: "assets/img/gmm-bomber.jpg", back: "assets/img/gmm-bomber-back.jpg", model: "assets/models/god-made-me-bomber.glb", badge: "New · 3D",
+    description: "The God Made Me bomber jacket in black, with white trims, the Birdboost mark on the chest and the GOD MADE ME print across the back. Turn it around in 3D to see every side.",
+  },
 ];
